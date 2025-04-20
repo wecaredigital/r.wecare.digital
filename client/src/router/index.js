@@ -21,9 +21,9 @@ import Dashboard from '../views/Dashboard.vue'
 Vue.use(VueRouter)
 
 const routes = [
-  {
-    path: '/',
-    name: 'dashboard',
+    {
+    path: '/admin',
+    name: 'admin',
     component: Dashboard
   }
 ]
