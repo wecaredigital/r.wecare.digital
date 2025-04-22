@@ -103,7 +103,7 @@ export default {
   name: "app",
   data() {
     return {
-      appName: `Magic ${process.env.VUE_APP_NAME}`,
+      appName: 'WECARE.DIGITAL',
       signUpUrl: `${authDomain}/signup?response_type=code&client_id=${clientId}&redirect_uri=${redUrl}`,
       logInUrl: `${authDomain}/login?response_type=code&client_id=${clientId}&redirect_uri=${redUrl}`,
       logOutUrl: `${authDomain}/logout?client_id=${clientId}&logout_uri=${redUrl}`,
