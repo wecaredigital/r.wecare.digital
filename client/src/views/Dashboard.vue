@@ -90,7 +90,7 @@
             </div>
           </div>
 
-          <!-- New Remark field -->
+          <!-- Remark field -->
           <div class="field">
             <div class="control">
               <input
@@ -153,7 +153,6 @@ export default {
   },
   methods: {
     toggleModal(type, link = null, ind = 0) {
-      // reset all fields
       this.model.id = "";
       this.model.url = "";
       this.model.remark = "";
@@ -179,9 +178,12 @@ export default {
         .catch(() => this.$store.commit("drainLinks"));
     },
     createLink() {
-      let that = this;
+      const payload = {
+        id: this.model.id,
+        url: this.model.url
+      };
       axios
-        .post(`${that.apiUrl}/app`, that.model, {
+        .post(`${this.apiUrl}/app`, payload, {
           headers: {
             Authorization: window.localStorage.getItem("cognitoIdentityToken"),
           },
@@ -190,30 +192,28 @@ export default {
           if (response.data.error) {
             alert(response.data.message);
           } else {
-            that.toggleModal();
-            that.$store.commit("addLink", response.data);
+            this.toggleModal();
+            this.$store.commit("addLink", response.data);
           }
         })
         .catch((err) => {
-          console.log(`POST to ${that.apiUrl}/app caught error ${err}`);
+          console.log(`POST to ${this.apiUrl}/app caught error ${err}`);
           alert("SlipLink cannot be created. Bad format.");
         });
     },
     updateLink() {
-      let that = this;
-      // include remark in update
-      that.currentLink.url = that.model.url;
-      that.currentLink.remark = that.model.remark;
+      this.currentLink.url = this.model.url;
+      this.currentLink.remark = this.model.remark;
       axios
-        .put(`${that.apiUrl}/app/${that.currentLink.id}`, that.currentLink, {
+        .put(`${this.apiUrl}/app/${this.currentLink.id}`, this.currentLink, {
           headers: {
             Authorization: window.localStorage.getItem("cognitoIdentityToken"),
           },
         })
         .then((response) => {
           if (response.status === 200) {
-            that.toggleModal();
-            that.$store.commit("updateLink", response.data, that.currentIndex);
+            this.toggleModal();
+            this.$store.commit("updateLink", response.data, this.currentIndex);
           } else {
             alert("There was an issue updating your SlipLink");
           }
@@ -224,16 +224,15 @@ export default {
     },
     deleteLink(id, ind) {
       if (confirm(`Are you sure you want to delete '${id}'?`)) {
-        let that = this;
         axios
-          .delete(`${that.apiUrl}/app/${id}`, {
+          .delete(`${this.apiUrl}/app/${id}`, {
             headers: {
               Authorization: window.localStorage.getItem("cognitoIdentityToken"),
             },
           })
           .then((response) => {
             if (response.status === 200) {
-              that.$store.commit("removeLink", ind);
+              this.$store.commit("removeLink", ind);
             } else {
               alert("There was an issue deleting your SlipLink");
             }
@@ -244,14 +243,10 @@ export default {
       }
     },
     copyToClipboard(text) {
-      navigator.clipboard.writeText(text)
-        .then(() => {
-          alert('Link copied to clipboard!');
-        })
-        .catch((err) => {
-          console.error('Failed to copy text: ', err);
-          alert('Failed to copy link.');
-        });
+      navigator.clipboard
+        .writeText(text)
+        .then(() => alert("Link copied to clipboard!"))
+        .catch(() => alert("Failed to copy link."));
     },
   },
 };
