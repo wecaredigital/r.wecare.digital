@@ -28,15 +28,11 @@
       </thead>
       <tbody>
         <tr v-for="(link, i) in links" :key="link.id">
-          <!-- auto‐number -->
           <td>{{ i + 1 }}</td>
-          <!-- existing columns -->
           <td>{{ link.id }}</td>
           <td class="is-clipped" :title="link.url">{{ link.url }}</td>
           <td><time>{{ link.timestamp | formatDate }}</time></td>
-          <!-- new Remarks column (placeholder) -->
-          <td><!-- {{ link.remark }} --></td>
-          <!-- actions -->
+          <td>{{ link.remark || '' }}</td>
           <td class="has-text-centered">
             <a v-on:click="toggleModal('edit', link, i)" href="#">Edit</a>
             &nbsp;|&nbsp;
@@ -53,7 +49,7 @@
       </tbody>
     </table>
 
-    <!-- Edit/Create Modal (unchanged) -->
+    <!-- Edit/Create Modal -->
     <div class="modal" v-bind:class="{ 'is-active': modalIsActive }">
       <div class="modal-background"></div>
       <div class="modal-card">
@@ -81,6 +77,7 @@
               />
             </div>
           </div>
+
           <div class="field">
             <div class="control">
               <input
@@ -92,6 +89,19 @@
               />
             </div>
           </div>
+
+          <!-- New Remark field -->
+          <div class="field">
+            <div class="control">
+              <input
+                class="input"
+                v-model="model.remark"
+                type="text"
+                placeholder="Remark (optional)"
+              />
+            </div>
+          </div>
+
           <p class="is-italic has-text-info is-size-7" v-if="!modalTypeCreate">
             Note: Updates take a minimum of 5 minutes to propagate. You may also
             need to clear your local cache.
@@ -128,6 +138,7 @@ export default {
       model: {
         id: "",
         url: "",
+        remark: ""
       },
       currentLink: {},
       currentIndex: 0,
@@ -142,7 +153,10 @@ export default {
   },
   methods: {
     toggleModal(type, link = null, ind = 0) {
-      this.model.id = this.model.url = ""; // reset
+      // reset all fields
+      this.model.id = "";
+      this.model.url = "";
+      this.model.remark = "";
       this.modalTypeCreate = type === "create";
       this.modalIsActive = !this.modalIsActive;
 
@@ -151,6 +165,7 @@ export default {
         this.currentIndex = ind;
         this.model.id = link.id;
         this.model.url = link.url;
+        this.model.remark = link.remark || "";
       }
     },
     fetchData() {
@@ -186,7 +201,9 @@ export default {
     },
     updateLink() {
       let that = this;
+      // include remark in update
       that.currentLink.url = that.model.url;
+      that.currentLink.remark = that.model.remark;
       axios
         .put(`${that.apiUrl}/app/${that.currentLink.id}`, that.currentLink, {
           headers: {
