@@ -1,4 +1,4 @@
-## get-response.json
+## get-response.json (DynamoDB → API Gateway Response)
 
 #set($inputRoot = $input.path('$'))
 [
