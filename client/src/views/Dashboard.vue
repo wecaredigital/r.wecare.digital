@@ -1,5 +1,3 @@
-<!-- Copyright 2019 Amazon.com, Inc. or its affiliates. -->
-
 <template>
   <div class="dashboard">
     <div class="columns is-mobile">
@@ -16,59 +14,36 @@
       </div>
     </div>
 
-    <div class="columns is-multiline">
-      <div
-        class="column is-one-third"
-        v-for="(link, i) in links"
-        v-bind:key="link.id"
-      >
-        <div class="card">
-          <header class="card-header has-background-info">
-            <p class="card-header-title has-text-white">
-              {{ link.id }}
-            </p>
-            <a href="#" class="card-header-icon" aria-label="more options">
-              <span class="icon">
-                <i class="fas fa-angle-down" aria-hidden="true"></i>
-              </span>
-            </a>
-          </header>
-          <div class="card-content">
-            <div class="content">
-              <div class="text-clip" :title="link.url">
-                {{ link.url }}
-              </div>
-              <div class="is-size-7">
-                <time>{{ link.timestamp | formatDate }}</time>
-              </div>
-            </div>
-          </div>
-          <footer class="card-footer">
-            <a
-              v-on:click="toggleModal('edit', link, i)"
-              href="#"
-              class="card-footer-item"
-            >
-              Edit
-            </a>
-            <a
-              v-on:click="deleteLink(link.id, i)"
-              href="#"
-              class="card-footer-item"
-            >
-              Delete
-            </a>
+    <!-- Table view instead of cards -->
+    <table class="table is-fullwidth is-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>URL</th>
+          <th>Created</th>
+          <th class="has-text-centered">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(link, i) in links" :key="link.id">
+          <td>{{ link.id }}</td>
+          <td class="is-clipped" :title="link.url">{{ link.url }}</td>
+          <td><time>{{ link.timestamp | formatDate }}</time></td>
+          <td class="has-text-centered">
+            <a v-on:click="toggleModal('edit', link, i)" href="#">Edit</a>
+            &nbsp;|&nbsp;
+            <a v-on:click="deleteLink(link.id, i)" href="#">Delete</a>
+            &nbsp;|&nbsp;
             <a
               href="javascript:void(0);"
               v-on:click="copyToClipboard(apiUrl + '/' + link.id)"
-              class="card-footer-item"
             >
               Copy
             </a>
-          </footer>
-        </div>
-      </div>
-    </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
     <!-- Edit Modal -->
     <div class="modal" v-bind:class="{ 'is-active': modalIsActive }">
