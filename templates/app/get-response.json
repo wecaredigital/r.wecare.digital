@@ -1,3 +1,6 @@
+## get-response.json
+
+#set($inputRoot = $input.path('$'))
 [
   #foreach($elem in $inputRoot.Items) {
     "id":        "$elem.id.S",
