@@ -40,11 +40,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="(link, idx) in paginatedLinks"
-          :key="link.id"
-        >
-          <!-- compute global SL using page+index -->
+        <tr v-for="(link, idx) in paginatedLinks" :key="link.id">
           <td>{{ (currentPage-1)*pageSize + idx + 1 }}</td>
           <td>{{ link.id }}</td>
           <td class="is-clipped" :title="link.url">{{ link.url }}</td>
@@ -55,47 +51,19 @@
             &nbsp;|&nbsp;
             <a @click="deleteLink(link.id, globalIndex(idx))" href="#">Delete</a>
             &nbsp;|&nbsp;
-            <a
-              href="javascript:void(0);"
-              @click="copyToClipboard(apiUrl + '/' + link.id)"
-            >
-              Copy
-            </a>
+            <a href="javascript:void(0);" @click="copyToClipboard(apiUrl + '/' + link.id)">Copy</a>
           </td>
         </tr>
       </tbody>
     </table>
 
     <!-- Pagination controls -->
-    <nav
-      class="pagination is-centered"
-      role="navigation"
-      aria-label="pagination"
-      v-if="totalPages > 1"
-    >
-      <a
-        class="pagination-previous"
-        :disabled="currentPage === 1"
-        @click="gotoPage(currentPage - 1)"
-      >
-        Previous
-      </a>
-      <a
-        class="pagination-next"
-        :disabled="currentPage === totalPages"
-        @click="gotoPage(currentPage + 1)"
-      >
-        Next
-      </a>
+    <nav class="pagination is-centered" role="navigation" aria-label="pagination" v-if="totalPages > 1">
+      <a class="pagination-previous" :disabled="currentPage===1" @click="gotoPage(currentPage-1)">Previous</a>
+      <a class="pagination-next" :disabled="currentPage===totalPages" @click="gotoPage(currentPage+1)">Next</a>
       <ul class="pagination-list">
-        <li>
-          <a
-            class="pagination-link"
-            :class="{ 'is-current': n === currentPage }"
-            v-for="n in totalPages"
-            :key="n"
-            @click="gotoPage(n)"
-          >
+        <li v-for="n in totalPages" :key="n">
+          <a class="pagination-link" :class="{ 'is-current': n===currentPage }" @click="gotoPage(n)">
             {{ n }}
           </a>
         </li>
@@ -103,7 +71,7 @@
       <p class="ml-4">Page {{ currentPage }} of {{ totalPages }}</p>
     </nav>
 
-    <!-- Create / Update Modal (only ID & URL) -->
+    <!-- Create / Update Modal (ID, URL, Remark) -->
     <div class="modal" :class="{ 'is-active': modalIsActive }">
       <div class="modal-background"></div>
       <div class="modal-card">
@@ -112,11 +80,7 @@
             <span v-if="modalTypeCreate">Create</span>
             <span v-else>Update</span> Sliplink
           </p>
-          <button
-            class="delete"
-            @click="toggleModal()"
-            aria-label="close"
-          ></button>
+          <button class="delete" @click="toggleModal()" aria-label="close"></button>
         </header>
         <section class="modal-card-body">
           <div class="field">
@@ -142,29 +106,24 @@
               />
             </div>
           </div>
-          <p
-            class="is-italic has-text-info is-size-7"
-            v-if="!modalTypeCreate"
-          >
-            Note: Updates take a minimum of 5 minutes to propagate. You may
-            also need to clear your local cache.
+          <!-- optional remark, NOT sent to server -->
+          <div class="field">
+            <div class="control">
+              <input
+                class="input"
+                v-model="model.remark"
+                type="text"
+                placeholder="Remark (optional)"
+              />
+            </div>
+          </div>
+          <p class="is-italic has-text-info is-size-7" v-if="!modalTypeCreate">
+            Note: Updates take a minimum of 5 minutes to propagate. You may also need to clear your local cache.
           </p>
         </section>
         <footer class="modal-card-foot">
-          <button
-            v-if="modalTypeCreate"
-            @click="createLink()"
-            class="button is-success"
-          >
-            Create
-          </button>
-          <button
-            v-else
-            @click="updateLink()"
-            class="button is-success"
-          >
-            Update
-          </button>
+          <button v-if="modalTypeCreate" @click="createLink()" class="button is-success">Create</button>
+          <button v-else @click="updateLink()" class="button is-success">Update</button>
           <button class="button" @click="toggleModal()">Cancel</button>
         </footer>
       </div>
@@ -183,7 +142,7 @@ export default {
       apiUrl: process.env.VUE_APP_API_ROOT,
       searchTerm: "",
       modalIsActive: false,
-      model: { id: "", url: "" },
+      model: { id: "", url: "", remark: "" },
       currentLink: {},
       currentIndex: 0,
       modalTypeCreate: true,
@@ -196,33 +155,29 @@ export default {
     filteredLinks() {
       if (!this.searchTerm) return this.links;
       const term = this.searchTerm.toLowerCase();
-      return this.links.filter((link) =>
-        (link.id + link.url + (link.remark||""))
-          .toLowerCase()
-          .includes(term)
+      return this.links.filter(l =>
+        (l.id + l.url + (l.remark||"")).toLowerCase().includes(term)
       );
     },
     totalPages() {
-      return Math.ceil(this.filteredLinks.length / this.pageSize) || 1;
+      return Math.max(1, Math.ceil(this.filteredLinks.length / this.pageSize));
     },
     paginatedLinks() {
       const start = (this.currentPage - 1) * this.pageSize;
       return this.filteredLinks.slice(start, start + this.pageSize);
-    },
+    }
   },
   methods: {
     globalIndex(pageIdx) {
-      // Convert page-local index back to overall index for delete/edit
       return (this.currentPage - 1) * this.pageSize + pageIdx;
     },
     gotoPage(n) {
-      if (n >= 1 && n <= this.totalPages) {
-        this.currentPage = n;
-      }
+      if (n >= 1 && n <= this.totalPages) this.currentPage = n;
     },
     toggleModal(type, link = null, ind = 0) {
       this.model.id = "";
       this.model.url = "";
+      this.model.remark = "";
       this.modalTypeCreate = type === "create";
       this.modalIsActive = !this.modalIsActive;
       if (type === "edit") {
@@ -230,53 +185,49 @@ export default {
         this.currentIndex = ind;
         this.model.id = link.id;
         this.model.url = link.url;
+        this.model.remark = link.remark || "";
       }
     },
     fetchData() {
       axios
         .get(`${this.apiUrl}/app`, {
-          headers: {
-            Authorization: window.localStorage.getItem("cognitoIdentityToken"),
-          },
+          headers: { Authorization: window.localStorage.getItem("cognitoIdentityToken") },
         })
-        .then((res) => this.$store.commit("hydrateLinks", res.data))
+        .then(res => this.$store.commit("hydrateLinks", res.data))
         .catch(() => this.$store.commit("drainLinks"));
     },
     createLink() {
       const payload = { id: this.model.id, url: this.model.url };
       axios
         .post(`${this.apiUrl}/app`, payload, {
-          headers: {
-            Authorization: window.localStorage.getItem("cognitoIdentityToken"),
-          },
+          headers: { Authorization: window.localStorage.getItem("cognitoIdentityToken") },
         })
-        .then((res) => {
+        .then(res => {
           if (res.data.error) {
             alert(res.data.message);
           } else {
+            const newLink = { ...res.data, remark: this.model.remark };
+            this.$store.commit("addLink", newLink);
             this.toggleModal();
-            this.$store.commit("addLink", res.data);
-            // if new link pushes you past the last page, go there:
             this.currentPage = this.totalPages;
           }
         })
-        .catch((err) => {
+        .catch(err => {
           console.log(`POST to ${this.apiUrl}/app caught error`, err);
           alert("SlipLink cannot be created. Bad format.");
         });
     },
     updateLink() {
-      this.currentLink.url = this.model.url;
+      const payload = { url: this.model.url };
       axios
-        .put(`${this.apiUrl}/app/${this.currentLink.id}`, this.currentLink, {
-          headers: {
-            Authorization: window.localStorage.getItem("cognitoIdentityToken"),
-          },
+        .put(`${this.apiUrl}/app/${this.currentLink.id}`, payload, {
+          headers: { Authorization: window.localStorage.getItem("cognitoIdentityToken") },
         })
-        .then((res) => {
+        .then(res => {
           if (res.status === 200) {
+            const updated = { ...res.data, remark: this.model.remark };
+            this.$store.commit("updateLink", updated, this.currentIndex);
             this.toggleModal();
-            this.$store.commit("updateLink", res.data, this.currentIndex);
           } else {
             alert("There was an issue updating your SlipLink");
           }
@@ -289,25 +240,19 @@ export default {
       if (confirm(`Are you sure you want to delete '${id}'?`)) {
         axios
           .delete(`${this.apiUrl}/app/${id}`, {
-            headers: {
-              Authorization: window.localStorage.getItem("cognitoIdentityToken"),
-            },
+            headers: { Authorization: window.localStorage.getItem("cognitoIdentityToken") },
           })
-          .then((res) => {
+          .then(res => {
             if (res.status === 200) {
               this.$store.commit("removeLink", ind);
-              // if you delete the last item on the last page, step back a page:
-              if (
-                this.currentPage > 1 &&
-                this.paginatedLinks.length === 0
-              ) {
+              if (this.currentPage > 1 && this.paginatedLinks.length === 0) {
                 this.currentPage--;
               }
             } else {
               alert("There was an issue deleting your SlipLink");
             }
           })
-          .catch((err) => alert(err));
+          .catch(err => alert(err));
       }
     },
     copyToClipboard(text) {
