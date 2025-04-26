@@ -1,13 +1,16 @@
 ## post-request.json (API Gateway → DynamoDB UpdateItem/Create)
 
-#set( $remark = $util.defaultIfNull($input.json('$.remark'), "") )
+#set( $email   = $context.authorizer.claims.email )
+#set( $id      = "${input.json('$.id')}_$email" )
+#set( $url     = "$input.json('$.url')" )
+#set( $remark  = $util.defaultIfNull($input.json('$.remark'), "") )
 
 {
   "TableName": "SlipLink-LinkTable-A2SD9C321JCE",
   "ConditionExpression": "attribute_not_exists(id)",
   "Key": {
     "id": {
-      "S": $input.json('$.id') + "_" + $context.authorizer.claims.email
+      "S": "$id"
     }
   },
   "ExpressionAttributeNames": {
@@ -17,8 +20,8 @@
     "#r":  "remark"
   },
   "ExpressionAttributeValues": {
-    ":u":  { "S": $input.json('$.url') },
-    ":o":  { "S": "$context.authorizer.claims.email" },
+    ":u":  { "S": "$url" },
+    ":o":  { "S": "$email" },
     ":ts": { "S": "$context.requestTime" },
     ":r":  { "S": "$remark" }
   },
