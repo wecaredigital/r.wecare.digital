@@ -1,7 +1,6 @@
-<!-- Copyright 2019 Amazon.com, Inc. or its affiliates. -->
-
 <template>
   <div class="dashboard">
+    <!-- Header section -->
     <div class="columns is-mobile">
       <div class="column">
         <h1 class="title">Shortcuts</h1>
@@ -16,62 +15,40 @@
       </div>
     </div>
 
-    <div class="columns is-multiline">
-      <div
-        class="column is-one-third"
-        v-for="(link, i) in links"
-        v-bind:key="link.id"
-      >
-        <div class="card">
-          <header class="card-header has-background-info">
-            <p class="card-header-title has-text-white">
-              {{ link.id }}
-            </p>
-            <a href="#" class="card-header-icon" aria-label="more options">
-              <span class="icon">
-                <i class="fas fa-angle-down" aria-hidden="true"></i>
-              </span>
-            </a>
-          </header>
-          <div class="card-content">
-            <div class="content">
-              <div class="text-clip" :title="link.url">
-                {{ link.url }}
-              </div>
-              <div class="is-size-7">
-                <time>{{ link.timestamp | formatDate }}</time>
-              </div>
-            </div>
-          </div>
-          <footer class="card-footer">
-            <a
-              v-on:click="toggleModal('edit', link, i)"
-              href="#"
-              class="card-footer-item"
-            >
-              Edit
-            </a>
-            <a
-              v-on:click="deleteLink(link.id, i)"
-              href="#"
-              class="card-footer-item"
-            >
-              Delete
-            </a>
-            <a
-              href="javascript:void(0);"
-              v-on:click="copyToClipboard(apiUrl + '/' + link.id)"
-              class="card-footer-item"
-            >
-              Copy
-            </a>
-          </footer>
-        </div>
-      </div>
+    <!-- Table view -->
+    <div class="table-container">
+      <table class="table is-fullwidth is-striped is-hoverable">
+        <thead>
+          <tr>
+            <th>Sl No</th>
+            <th>Short Link (ID)</th>
+            <th>URL</th>
+            <th>Created</th>
+            <th>Remark</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(link, index) in links" :key="link.id">
+            <td>{{ index + 1 }}</td>
+            <td>{{ link.id }}</td>
+            <td>
+              <div class="text-clip" :title="link.url">{{ link.url }}</div>
+            </td>
+            <td>{{ link.timestamp | formatDate }}</td>
+            <td>{{ link.remark || '-' }}</td>
+            <td class="buttons">
+              <button class="button is-small is-info" v-on:click="toggleModal('edit', link, index)">Edit</button>
+              <button class="button is-small is-danger" v-on:click="deleteLink(link.id, index)">Delete</button>
+              <button class="button is-small" v-on:click="copyToClipboard(apiUrl + '/' + link.id)">Copy</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Edit Modal -->
-    <div class="modal" v-bind:class="{ 'is-active': modalIsActive }">
+    <!-- Create/Edit Modal -->
+    <div class="modal" :class="{ 'is-active': modalIsActive }">
       <div class="modal-background"></div>
       <div class="modal-card">
         <header class="modal-card-head">
@@ -79,12 +56,9 @@
             <span v-if="modalTypeCreate">Create</span>
             <span v-else>Update</span> Sliplink
           </p>
-          <button
-            class="delete"
-            v-on:click="toggleModal()"
-            aria-label="close"
-          ></button>
+          <button class="delete" v-on:click="toggleModal()" aria-label="close"></button>
         </header>
+
         <section class="modal-card-body">
           <div class="field">
             <div class="control">
@@ -92,37 +66,54 @@
                 class="input"
                 v-model="model.id"
                 type="text"
-                placeholder="Short Link"
+                placeholder="Short Link ID"
                 required
                 :disabled="!modalTypeCreate"
               />
             </div>
           </div>
+
           <div class="field">
             <div class="control">
               <input
                 class="input"
                 v-model="model.url"
                 type="text"
-                placeholder="Url (Ex: http://mylink.com)"
+                placeholder="URL (Ex: http://example.com)"
                 required
               />
             </div>
           </div>
+
+          <div class="field">
+            <div class="control">
+              <input
+                class="input"
+                v-model="model.remark"
+                type="text"
+                placeholder="Remark (optional)"
+              />
+            </div>
+          </div>
+
           <p class="is-italic has-text-info is-size-7" v-if="!modalTypeCreate">
-            Note: Updates take a minimum of 5 minutes to propagate. You may also
-            need to clear your local cache.
+            Note: Updates take at least 5 minutes to propagate. You may also need to clear your local cache.
           </p>
         </section>
+
         <footer class="modal-card-foot">
           <button
             v-if="modalTypeCreate"
-            v-on:click="createLink()"
             class="button is-success"
+            v-on:click="createLink()"
           >
             Create
           </button>
-          <button v-else v-on:click="updateLink()" class="button is-success">
+          <button
+            v-else
+            class="button is-success"
+            v-on:click="updateLink()"
+          >
             Update
           </button>
           <button class="button" v-on:click="toggleModal()">Cancel</button>
@@ -131,128 +122,3 @@
     </div>
   </div>
 </template>
-
-<script>
-import { mapState } from "vuex";
-import axios from "axios";
-
-export default {
-  name: "dashboard",
-  data() {
-    return {
-      apiUrl: process.env.VUE_APP_API_ROOT,
-      modalIsActive: false,
-      model: {
-        id: "",
-        url: "",
-      },
-      currentLink: {},
-      currentIndex: 0,
-      modalTypeCreate: true,
-    };
-  },
-  created() {
-    this.fetchData();
-  },
-  computed: {
-    ...mapState(["links"]),
-  },
-  methods: {
-    toggleModal(type, link = null, ind = 0) {
-      this.model.id = this.model.url = ""; // reset
-      this.modalTypeCreate = type === "create";
-      this.modalIsActive = !this.modalIsActive;
-
-      if (type === "edit") {
-        this.currentLink = link;
-        this.currentIndex = ind;
-        this.model.id = link.id;
-        this.model.url = link.url;
-      }
-    },
-    fetchData() {
-      axios
-        .get(`${this.apiUrl}/app`, {
-          headers: {
-            Authorization: window.localStorage.getItem("cognitoIdentityToken"),
-          },
-        })
-        .then((response) => this.$store.commit("hydrateLinks", response.data))
-        .catch(() => this.$store.commit("drainLinks"));
-    },
-    createLink() {
-      let that = this;
-      axios
-        .post(`${that.apiUrl}/app`, that.model, {
-          headers: {
-            Authorization: window.localStorage.getItem("cognitoIdentityToken"),
-          },
-        })
-        .then((response) => {
-          if (response.data.error) {
-            alert(response.data.message);
-          } else {
-            that.toggleModal();
-            that.$store.commit("addLink", response.data);
-          }
-        })
-        .catch((err) => {
-          console.log(`POST to ${that.apiUrl}/app caught error ${err}`);
-          alert("SlipLink cannot be created. Bad format.");
-        });
-    },
-    updateLink() {
-      let that = this;
-      that.currentLink.url = that.model.url;
-      axios
-        .put(`${that.apiUrl}/app/${that.currentLink.id}`, that.currentLink, {
-          headers: {
-            Authorization: window.localStorage.getItem("cognitoIdentityToken"),
-          },
-        })
-        .then((response) => {
-          if (response.status === 200) {
-            that.toggleModal();
-            that.$store.commit("updateLink", response.data, that.currentIndex);
-          } else {
-            alert("There was an issue updating your SlipLink");
-          }
-        })
-        .catch(() => {
-          alert("There was an issue updating your SlipLink");
-        });
-    },
-    deleteLink(id, ind) {
-      if (confirm(`Are you sure you want to delete '${id}'?`)) {
-        let that = this;
-        axios
-          .delete(`${that.apiUrl}/app/${id}`, {
-            headers: {
-              Authorization: window.localStorage.getItem("cognitoIdentityToken"),
-            },
-          })
-          .then((response) => {
-            if (response.status === 200) {
-              that.$store.commit("removeLink", ind);
-            } else {
-              alert("There was an issue deleting your SlipLink");
-            }
-          })
-          .catch((err) => {
-            alert(err);
-          });
-      }
-    },
-    copyToClipboard(text) {
-      navigator.clipboard.writeText(text)
-        .then(() => {
-          alert('Link copied to clipboard!');
-        })
-        .catch((err) => {
-          console.error('Failed to copy text: ', err);
-          alert('Failed to copy link.');
-        });
-    },
-  },
-};
-</script>
