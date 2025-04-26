@@ -14,21 +14,29 @@
       </div>
     </div>
 
-    <!-- Table view instead of cards -->
+    <!-- Table view with SL No and Remarks -->
     <table class="table is-fullwidth is-striped">
       <thead>
         <tr>
+          <th>SL No</th>
           <th>ID</th>
           <th>URL</th>
           <th>Created</th>
+          <th>Remarks</th>
           <th class="has-text-centered">Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(link, i) in links" :key="link.id">
+          <!-- auto‐number -->
+          <td>{{ i + 1 }}</td>
+          <!-- existing columns -->
           <td>{{ link.id }}</td>
           <td class="is-clipped" :title="link.url">{{ link.url }}</td>
           <td><time>{{ link.timestamp | formatDate }}</time></td>
+          <!-- new Remarks column (placeholder) -->
+          <td><!-- {{ link.remark }} --></td>
+          <!-- actions -->
           <td class="has-text-centered">
             <a v-on:click="toggleModal('edit', link, i)" href="#">Edit</a>
             &nbsp;|&nbsp;
@@ -45,7 +53,7 @@
       </tbody>
     </table>
 
-    <!-- Edit Modal -->
+    <!-- Edit/Create Modal (unchanged) -->
     <div class="modal" v-bind:class="{ 'is-active': modalIsActive }">
       <div class="modal-background"></div>
       <div class="modal-card">
