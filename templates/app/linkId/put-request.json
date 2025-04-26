@@ -1,13 +1,15 @@
-## put-request.json
+## put-request.json (API Gateway → DynamoDB UpdateItem)
 
 #set( $email   = $context.authorizer.claims.email )
+#set( $rawId   = $input.params('id') )
+#set( $id      = "${rawId}_$email" )
 #set( $url     = "$input.json('$.url')" )
 #set( $remark  = $util.defaultIfNull($input.json('$.remark'), "") )
 
 {
   "TableName": "SlipLink-LinkTable-A2SD9C321JCE",
   "Key": {
-    "id": { "S": "${email}_$input.json('$.id')" }
+    "id": { "S": "$id" }
   },
   "ExpressionAttributeNames": {
     "#u": "url",
