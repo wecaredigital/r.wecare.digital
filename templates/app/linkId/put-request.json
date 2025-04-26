@@ -1,27 +1,21 @@
+## put-request.json (API Gateway → DynamoDB UpdateItem)
+#set( $email   = $context.authorizer.claims.email )
+#set( $url     = $input.json('$.url') )
+#set( $remark  = $util.defaultIfNull($input.json('$.remark'), "") )
+
 {
-  "TableName": "Shortie",
+  "TableName": "SlipLink-LinkTable-A2SD9C321JCE",
   "Key": {
-    "id": {
-      "S": $input.json('$.id') + "_" + $context.authorizer.claims.email
-    }
+    "id": { "S": "$email_$input.json('$.id')" }
   },
   "ExpressionAttributeNames": {
     "#u": "url",
-    "#owner": "owner",
-    "#id":"id"
+    "#r": "remark"
   },
   "ExpressionAttributeValues": {
-    ":u": {
-      "S": $input.json('$.url')
-    },
-    ":owner": {
-      "S": "$context.authorizer.claims.email"
-    },
-    ":linkId": {
-        "S": "$input.params().path.linkId"
-    }
+    ":u": { "S": "$url" },
+    ":r": { "S": "$remark" }
   },
-  "UpdateExpression": "SET #u = :u",
-  "ReturnValues": "ALL_NEW",
-  "ConditionExpression": "#owner = :owner AND #id = :linkId"
+  "UpdateExpression": "SET #u = :u, #r = :r",
+  "ReturnValues": "ALL_NEW"
 }
