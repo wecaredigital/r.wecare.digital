@@ -91,6 +91,8 @@ Resources:
           AttributeType: S
         - AttributeName: owner
           AttributeType: S
+        - AttributeName: remark
+          AttributeType: S
       GlobalSecondaryIndexes:
         - IndexName: OwnerIndex
           KeySchema:
