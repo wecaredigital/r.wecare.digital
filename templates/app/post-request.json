@@ -1,7 +1,8 @@
-## post-request.json
+## post-request.json (API Gateway → DynamoDB UpdateItem/Create)
 
 #set( $email   = $context.authorizer.claims.email )
-#set( $id      = "${input.json('$.id')}_$email" )
+#set( $rawId   = $input.json('$.id') )
+#set( $id      = "${rawId}_$email" )
 #set( $url     = "$input.json('$.url')" )
 #set( $remark  = $util.defaultIfNull($input.json('$.remark'), "") )
 
