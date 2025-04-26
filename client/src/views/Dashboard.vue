@@ -1,18 +1,4 @@
-<!-- Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-SPDX-License-Identifier: MIT-0
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this
-software and associated documentation files (the "Software"), to deal in the Software
-without restriction, including without limitation the rights to use, copy, modify,
-merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+<!-- Copyright 2019 Amazon.com, Inc. or its affiliates. -->
 
 <template>
   <div class="dashboard">
@@ -62,20 +48,23 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
               v-on:click="toggleModal('edit', link, i)"
               href="#"
               class="card-footer-item"
-              >Edit</a
             >
+              Edit
+            </a>
             <a
               v-on:click="deleteLink(link.id, i)"
               href="#"
               class="card-footer-item"
-              >Delete</a
             >
+              Delete
+            </a>
             <a
-              target="_blank"
-              :href="apiUrl + '/' + link.id"
+              href="javascript:void(0);"
+              v-on:click="copyToClipboard(apiUrl + '/' + link.id)"
               class="card-footer-item"
-              >Try it</a
             >
+              Copy
+            </a>
           </footer>
         </div>
       </div>
@@ -121,7 +110,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
             </div>
           </div>
           <p class="is-italic has-text-info is-size-7" v-if="!modalTypeCreate">
-            Note: Updates take a minimum of 5 minutes to propogate. You may also
+            Note: Updates take a minimum of 5 minutes to propagate. You may also
             need to clear your local cache.
           </p>
         </section>
@@ -169,8 +158,8 @@ export default {
     ...mapState(["links"]),
   },
   methods: {
-    toggleModal: function (type, link = null, ind = 0) {
-      this.model.id = this.model.url = ""; // hacky reset
+    toggleModal(type, link = null, ind = 0) {
+      this.model.id = this.model.url = ""; // reset
       this.modalTypeCreate = type === "create";
       this.modalIsActive = !this.modalIsActive;
 
@@ -181,7 +170,7 @@ export default {
         this.model.url = link.url;
       }
     },
-    fetchData: function () {
+    fetchData() {
       axios
         .get(`${this.apiUrl}/app`, {
           headers: {
@@ -191,7 +180,7 @@ export default {
         .then((response) => this.$store.commit("hydrateLinks", response.data))
         .catch(() => this.$store.commit("drainLinks"));
     },
-    createLink: function () {
+    createLink() {
       let that = this;
       axios
         .post(`${that.apiUrl}/app`, that.model, {
@@ -208,12 +197,11 @@ export default {
           }
         })
         .catch((err) => {
-          // eslint-disable-next-line
           console.log(`POST to ${that.apiUrl}/app caught error ${err}`);
           alert("SlipLink cannot be created. Bad format.");
         });
     },
-    updateLink: function () {
+    updateLink() {
       let that = this;
       that.currentLink.url = that.model.url;
       axios
@@ -227,22 +215,20 @@ export default {
             that.toggleModal();
             that.$store.commit("updateLink", response.data, that.currentIndex);
           } else {
-            alert("There was an issue deleting your SlipLink");
+            alert("There was an issue updating your SlipLink");
           }
         })
         .catch(() => {
-          alert("There was an issue deleting your SlipLink");
+          alert("There was an issue updating your SlipLink");
         });
     },
-    deleteLink: function (id, ind) {
-      if (confirm(`Are you sure you want to delete '${id}'`)) {
+    deleteLink(id, ind) {
+      if (confirm(`Are you sure you want to delete '${id}'?`)) {
         let that = this;
         axios
           .delete(`${that.apiUrl}/app/${id}`, {
             headers: {
-              Authorization: window.localStorage.getItem(
-                "cognitoIdentityToken"
-              ),
+              Authorization: window.localStorage.getItem("cognitoIdentityToken"),
             },
           })
           .then((response) => {
@@ -257,6 +243,17 @@ export default {
           });
       }
     },
+    copyToClipboard(text) {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          alert('Link copied to clipboard!');
+        })
+        .catch((err) => {
+          console.error('Failed to copy text: ', err);
+          alert('Failed to copy link.');
+        });
+    },
   },
 };
 </script>
+
