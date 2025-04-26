@@ -1,4 +1,4 @@
-<!-- Dashboard.vue -->
+<!-- Copyright 2019 Amazon.com, Inc. or its affiliates. -->
 
 <template>
   <div class="dashboard">
@@ -9,55 +9,69 @@
       <div class="column is-2-desktop is-half-mobile">
         <button
           class="button is-info is-outlined is-fullwidth"
-          @click="toggleModal('create')"
+          v-on:click="toggleModal('create')"
         >
           New Shortcut
         </button>
       </div>
     </div>
 
-    <!-- Search Bar -->
-    <div class="field">
-      <div class="control">
-        <input
-          class="input"
-          type="text"
-          placeholder="Search shortcuts..."
-          v-model="searchQuery"
-        />
+    <div class="columns is-multiline">
+      <div
+        class="column is-one-third"
+        v-for="(link, i) in links"
+        v-bind:key="link.id"
+      >
+        <div class="card">
+          <header class="card-header has-background-info">
+            <p class="card-header-title has-text-white">
+              {{ link.id }}
+            </p>
+            <a href="#" class="card-header-icon" aria-label="more options">
+              <span class="icon">
+                <i class="fas fa-angle-down" aria-hidden="true"></i>
+              </span>
+            </a>
+          </header>
+          <div class="card-content">
+            <div class="content">
+              <div class="text-clip" :title="link.url">
+                {{ link.url }}
+              </div>
+              <div class="is-size-7">
+                <time>{{ link.timestamp | formatDate }}</time>
+              </div>
+            </div>
+          </div>
+          <footer class="card-footer">
+            <a
+              v-on:click="toggleModal('edit', link, i)"
+              href="#"
+              class="card-footer-item"
+            >
+              Edit
+            </a>
+            <a
+              v-on:click="deleteLink(link.id, i)"
+              href="#"
+              class="card-footer-item"
+            >
+              Delete
+            </a>
+            <a
+              href="javascript:void(0);"
+              v-on:click="copyToClipboard(apiUrl + '/' + link.id)"
+              class="card-footer-item"
+            >
+              Copy
+            </a>
+          </footer>
+        </div>
       </div>
     </div>
 
-    <!-- Table View -->
-    <table class="table is-fullwidth is-hoverable">
-      <thead>
-        <tr>
-          <th>Shortcut ID</th>
-          <th>URL</th>
-          <th>Created</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(link, i) in filteredLinks"
-          :key="link.id"
-          :class="{ 'has-background-light': i % 2 === 0 }"
-        >
-          <td>{{ link.id }}</td>
-          <td class="text-clip" :title="link.url">{{ link.url }}</td>
-          <td><time>{{ link.timestamp | formatDate }}</time></td>
-          <td>
-            <button class="button is-small is-info is-light" @click="toggleModal('edit', link, i)">Edit</button>
-            <button class="button is-small is-danger is-light" @click="deleteLink(link.id, i)">Delete</button>
-            <button class="button is-small is-primary is-light" @click="copyToClipboard(apiUrl + '/' + link.id)">Copy</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Modal -->
-    <div class="modal" :class="{ 'is-active': modalIsActive }">
+    <!-- Edit Modal -->
+    <div class="modal" v-bind:class="{ 'is-active': modalIsActive }">
       <div class="modal-background"></div>
       <div class="modal-card">
         <header class="modal-card-head">
@@ -65,7 +79,11 @@
             <span v-if="modalTypeCreate">Create</span>
             <span v-else>Update</span> Sliplink
           </p>
-          <button class="delete" @click="toggleModal()" aria-label="close"></button>
+          <button
+            class="delete"
+            v-on:click="toggleModal()"
+            aria-label="close"
+          ></button>
         </header>
         <section class="modal-card-body">
           <div class="field">
@@ -99,15 +117,15 @@
         <footer class="modal-card-foot">
           <button
             v-if="modalTypeCreate"
-            @click="createLink"
+            v-on:click="createLink()"
             class="button is-success"
           >
             Create
           </button>
-          <button v-else @click="updateLink" class="button is-success">
+          <button v-else v-on:click="updateLink()" class="button is-success">
             Update
           </button>
-          <button class="button" @click="toggleModal()">Cancel</button>
+          <button class="button" v-on:click="toggleModal()">Cancel</button>
         </footer>
       </div>
     </div>
@@ -119,7 +137,7 @@ import { mapState } from "vuex";
 import axios from "axios";
 
 export default {
-  name: "Dashboard",
+  name: "dashboard",
   data() {
     return {
       apiUrl: process.env.VUE_APP_API_ROOT,
@@ -131,7 +149,6 @@ export default {
       currentLink: {},
       currentIndex: 0,
       modalTypeCreate: true,
-      searchQuery: "",
     };
   },
   created() {
@@ -139,21 +156,10 @@ export default {
   },
   computed: {
     ...mapState(["links"]),
-    filteredLinks() {
-      if (!this.searchQuery.trim()) {
-        return this.links;
-      }
-      const query = this.searchQuery.toLowerCase();
-      return this.links.filter(
-        (link) =>
-          link.id.toLowerCase().includes(query) ||
-          link.url.toLowerCase().includes(query)
-      );
-    },
   },
   methods: {
     toggleModal(type, link = null, ind = 0) {
-      this.model.id = this.model.url = "";
+      this.model.id = this.model.url = ""; // reset
       this.modalTypeCreate = type === "create";
       this.modalIsActive = !this.modalIsActive;
 
@@ -175,8 +181,9 @@ export default {
         .catch(() => this.$store.commit("drainLinks"));
     },
     createLink() {
+      let that = this;
       axios
-        .post(`${this.apiUrl}/app`, this.model, {
+        .post(`${that.apiUrl}/app`, that.model, {
           headers: {
             Authorization: window.localStorage.getItem("cognitoIdentityToken"),
           },
@@ -185,27 +192,28 @@ export default {
           if (response.data.error) {
             alert(response.data.message);
           } else {
-            this.toggleModal();
-            this.$store.commit("addLink", response.data);
+            that.toggleModal();
+            that.$store.commit("addLink", response.data);
           }
         })
         .catch((err) => {
-          console.error(`POST to ${this.apiUrl}/app caught error`, err);
+          console.log(`POST to ${that.apiUrl}/app caught error ${err}`);
           alert("SlipLink cannot be created. Bad format.");
         });
     },
     updateLink() {
-      this.currentLink.url = this.model.url;
+      let that = this;
+      that.currentLink.url = that.model.url;
       axios
-        .put(`${this.apiUrl}/app/${this.currentLink.id}`, this.currentLink, {
+        .put(`${that.apiUrl}/app/${that.currentLink.id}`, that.currentLink, {
           headers: {
             Authorization: window.localStorage.getItem("cognitoIdentityToken"),
           },
         })
         .then((response) => {
           if (response.status === 200) {
-            this.toggleModal();
-            this.$store.commit("updateLink", response.data, this.currentIndex);
+            that.toggleModal();
+            that.$store.commit("updateLink", response.data, that.currentIndex);
           } else {
             alert("There was an issue updating your SlipLink");
           }
@@ -216,15 +224,16 @@ export default {
     },
     deleteLink(id, ind) {
       if (confirm(`Are you sure you want to delete '${id}'?`)) {
+        let that = this;
         axios
-          .delete(`${this.apiUrl}/app/${id}`, {
+          .delete(`${that.apiUrl}/app/${id}`, {
             headers: {
               Authorization: window.localStorage.getItem("cognitoIdentityToken"),
             },
           })
           .then((response) => {
             if (response.status === 200) {
-              this.$store.commit("removeLink", ind);
+              that.$store.commit("removeLink", ind);
             } else {
               alert("There was an issue deleting your SlipLink");
             }
@@ -247,12 +256,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.text-clip {
-  max-width: 300px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-</style>
