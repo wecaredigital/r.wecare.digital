@@ -1,62 +1,88 @@
-<!-- # Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this
-# software and associated documentation files (the "Software"), to deal in the Software
-# without restriction, including without limitation the rights to use, copy, modify,
-# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+# WECARE.DIGITAL — Serverless URL Shortener Platform
 
-# URL Shortener Client
-This application is a simple Vuejs application that interacts with the functionless url shortener.
+Welcome to the repository for the **WECARE.DIGITAL URL Shortener** — a secure, scalable, serverless solution to create, manage, and share custom short links powered by AWS cloud infrastructure.
 
-![Personal access token scopes](../assets/client.png)
+---
 
-## Requirements
-* [Node](https://nodejs.org)
-* [Vue CLI](https://cli.vuejs.org/)
+## 🚀 Project Overview
 
-If Node with NPM is already installed simply run.
-```
-npm install -g @vue/cli
-```
+This solution is designed to deliver a **high-performance URL shortener** using modern AWS serverless technologies and a responsive Vue.js dashboard.
 
-## Setup
+Built for:
+- **Scalability**
+- **Security**
+- **Minimal operational overhead**
+- **Global availability**
 
-**In order for the local client to work for testing, be sure and set the *UseLocalClient* option when launching the backend stack**
+---
 
-**The following commands need to be run from within the `client` folder.**
+## 🏗️ Architecture
 
-### 1. Update the environment variables in the `.env` file.
-The client needs some information about the backend. These values were output when you deployed the backend. If you need them again, simply run in your terminal:
-```
-aws cloudformation describe-stacks --stack-name URLShortener
-```
-Update and save the `.env` file. when you are done it should look "something" like this.
+- **Frontend:** Vue.js Single Page Application (SPA) hosted on Amazon S3 with CloudFront CDN
+- **Authentication:** Amazon Cognito User Pools (OAuth2 + JWT Tokens)
+- **Backend:** Amazon API Gateway (REST API secured with Cognito Authorizer)
+- **Database:** Amazon DynamoDB (Serverless NoSQL for storing short links)
+- **DNS Management:** Amazon Route53
+- **CI/CD:** AWS Amplify connected to GitHub repository
 
-```
-VUE_APP_NAME=shortener
-VUE_APP_API_ROOT=https://fd7c8be3rg.execute-api.us-west-2.amazonaws.com/Prod
-VUE_APP_AUTH_DOMAIN=https://shortener.auth.us-west-2.amazoncognito.com
-VUE_APP_CLIENT_ID=432p7npp8tf7a8pnb0hg5cbegl
-```
+---
 
-### 2. Install NPM dependencies
+## 🌐 Custom Domains
 
-```
-npm i
-```
+| Domain | Purpose |
+|--------|---------|
+| [r.wecare.digital](https://r.wecare.digital) | Public URL Redirection |
+| [go.wecare.digital](https://go.wecare.digital) | Secure User Dashboard for link management |
 
-### 3. Start the local server
-```
+---
+
+## ✨ Key Features
+
+- 🚀 Create, edit, delete short links easily
+- 🔎 Full search across ID, URL, and remarks
+- 📋 Copy shortened links to clipboard
+- 📈 Paginated list (500 links per page)
+- 🔒 Fully secured via Amazon Cognito authentication
+- 🌎 Fast global access via Amazon CloudFront CDN
+- 🛡️ Backend protected by OAuth2 JWT authorization
+
+---
+
+## 🔒 Security
+
+- Frontend login using Amazon Cognito Hosted UI (OAuth2)
+- JWT Token validation for all protected API routes
+- Owner-based data access control in DynamoDB
+- CORS correctly configured for cross-domain API access
+
+---
+
+## 📚 Documentation
+
+Full Architecture Whitepaper available:  
+👉 [AWS URL Shortener Architecture — Full Documentation (PDF)](link-to-pdf-if-you-upload-it)
+
+Highlights:
+- Expanded System Architecture
+- Dashboard Evolution (Earlier vs Improved)
+- Full End-to-End Data Flow
+- Expanded Change Management (Fixes and Enhancements)
+- Security Best Practices Applied
+
+---
+
+## 📦 Repository Structure
+
+```plaintext
+/client             --> Vue.js Frontend Source Code
+/amplify            --> AWS Amplify App Configuration
+/cdk                --> (Optional) Future Infrastructure as Code modules
+README.md           --> Project Overview (this file)
+
+
+git clone https://github.com/wecaredigital/r.wecare.digital.git
+
+cd client
+npm install
 npm run serve
-```
 
-### 4. Open the webpage at [http://localhost:8080](http://localhost:8080)
