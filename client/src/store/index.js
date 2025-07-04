@@ -1,38 +1,38 @@
-// client/src/store/index.js
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from "vue";
+import Vuex from "vuex";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    authorized: false,
-    links: []
+    links: []  // stores all shortcuts
   },
+
   mutations: {
-    authorize(state){
-      state.authorized = true;
+    addLink(state, link) {
+      state.links.push(link);
     },
-    deAuthorize(state) {
-      state.authorized = false;
+    updateLink(state, { link, ind }) {
+      Vue.set(state.links, ind, link);
+    },
+    removeLink(state, index) {
+      state.links.splice(index, 1);
     },
     hydrateLinks(state, links) {
       state.links = links;
     },
-    drainLinks(state){
-      state.links.length = 0;
-    },
-    addLink(state, link){
-      state.links.push(link);
-    },
-    removeLink(state, ind){
-      state.links.splice(ind, 1);
-    },
-    updateLink(state, link, ind){
-      state.links[ind] = link;
+    drainLinks(state) {
+      state.links = [];
     }
   },
-  getters: {},
-  actions: {},
-  modules: {}
+
+  actions: {
+    // Optional: you could move fetch/create/delete here for cleaner logic
+  },
+
+  getters: {
+    getLinkById: (state) => (id) => {
+      return state.links.find(link => link.id === id);
+    }
+  }
 });
