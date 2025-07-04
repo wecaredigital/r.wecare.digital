@@ -1,12 +1,12 @@
 // Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-//
+
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify,
 // merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so.
-//
+
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
 // PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -23,10 +23,12 @@ require('./assets/main.scss')
 
 Vue.config.productionTip = false
 
-// filters
+// ✅ Global filter to format ISO timestamps to readable IST
 Vue.filter('formatDate', function (value) {
-  return moment(value, 'DD/MMM/YYYY:HH:mm:ss Z').format("YYYY-MM-DD HH:mm:ss A")
-})
+  if (!value) return '';
+  // Formats: "2025-07-04T19:05:00.000Z" → "2025-07-04 07:35:00 PM"
+  return moment(value).utcOffset("+05:30").format("YYYY-MM-DD hh:mm:ss A");
+});
 
 new Vue({
   router,
