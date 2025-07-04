@@ -61,7 +61,7 @@
           <div class="modal-content">
             <div class="box">
               <h2 class="subtitle">{{ isEditMode ? 'Edit Shortcut' : 'New Shortcut' }}</h2>
-              <form @submit.prevent="submitShortcut">
+              <form @submit.prevent="createLink">
                 <div class="field">
                   <label class="label">ID</label>
                   <div class="control">
@@ -153,7 +153,7 @@ export default {
       this.model = { id: "", url: "", folder: "", remark: "", owner: "" };
       this.isEditMode = false;
     },
-    async submitShortcut() {
+    async createLink() {
       if (this.isEditMode) {
         this.$store.commit("updateLink", { link: this.model, ind: 0 }); // fallback
       } else {
