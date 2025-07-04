@@ -16,6 +16,7 @@
 
     <div class="column">
       <div class="dashboard">
+        <div v-if="successMsg" class="notification is-success is-light">{{ successMsg }}</div>
         <div class="columns is-mobile">
           <div class="column"><h1 class="title">Shortcuts</h1></div>
           <div class="column is-5-desktop is-full-mobile">
@@ -40,10 +41,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(link, idx) in filteredLinks" :key="link.id">
-              <td>{{ idx + 1 }}</td>
+            <tr v-for="(link, idx) in paginatedLinks" :key="link.id">
+              <td>{{ idx + 1 + (currentPage - 1) * pageSize }}</td>
               <td>{{ link.id }}</td>
-              <td><a :href="link.url" target="_blank">{{ link.url }}</a></td>
+              <td>
+                <a :href="link.url" target="_blank">{{ link.url }}</a>
+                <button class="button is-small is-white ml-2" @click="copy(link.url)">
+                  <span class="icon is-small"><i class="fas fa-copy"></i></span>
+                </button>
+              </td>
               <td>{{ link.folder }}</td>
               <td>{{ link.remark }}</td>
               <td>{{ link.owner }}</td>
@@ -55,6 +61,11 @@
             </tr>
           </tbody>
         </table>
+
+        <nav class="pagination is-centered mt-4" v-if="filteredLinks.length > pageSize">
+          <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
+          <a class="pagination-next" :disabled="currentPage * pageSize >= filteredLinks.length" @click="currentPage++">Next</a>
+        </nav>
 
         <div v-if="modalIsActive" class="modal is-active">
           <div class="modal-background" @click="toggleModal()"></div>
@@ -118,13 +129,16 @@ export default {
       modalIsActive: false,
       model: { id: "", url: "", folder: "", remark: "", owner: "" },
       isEditMode: false,
-      selectedFolder: ""
+      selectedFolder: "",
+      currentPage: 1,
+      pageSize: 500,
+      successMsg: null
     };
   },
   computed: {
     folderList() {
-      const folders = this.$store.state.links.map(l => l.folder || "").filter(f => f).filter((v, i, a) => a.indexOf(v) === i);
-      return folders.sort();
+      const folders = this.$store.state.links.map(l => l.folder || "").filter(f => f);
+      return [...new Set(folders)].sort();
     },
     filteredLinks() {
       let arr = this.$store.state.links;
@@ -132,15 +146,28 @@ export default {
         arr = arr.filter(link => (link.folder || "") === this.selectedFolder);
       }
       if (this.searchTerm) {
+        const term = this.searchTerm.toLowerCase();
         arr = arr.filter(link =>
-          link.id.includes(this.searchTerm) ||
-          (link.url && link.url.includes(this.searchTerm)) ||
-          (link.folder && link.folder.includes(this.searchTerm)) ||
-          (link.remark && link.remark.includes(this.searchTerm)) ||
-          (link.owner && link.owner.includes(this.searchTerm))
+          link.id.toLowerCase().includes(term) ||
+          (link.url && link.url.toLowerCase().includes(term)) ||
+          (link.folder && link.folder.toLowerCase().includes(term)) ||
+          (link.remark && link.remark.toLowerCase().includes(term)) ||
+          (link.owner && link.owner.toLowerCase().includes(term))
         );
       }
       return arr;
+    },
+    paginatedLinks() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      return this.filteredLinks.slice(start, start + this.pageSize);
+    }
+  },
+  watch: {
+    selectedFolder() {
+      this.currentPage = 1;
+    },
+    searchTerm() {
+      this.currentPage = 1;
     }
   },
   methods: {
@@ -151,18 +178,26 @@ export default {
     },
     resetModel() {
       this.model = { id: "", url: "", folder: "", remark: "", owner: "" };
-      this.isEditMode = false;
     },
-    formatDate(timestamp) {
-      return new Date(timestamp).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: true });
+    formatDate(ts) {
+      const d = new Date(ts);
+      const day = d.toLocaleString('en-IN', { day: '2-digit' });
+      const mon = d.toLocaleString('en-IN', { month: 'short' });
+      const year = d.getFullYear();
+      const time = d.toLocaleTimeString('en-IN', { hour12: false });
+      return `${day}/${mon}/${year}:${time} +0530`;
+    },
+    copy(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        this.successMsg = "Copied!";
+        setTimeout(() => this.successMsg = null, 1500);
+      }).catch(() => alert("Failed to copy"));
     },
     async createLink() {
       const now = new Date();
-      const istDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-
       const payload = {
         ...this.model,
-        timestamp: istDate.toISOString()
+        timestamp: now.toISOString()
       };
 
       try {
@@ -189,8 +224,7 @@ export default {
     },
     editLink(link) {
       this.model = { ...link };
-      this.isEditMode = true;
-      this.modalIsActive = true;
+      this.toggleModal('edit');
     },
     deleteLink(id) {
       const ind = this.$store.state.links.findIndex(l => l.id === id);
