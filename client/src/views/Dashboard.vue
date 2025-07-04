@@ -247,13 +247,16 @@ export default {
   computed: {
     ...mapState(["links"]),
     folderList() {
-      const folders = new Set(this.links.map(l => l.folder).filter(f => f));
-      return Array.from(folders).sort();
+      const folders = this.links
+        .map(l => (l.folder || '').trim())
+        .filter(f => f)
+        .filter((v, i, a) => a.indexOf(v) === i);
+      return folders.sort();
     },
     filteredLinks() {
       let links = this.links;
       if (this.selectedFolder) {
-        links = links.filter(l => l.folder === this.selectedFolder);
+        links = links.filter(l => (l.folder || '').trim() === this.selectedFolder);
       }
       if (this.searchTerm) {
         const t = this.searchTerm.toLowerCase();
@@ -391,32 +394,26 @@ export default {
         .catch(() => alert("Copy failed."));
     },
     formatDate(value) {
-      // Bulletproof: Accepts ISO strings, timestamps, "YYYYMMDDHHmmss", or returns ""
       if (!value) return "";
-      // If number, assume epoch ms
-      if (typeof value === "number" || /^\d+$/.test(value)) {
-        // If it's 13 digits, assume ms; if 10, seconds
-        let num = typeof value === "number" ? value : parseInt(value, 10);
-        if (num > 1e12) {
-          // ms
-          const date = new Date(num);
-          return isNaN(date.getTime()) ? "" : date.toLocaleString();
-        } else if (num > 1e9) {
-          // s
-          const date = new Date(num * 1000);
-          return isNaN(date.getTime()) ? "" : date.toLocaleString();
-        } else if (/^\d{14}$/.test(value)) {
-          // YYYYMMDDHHmmss
+      if (typeof value === "number" && value > 1e12) {
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? value : date.toLocaleString();
+      }
+      if (typeof value === "number" && value > 1e9) {
+        const date = new Date(value * 1000);
+        return isNaN(date.getTime()) ? value : date.toLocaleString();
+      }
+      if (typeof value === "string") {
+        if (/^\d{14}$/.test(value)) {
           const y = value.substr(0,4), m = value.substr(4,2), d = value.substr(6,2);
           const H = value.substr(8,2), M = value.substr(10,2), S = value.substr(12,2);
           const date = new Date(`${y}-${m}-${d}T${H}:${M}:${S}Z`);
-          return isNaN(date.getTime()) ? "" : date.toLocaleString();
+          return isNaN(date.getTime()) ? value : date.toLocaleString();
         }
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? value : date.toLocaleString();
       }
-      // If string, try Date parsing
-      const date = new Date(value);
-      if (isNaN(date.getTime())) return "";
-      return date.toLocaleString();
+      return value;
     },
   },
   watch: {
@@ -426,6 +423,12 @@ export default {
   },
   created() {
     this.fetchData();
+    // For debugging: Uncomment to see what your links look like after loading
+    // this.$watch(
+    //   () => this.links,
+    //   (val) => { console.log('Links:', val); },
+    //   { immediate: true, deep: true }
+    // );
   },
 };
 </script>
