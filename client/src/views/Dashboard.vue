@@ -47,7 +47,7 @@
               <td>{{ link.folder }}</td>
               <td>{{ link.remark }}</td>
               <td>{{ link.owner }}</td>
-              <td>{{ link.timestamp }}</td>
+              <td>{{ formatDate(link.timestamp) }}</td>
               <td>
                 <button class="button is-small is-info" @click="editLink(link)">Edit</button>
                 <button class="button is-small is-danger" @click="deleteLink(link.id)">Delete</button>
@@ -153,13 +153,39 @@ export default {
       this.model = { id: "", url: "", folder: "", remark: "", owner: "" };
       this.isEditMode = false;
     },
+    formatDate(timestamp) {
+      return new Date(timestamp).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: true });
+    },
     async createLink() {
-      if (this.isEditMode) {
-        this.$store.commit("updateLink", { link: this.model, ind: 0 }); // fallback
-      } else {
-        this.$store.commit("addLink", this.model);
+      const now = new Date();
+      const istDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+
+      const payload = {
+        ...this.model,
+        timestamp: istDate.toISOString()
+      };
+
+      try {
+        const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          this.$store.commit("addLink", payload);
+          this.toggleModal();
+        } else {
+          const error = await response.json();
+          alert("Failed to save: " + (error.message || response.statusText));
+        }
+      } catch (err) {
+        console.error("Error submitting link:", err);
+        alert("Network or server error. Check console.");
       }
-      this.toggleModal();
     },
     editLink(link) {
       this.model = { ...link };
@@ -172,7 +198,29 @@ export default {
     },
     selectFolder(folder) {
       this.selectedFolder = folder;
+    },
+    async fetchLinks() {
+      try {
+        const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
+          headers: {
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          this.$store.commit("hydrateLinks", data);
+        } else {
+          this.$store.commit("drainLinks");
+        }
+      } catch (err) {
+        console.error("Failed to fetch links:", err);
+        this.$store.commit("drainLinks");
+      }
     }
+  },
+  created() {
+    this.fetchLinks();
   }
 };
 </script>
