@@ -247,6 +247,7 @@ export default {
   computed: {
     ...mapState(["links"]),
     folderList() {
+      // Only show non-empty, unique folders
       const folders = this.links
         .map(l => (l.folder || '').trim())
         .filter(f => f)
@@ -327,6 +328,7 @@ export default {
             alert(res.data.message);
             return;
           }
+          // Make sure folder is updated from payload (if backend does not echo)
           this.$store.commit("addLink", { ...res.data, remark: payload.remark, folder: payload.folder });
           this.toggleModal();
           this.currentPage = this.totalPages;
@@ -423,12 +425,6 @@ export default {
   },
   created() {
     this.fetchData();
-    // For debugging: Uncomment to see what your links look like after loading
-    // this.$watch(
-    //   () => this.links,
-    //   (val) => { console.log('Links:', val); },
-    //   { immediate: true, deep: true }
-    // );
   },
 };
 </script>
