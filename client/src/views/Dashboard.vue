@@ -1,5 +1,6 @@
 <template>
   <div class="columns">
+    <!-- Sidebar -->
     <div class="column is-2 is-narrow sidebar-folders">
       <aside class="menu">
         <p class="menu-label">Folders</p>
@@ -8,57 +9,91 @@
             <a :class="{ 'is-active': selectedFolder === '' }" @click="selectFolder('')" href="#">All Folders</a>
           </li>
           <li v-for="folder in folderList" :key="folder">
-            <a :class="{ 'is-active': selectedFolder === folder }" @click="selectFolder(folder)" href="#">{{ folder }}</a>
+            <a :class="{ 'is-active': selectedFolder === folder }" @click="selectFolder(folder)" href="#">
+              {{ folder }}
+            </a>
           </li>
         </ul>
       </aside>
     </div>
 
+    <!-- Main Content -->
     <div class="column">
       <div class="dashboard">
-        <div class="columns is-mobile">
-          <div class="column"><h1 class="title">Shortcuts</h1></div>
+
+        <!-- Notification -->
+        <div v-if="successMsg" class="notification is-success is-light">{{ successMsg }}</div>
+        <div v-if="errorMsg" class="notification is-danger is-light">{{ errorMsg }}</div>
+
+        <!-- Header -->
+        <div class="columns is-mobile is-vcentered mb-4">
+          <div class="column"><h1 class="title is-4">Shortcuts</h1></div>
           <div class="column is-5-desktop is-full-mobile">
             <input class="input" v-model="searchTerm" type="text" placeholder="Search shortcuts…" />
           </div>
           <div class="column is-2-desktop is-half-mobile">
-            <button class="button is-info is-outlined is-fullwidth" @click="toggleModal('create')">New Shortcut</button>
+            <button class="button is-info is-outlined is-fullwidth" @click="toggleModal('create')">
+              <span class="icon"><i class="fas fa-plus"></i></span>
+              <span>New</span>
+            </button>
           </div>
         </div>
 
-        <table class="table is-fullwidth is-striped">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>ID</th>
-              <th>URL</th>
-              <th>Folder</th>
-              <th>Remark</th>
-              <th>Owner</th>
-              <th>Timestamp</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(link, idx) in filteredLinks" :key="link.id">
-              <td>{{ idx + 1 }}</td>
-              <td>{{ link.id }}</td>
-              <td><a :href="link.url" target="_blank">{{ link.url }}</a></td>
-              <td>{{ link.folder }}</td>
-              <td>{{ link.remark }}</td>
-              <td>{{ link.owner }}</td>
-              <td>{{ formatDate(link.timestamp) }}</td>
-              <td>
-                <button class="button is-small is-info" @click="editLink(link)">Edit</button>
-                <button class="button is-small is-danger" @click="deleteLink(link.id)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Table -->
+        <div v-if="isLoading" class="has-text-centered py-6">
+          <button class="button is-loading is-info is-light">Loading links…</button>
+        </div>
+        <div class="table-container" v-else>
+          <table class="table is-fullwidth is-striped is-hoverable is-size-7-mobile">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>ID</th>
+                <th>URL</th>
+                <th>Folder</th>
+                <th>Remark</th>
+                <th>Owner</th>
+                <th>Timestamp</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(link, idx) in paginatedLinks" :key="link.id">
+                <td>{{ idx + 1 + ((currentPage - 1) * pageSize) }}</td>
+                <td>{{ link.id }}</td>
+                <td>
+                  <a :href="link.url" target="_blank">{{ link.url }}</a>
+                  <button class="button is-small is-light ml-2" @click="copy(link.url)">
+                    <span class="icon is-small"><i class="fas fa-copy"></i></span>
+                  </button>
+                </td>
+                <td>{{ link.folder }}</td>
+                <td>{{ link.remark }}</td>
+                <td>{{ link.owner }}</td>
+                <td><time :datetime="link.timestamp">{{ formatDate(link.timestamp) }}</time></td>
+                <td>
+                  <button class="button is-small is-info is-light mr-1" @click="editLink(link)">
+                    <span class="icon"><i class="fas fa-edit"></i></span>
+                  </button>
+                  <button class="button is-small is-danger is-light" @click="deleteLink(link.id)">
+                    <span class="icon"><i class="fas fa-trash"></i></span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
+        <!-- Pagination -->
+        <nav class="pagination is-centered mt-4" role="navigation" v-if="filteredLinks.length > pageSize">
+          <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
+          <a class="pagination-next" :disabled="currentPage * pageSize >= filteredLinks.length" @click="currentPage++">Next</a>
+        </nav>
+
+        <!-- Modal -->
         <div v-if="modalIsActive" class="modal is-active">
           <div class="modal-background" @click="toggleModal()"></div>
-          <div class="modal-content">
+          <div class="modal-content" style="max-width: 600px; margin: auto;">
             <div class="box">
               <h2 class="subtitle">{{ isEditMode ? 'Edit Shortcut' : 'New Shortcut' }}</h2>
               <form @submit.prevent="createLink">
@@ -66,6 +101,7 @@
                   <label class="label">ID</label>
                   <div class="control">
                     <input class="input" v-model="model.id" :readonly="isEditMode" required />
+                    <p v-if="isDuplicateId && !isEditMode" class="help is-danger">ID already exists.</p>
                   </div>
                 </div>
                 <div class="field">
@@ -94,7 +130,9 @@
                 </div>
                 <div class="field is-grouped">
                   <div class="control">
-                    <button class="button is-link" type="submit">{{ isEditMode ? 'Update' : 'Create' }}</button>
+                    <button class="button is-link" type="submit" :disabled="isDuplicateId && !isEditMode">
+                      {{ isEditMode ? 'Update' : 'Create' }}
+                    </button>
                   </div>
                   <div class="control">
                     <button class="button" @click="toggleModal()" type="button">Cancel</button>
@@ -118,7 +156,12 @@ export default {
       modalIsActive: false,
       model: { id: "", url: "", folder: "", remark: "", owner: "" },
       isEditMode: false,
-      selectedFolder: ""
+      selectedFolder: "",
+      currentPage: 1,
+      pageSize: 500,
+      isLoading: false,
+      successMsg: null,
+      errorMsg: null
     };
   },
   computed: {
@@ -141,6 +184,13 @@ export default {
         );
       }
       return arr;
+    },
+    paginatedLinks() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      return this.filteredLinks.slice(start, start + this.pageSize);
+    },
+    isDuplicateId() {
+      return this.$store.state.links.some(link => link.id === this.model.id);
     }
   },
   methods: {
@@ -152,6 +202,8 @@ export default {
     resetModel() {
       this.model = { id: "", url: "", folder: "", remark: "", owner: "" };
       this.isEditMode = false;
+      this.successMsg = null;
+      this.errorMsg = null;
     },
     formatDate(timestamp) {
       return new Date(timestamp).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: true });
@@ -178,13 +230,37 @@ export default {
         if (response.ok) {
           this.$store.commit("addLink", payload);
           this.toggleModal();
+          this.successMsg = "Shortcut saved successfully.";
         } else {
           const error = await response.json();
-          alert("Failed to save: " + (error.message || response.statusText));
+          this.errorMsg = "Failed to save: " + (error.message || response.statusText);
         }
       } catch (err) {
         console.error("Error submitting link:", err);
-        alert("Network or server error. Check console.");
+        this.errorMsg = "Network error. See console.";
+      }
+    },
+    async deleteLink(id) {
+      if (!confirm("Are you sure you want to delete this shortcut?")) return;
+
+      try {
+        const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+          }
+        });
+
+        if (response.ok) {
+          const ind = this.$store.state.links.findIndex(l => l.id === id);
+          if (ind > -1) this.$store.commit("removeLink", ind);
+          this.successMsg = "Shortcut deleted.";
+        } else {
+          this.errorMsg = "Failed to delete.";
+        }
+      } catch (err) {
+        console.error("Delete error:", err);
+        this.errorMsg = "Network error while deleting.";
       }
     },
     editLink(link) {
@@ -192,14 +268,16 @@ export default {
       this.isEditMode = true;
       this.modalIsActive = true;
     },
-    deleteLink(id) {
-      const ind = this.$store.state.links.findIndex(l => l.id === id);
-      if (ind > -1) this.$store.commit("removeLink", ind);
-    },
     selectFolder(folder) {
       this.selectedFolder = folder;
     },
+    copy(url) {
+      navigator.clipboard.writeText(url)
+        .then(() => (this.successMsg = "Copied to clipboard"))
+        .catch(() => (this.errorMsg = "Copy failed"));
+    },
     async fetchLinks() {
+      this.isLoading = true;
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           headers: {
@@ -217,20 +295,4 @@ export default {
         console.error("Failed to fetch links:", err);
         this.$store.commit("drainLinks");
       }
-    }
-  },
-  created() {
-    this.fetchLinks();
-  }
-};
-</script>
-
-<style scoped>
-.sidebar-folders {
-  border-right: 1px solid #eee;
-  height: 100vh;
-}
-.dashboard {
-  padding: 2rem;
-}
-</style>
+      this.isLoading = false;
