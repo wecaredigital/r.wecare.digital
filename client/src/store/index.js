@@ -5,29 +5,32 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    links: []  // stores all shortcuts
+    authorized: false,
+    links: []
   },
 
   mutations: {
-    addLink(state, link) {
-      state.links.push(link);
+    authorize(state) {
+      state.authorized = true;
     },
-    updateLink(state, { link, ind }) {
-      Vue.set(state.links, ind, link);
-    },
-    removeLink(state, index) {
-      state.links.splice(index, 1);
+    deAuthorize(state) {
+      state.authorized = false;
     },
     hydrateLinks(state, links) {
       state.links = links;
     },
     drainLinks(state) {
       state.links = [];
+    },
+    addLink(state, link) {
+      state.links.push(link);
+    },
+    removeLink(state, ind) {
+      state.links.splice(ind, 1);
+    },
+    updateLink(state, { link, ind }) {
+      Vue.set(state.links, ind, link);
     }
-  },
-
-  actions: {
-    // Optional: you could move fetch/create/delete here for cleaner logic
   },
 
   getters: {
