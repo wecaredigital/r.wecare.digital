@@ -1,6 +1,6 @@
 <template>
-  <div class="columns">
-    <div class="column is-2 is-narrow sidebar-folders">
+  <div class="columns is-mobile">
+    <div class="column is-12-mobile is-2-tablet is-narrow sidebar-folders">
       <aside class="menu">
         <p class="menu-label">Folders</p>
         <ul class="menu-list">
@@ -14,117 +14,123 @@
       </aside>
     </div>
 
-    <div class="column">
-      <div class="dashboard">
-        <div v-if="successMsg" class="notification is-success is-light">{{ successMsg }}</div>
+    <div class="column dashboard">
+      <div v-if="successMsg" class="notification is-success is-light">{{ successMsg }}</div>
 
-        <div class="columns is-mobile">
-          <div class="column"><h1 class="title">Shortcuts</h1></div>
-          <div class="column is-5-desktop is-full-mobile">
-            <input class="input" v-model="searchTerm" type="text" placeholder="Search shortcuts…" />
-          </div>
-          <div class="column is-2-desktop is-half-mobile">
-            <button class="button is-info is-outlined is-fullwidth" @click="toggleModal('create')">New Shortcut</button>
+      <div class="columns is-multiline is-mobile mb-2">
+        <div class="column is-12-mobile is-6-tablet is-4-desktop">
+          <h1 class="title is-size-4-mobile is-size-3-tablet">Shortcuts</h1>
+        </div>
+        <div class="column is-12-mobile is-6-tablet is-4-desktop">
+          <input class="input" v-model="searchTerm" type="text" placeholder="Search shortcuts…" />
+        </div>
+        <div class="column is-12-mobile is-12-tablet is-4-desktop">
+          <button class="button is-info is-outlined is-fullwidth" @click="toggleModal('create')">New Shortcut</button>
+        </div>
+      </div>
+
+      <table class="table is-fullwidth is-striped">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ID</th>
+            <th>URL</th>
+            <th>Folder</th>
+            <th>Remark</th>
+            <th>Owner</th>
+            <th>Timestamp</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(link, idx) in paginatedLinks" :key="link.id">
+            <td>{{ idx + 1 + (currentPage - 1) * pageSize }}</td>
+            <td>
+              {{ link.id }}
+              <button class="button is-small is-white ml-2" @click="copyShort(link.id)">📋</button>
+            </td>
+            <td>
+              <a :href="link.url" target="_blank">{{ link.url }}</a>
+              <button class="button is-small is-white ml-2" @click="copy(link.url)">📋</button>
+            </td>
+            <td>{{ link.folder }}</td>
+            <td>{{ link.remark }}</td>
+            <td>{{ link.owner }}</td>
+            <td>{{ formatDate(link.timestamp) }}</td>
+            <td>
+              <button class="button is-small is-info" @click="editLink(link)">Edit</button>
+              <button class="button is-small is-danger" @click="deleteLink(link.id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <nav class="pagination is-centered mt-4" v-if="filteredLinks.length > pageSize">
+        <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
+        <ul class="pagination-list">
+          <li v-for="page in totalPages" :key="page">
+            <a class="pagination-link" :class="{ 'is-current': currentPage === page }" @click="goToPage(page)">
+              {{ page }}
+            </a>
+          </li>
+        </ul>
+        <a class="pagination-next" :disabled="currentPage === totalPages" @click="currentPage++">Next</a>
+      </nav>
+
+      <!-- Modal -->
+      <div v-if="modalIsActive" class="modal is-active">
+        <div class="modal-background" @click="toggleModal()"></div>
+        <div class="modal-content">
+          <div class="box">
+            <h2 class="subtitle">{{ isEditMode ? 'Edit Shortcut' : 'New Shortcut' }}</h2>
+            <form @submit.prevent="createLink">
+              <div class="field">
+                <label class="label">ID</label>
+                <div class="control">
+                  <input class="input" v-model="model.id" :readonly="isEditMode" required />
+                </div>
+                <p v-if="idExists && !isEditMode" class="help is-danger">This ID already exists.</p>
+              </div>
+              <div class="field">
+                <label class="label">URL</label>
+                <div class="control">
+                  <input class="input" v-model="model.url" type="url" required />
+                </div>
+                <p v-if="model.url && !isValidUrl(model.url)" class="help is-danger">Please enter a valid URL.</p>
+              </div>
+              <div class="field">
+                <label class="label">Folder</label>
+                <div class="control">
+                  <input class="input" v-model="model.folder" />
+                </div>
+              </div>
+              <div class="field">
+                <label class="label">Remark</label>
+                <div class="control">
+                  <input class="input" v-model="model.remark" />
+                </div>
+              </div>
+              <div class="field">
+                <label class="label">Owner</label>
+                <div class="control">
+                  <input class="input" v-model="model.owner" />
+                </div>
+              </div>
+              <div class="field is-grouped">
+                <div class="control">
+                  <button class="button is-link" type="submit"
+                    :disabled="!model.id || !model.url || (!isEditMode && idExists) || !isValidUrl(model.url)">
+                    {{ isEditMode ? 'Update' : 'Create' }}
+                  </button>
+                </div>
+                <div class="control">
+                  <button class="button" type="button" @click="toggleModal()">Cancel</button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
-
-        <table class="table is-fullwidth is-striped">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>ID</th>
-              <th>URL</th>
-              <th>Folder</th>
-              <th>Remark</th>
-              <th>Owner</th>
-              <th>Timestamp</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(link, idx) in paginatedLinks" :key="link.id">
-              <td>{{ idx + 1 + (currentPage - 1) * pageSize }}</td>
-              <td>
-                {{ link.id }}
-                <button class="button is-small is-white ml-2" @click="copyShort(link.id)" title="Copy short URL">📋</button>
-              </td>
-              <td>
-                <a :href="link.url" target="_blank">{{ link.url }}</a>
-                <button class="button is-small is-white ml-2" @click="copy(link.url)" title="Copy full URL">📋</button>
-              </td>
-              <td>{{ link.folder }}</td>
-              <td>{{ link.remark }}</td>
-              <td>{{ link.owner }}</td>
-              <td>{{ formatDate(link.timestamp) }}</td>
-              <td>
-                <button class="button is-small is-info" @click="editLink(link)">Edit</button>
-                <button class="button is-small is-danger" @click="deleteLink(link.id)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <nav class="pagination is-centered mt-4" v-if="filteredLinks.length > pageSize">
-          <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
-          <a class="pagination-next" :disabled="currentPage * pageSize >= filteredLinks.length" @click="currentPage++">Next</a>
-        </nav>
-
-        <div v-if="modalIsActive" class="modal is-active">
-          <div class="modal-background" @click="toggleModal()"></div>
-          <div class="modal-content">
-            <div class="box">
-              <h2 class="subtitle">{{ isEditMode ? 'Edit Shortcut' : 'New Shortcut' }}</h2>
-              <form @submit.prevent="createLink">
-                <div class="field">
-                  <label class="label">ID</label>
-                  <div class="control">
-                    <input class="input" v-model="model.id" :readonly="isEditMode" required />
-                  </div>
-                  <p v-if="idExists && !isEditMode" class="help is-danger">This ID already exists.</p>
-                </div>
-                <div class="field">
-                  <label class="label">URL</label>
-                  <div class="control">
-                    <input class="input" v-model="model.url" type="url" required />
-                  </div>
-                  <p v-if="model.url && !isValidUrl(model.url)" class="help is-danger">Please enter a valid URL.</p>
-                </div>
-                <div class="field">
-                  <label class="label">Folder</label>
-                  <div class="control">
-                    <input class="input" v-model="model.folder" />
-                  </div>
-                </div>
-                <div class="field">
-                  <label class="label">Remark</label>
-                  <div class="control">
-                    <input class="input" v-model="model.remark" />
-                  </div>
-                </div>
-                <div class="field">
-                  <label class="label">Owner</label>
-                  <div class="control">
-                    <input class="input" v-model="model.owner" />
-                  </div>
-                </div>
-                <div class="field is-grouped">
-                  <div class="control">
-                    <button
-                      class="button is-link"
-                      type="submit"
-                      :disabled="!model.id || !model.url || (!isEditMode && idExists) || !isValidUrl(model.url)">
-                      {{ isEditMode ? 'Update' : 'Create' }}
-                    </button>
-                  </div>
-                  <div class="control">
-                    <button class="button" @click="toggleModal()" type="button">Cancel</button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-          <button class="modal-close is-large" @click="toggleModal()" aria-label="close"></button>
-        </div>
+        <button class="modal-close is-large" @click="toggleModal()" aria-label="close"></button>
       </div>
     </div>
   </div>
@@ -146,7 +152,7 @@ export default {
   },
   computed: {
     folderList() {
-      const folders = this.$store.state.links.map(l => l.folder || "").filter(f => f);
+      const folders = this.$store.state.links.map(l => l.folder || "").filter(Boolean);
       return [...new Set(folders)].sort();
     },
     filteredLinks() {
@@ -170,46 +176,41 @@ export default {
       const start = (this.currentPage - 1) * this.pageSize;
       return this.filteredLinks.slice(start, start + this.pageSize);
     },
+    totalPages() {
+      return Math.ceil(this.filteredLinks.length / this.pageSize);
+    },
     idExists() {
       return this.$store.state.links.some(link => link.id === this.model.id);
-    }
-  },
-  watch: {
-    selectedFolder() {
-      this.currentPage = 1;
-    },
-    searchTerm() {
-      this.currentPage = 1;
     }
   },
   methods: {
     toggleModal(mode) {
       this.modalIsActive = !this.modalIsActive;
-      if (!this.modalIsActive) this.resetModel();
+      if (!this.modalIsActive) this.model = { id: "", url: "", folder: "", remark: "", owner: "" };
       this.isEditMode = (mode === 'edit');
     },
-    resetModel() {
-      this.model = { id: "", url: "", folder: "", remark: "", owner: "" };
-    },
     formatDate(timestamp) {
-      const options = {
-        timeZone: 'Asia/Kolkata',
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      };
-      const dateStr = new Date(timestamp).toLocaleString('en-GB', options);
-      return dateStr.replace(',', '').replace(' at', ':') + ' +0530';
+      try {
+        const options = {
+          timeZone: 'Asia/Kolkata',
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        };
+        return new Date(timestamp).toLocaleString('en-GB', options).replace(',', '') + ' +0530';
+      } catch {
+        return 'Invalid';
+      }
     },
     isValidUrl(url) {
       try {
         const u = new URL(url);
         return u.protocol === "http:" || u.protocol === "https:";
-      } catch (_) {
+      } catch {
         return false;
       }
     },
@@ -217,21 +218,17 @@ export default {
       navigator.clipboard.writeText(url).then(() => {
         this.successMsg = "Copied!";
         setTimeout(() => (this.successMsg = null), 1000);
-      }).catch(() => alert("Copy failed."));
+      });
     },
     copyShort(id) {
       const shortUrl = `https://r.wecare.digital/${id}`;
       navigator.clipboard.writeText(shortUrl).then(() => {
         this.successMsg = "Short URL copied!";
         setTimeout(() => (this.successMsg = null), 1000);
-      }).catch(() => alert("Copy failed."));
+      });
     },
     async createLink() {
-      const now = new Date();
-      const payload = {
-        ...this.model,
-        timestamp: now.toISOString()
-      };
+      const payload = { ...this.model, timestamp: new Date().toISOString() };
 
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
@@ -251,8 +248,8 @@ export default {
           alert("Failed to save: " + (error.message || response.statusText));
         }
       } catch (err) {
-        console.error("Error submitting link:", err);
-        alert("Network or server error. Check console.");
+        alert("Network or server error.");
+        console.error(err);
       }
     },
     async deleteLink(id) {
@@ -278,8 +275,8 @@ export default {
           alert("Delete failed: " + (error.message || response.statusText));
         }
       } catch (err) {
-        console.error("Delete error:", err);
         alert("Network error while deleting.");
+        console.error(err);
       }
     },
     editLink(link) {
@@ -288,6 +285,10 @@ export default {
     },
     selectFolder(folder) {
       this.selectedFolder = folder;
+      this.currentPage = 1;
+    },
+    goToPage(n) {
+      this.currentPage = n;
     },
     async fetchLinks() {
       try {
@@ -304,8 +305,8 @@ export default {
           this.$store.commit("drainLinks");
         }
       } catch (err) {
-        console.error("Failed to fetch links:", err);
         this.$store.commit("drainLinks");
+        console.error("Failed to fetch links:", err);
       }
     }
   },
@@ -321,6 +322,22 @@ export default {
   height: 100vh;
 }
 .dashboard {
-  padding: 2rem;
+  padding: 1rem;
+}
+@media screen and (max-width: 768px) {
+  .table thead {
+    display: none;
+  }
+  .table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+  }
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    word-break: break-word;
+  }
 }
 </style>
