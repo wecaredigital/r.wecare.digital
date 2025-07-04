@@ -88,6 +88,11 @@
                 </a>
               </td>
             </tr>
+            <tr v-if="paginatedLinks.length === 0">
+              <td colspan="7" class="has-text-centered has-text-grey-light">
+                No shortcuts found.
+              </td>
+            </tr>
           </tbody>
         </table>
 
@@ -386,8 +391,32 @@ export default {
         .catch(() => alert("Copy failed."));
     },
     formatDate(value) {
+      // Bulletproof: Accepts ISO strings, timestamps, "YYYYMMDDHHmmss", or returns ""
       if (!value) return "";
-      return new Date(value).toLocaleString();
+      // If number, assume epoch ms
+      if (typeof value === "number" || /^\d+$/.test(value)) {
+        // If it's 13 digits, assume ms; if 10, seconds
+        let num = typeof value === "number" ? value : parseInt(value, 10);
+        if (num > 1e12) {
+          // ms
+          const date = new Date(num);
+          return isNaN(date.getTime()) ? "" : date.toLocaleString();
+        } else if (num > 1e9) {
+          // s
+          const date = new Date(num * 1000);
+          return isNaN(date.getTime()) ? "" : date.toLocaleString();
+        } else if (/^\d{14}$/.test(value)) {
+          // YYYYMMDDHHmmss
+          const y = value.substr(0,4), m = value.substr(4,2), d = value.substr(6,2);
+          const H = value.substr(8,2), M = value.substr(10,2), S = value.substr(12,2);
+          const date = new Date(`${y}-${m}-${d}T${H}:${M}:${S}Z`);
+          return isNaN(date.getTime()) ? "" : date.toLocaleString();
+        }
+      }
+      // If string, try Date parsing
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return "";
+      return date.toLocaleString();
     },
   },
   watch: {
