@@ -339,5 +339,12 @@ export default {
     padding: 0.5rem;
     word-break: break-word;
   }
+  .table {
+  border: 1px solid #ddd;
+}
+.table td,
+.table th {
+  border: 1px solid #ccc !important;
+}
 }
 </style>
