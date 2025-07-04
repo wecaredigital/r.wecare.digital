@@ -17,6 +17,7 @@
     <div class="column">
       <div class="dashboard">
         <div v-if="successMsg" class="notification is-success is-light">{{ successMsg }}</div>
+
         <div class="columns is-mobile">
           <div class="column"><h1 class="title">Shortcuts</h1></div>
           <div class="column is-5-desktop is-full-mobile">
@@ -46,9 +47,7 @@
               <td>{{ link.id }}</td>
               <td>
                 <a :href="link.url" target="_blank">{{ link.url }}</a>
-                <button class="button is-small is-white ml-2" @click="copy(link.url)">
-                  <span class="icon is-small"><i class="fas fa-copy"></i></span>
-                </button>
+                <button class="button is-small is-white ml-2" @click="copy(link.url)" title="Copy to clipboard">📋</button>
               </td>
               <td>{{ link.folder }}</td>
               <td>{{ link.remark }}</td>
@@ -179,19 +178,25 @@ export default {
     resetModel() {
       this.model = { id: "", url: "", folder: "", remark: "", owner: "" };
     },
-    formatDate(ts) {
-      const d = new Date(ts);
-      const day = d.toLocaleString('en-IN', { day: '2-digit' });
-      const mon = d.toLocaleString('en-IN', { month: 'short' });
-      const year = d.getFullYear();
-      const time = d.toLocaleTimeString('en-IN', { hour12: false });
-      return `${day}/${mon}/${year}:${time} +0530`;
+    formatDate(timestamp) {
+      const options = {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      };
+      const dateStr = new Date(timestamp).toLocaleString('en-GB', options);
+      return dateStr.replace(',', '').replace(' at', ':') + ' +0530';
     },
     copy(url) {
       navigator.clipboard.writeText(url).then(() => {
         this.successMsg = "Copied!";
-        setTimeout(() => this.successMsg = null, 1500);
-      }).catch(() => alert("Failed to copy"));
+        setTimeout(() => (this.successMsg = null), 1000);
+      }).catch(() => alert("Failed to copy."));
     },
     async createLink() {
       const now = new Date();
