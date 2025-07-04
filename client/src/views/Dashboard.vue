@@ -1,21 +1,19 @@
 <template>
   <div class="columns">
-    <!-- Sidebar: Folders -->
     <div class="column is-2 is-narrow sidebar-folders">
       <aside class="menu">
         <p class="menu-label">Folders</p>
         <ul class="menu-list">
           <li>
-            <a :class="{ 'is-active': selectedFolder === '' }" @click="selectFolder('')" href="javascript:void(0);">All Folders</a>
+            <a :class="{ 'is-active': selectedFolder === '' }" @click="selectFolder('')" href="#">All Folders</a>
           </li>
           <li v-for="folder in folderList" :key="folder">
-            <a :class="{ 'is-active': selectedFolder === folder }" @click="selectFolder(folder)" href="javascript:void(0);">{{ folder }}</a>
+            <a :class="{ 'is-active': selectedFolder === folder }" @click="selectFolder(folder)" href="#">{{ folder }}</a>
           </li>
         </ul>
       </aside>
     </div>
 
-    <!-- Main Dashboard -->
     <div class="column">
       <div class="dashboard">
         <div class="columns is-mobile">
@@ -28,8 +26,7 @@
           </div>
         </div>
 
-        <!-- Table -->
-        <table class="table is-fullwidth is-hoverable">
+        <table class="table is-fullwidth is-striped">
           <thead>
             <tr>
               <th>#</th>
@@ -43,18 +40,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-if="isLoading">
-              <td colspan="8" class="has-text-centered">Loading...</td>
-            </tr>
-            <tr v-else-if="filteredLinks.length === 0">
-              <td colspan="8" class="has-text-centered">No data</td>
-            </tr>
             <tr v-for="(link, idx) in filteredLinks" :key="link.id">
               <td>{{ idx + 1 }}</td>
               <td>{{ link.id }}</td>
-              <td>
-                <a :href="link.url" target="_blank">{{ link.url }}</a>
-              </td>
+              <td><a :href="link.url" target="_blank">{{ link.url }}</a></td>
               <td>{{ link.folder }}</td>
               <td>{{ link.remark }}</td>
               <td>{{ link.owner }}</td>
@@ -67,10 +56,6 @@
           </tbody>
         </table>
 
-        <!-- Error Message -->
-        <div v-if="error" class="notification is-danger">{{ error }}</div>
-
-        <!-- Modal for Create/Edit -->
         <div v-if="modalIsActive" class="modal is-active">
           <div class="modal-background" @click="toggleModal()"></div>
           <div class="modal-content">
@@ -126,8 +111,6 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-
 export default {
   data() {
     return {
@@ -139,19 +122,16 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["links", "isLoading", "error"]),
     folderList() {
-      const folders = this.links
-        .map(l => (l.folder || "").trim())
-        .filter(f => f)
-        .filter((v, i, a) => a.indexOf(v) === i);
+      const folders = this.$store.state.links.map(l => l.folder || "").filter(f => f).filter((v, i, a) => a.indexOf(v) === i);
       return folders.sort();
     },
     filteredLinks() {
-      let arr = this.links;
-      if (this.selectedFolder)
+      let arr = this.$store.state.links;
+      if (this.selectedFolder) {
         arr = arr.filter(link => (link.folder || "") === this.selectedFolder);
-      if (this.searchTerm)
+      }
+      if (this.searchTerm) {
         arr = arr.filter(link =>
           link.id.includes(this.searchTerm) ||
           (link.url && link.url.includes(this.searchTerm)) ||
@@ -159,15 +139,14 @@ export default {
           (link.remark && link.remark.includes(this.searchTerm)) ||
           (link.owner && link.owner.includes(this.searchTerm))
         );
+      }
       return arr;
     }
   },
   methods: {
     toggleModal(mode) {
       this.modalIsActive = !this.modalIsActive;
-      if (!this.modalIsActive) {
-        this.resetModel();
-      }
+      if (!this.modalIsActive) this.resetModel();
       this.isEditMode = (mode === 'edit');
     },
     resetModel() {
@@ -176,9 +155,9 @@ export default {
     },
     async submitShortcut() {
       if (this.isEditMode) {
-        await this.$store.dispatch("updateLink", { id: this.model.id, data: this.model });
+        this.$store.commit("updateLink", { link: this.model, ind: 0 }); // fallback
       } else {
-        await this.$store.dispatch("createLink", this.model);
+        this.$store.commit("addLink", this.model);
       }
       this.toggleModal();
     },
@@ -187,17 +166,13 @@ export default {
       this.isEditMode = true;
       this.modalIsActive = true;
     },
-    async deleteLink(id) {
-      if (confirm("Delete this shortcut?")) {
-        await this.$store.dispatch("deleteLink", id);
-      }
+    deleteLink(id) {
+      const ind = this.$store.state.links.findIndex(l => l.id === id);
+      if (ind > -1) this.$store.commit("removeLink", ind);
     },
     selectFolder(folder) {
       this.selectedFolder = folder;
     }
-  },
-  mounted() {
-    this.$store.dispatch("fetchLinks");
   }
 };
 </script>
