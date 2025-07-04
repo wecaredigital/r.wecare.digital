@@ -44,10 +44,13 @@
           <tbody>
             <tr v-for="(link, idx) in paginatedLinks" :key="link.id">
               <td>{{ idx + 1 + (currentPage - 1) * pageSize }}</td>
-              <td>{{ link.id }}</td>
+              <td>
+                {{ link.id }}
+                <button class="button is-small is-white ml-2" @click="copyShort(link.id)" title="Copy short URL">📋</button>
+              </td>
               <td>
                 <a :href="link.url" target="_blank">{{ link.url }}</a>
-                <button class="button is-small is-white ml-2" @click="copy(link.url)" title="Copy to clipboard">📋</button>
+                <button class="button is-small is-white ml-2" @click="copy(link.url)" title="Copy full URL">📋</button>
               </td>
               <td>{{ link.folder }}</td>
               <td>{{ link.remark }}</td>
@@ -77,12 +80,14 @@
                   <div class="control">
                     <input class="input" v-model="model.id" :readonly="isEditMode" required />
                   </div>
+                  <p v-if="idExists && !isEditMode" class="help is-danger">This ID already exists.</p>
                 </div>
                 <div class="field">
                   <label class="label">URL</label>
                   <div class="control">
                     <input class="input" v-model="model.url" type="url" required />
                   </div>
+                  <p v-if="model.url && !isValidUrl(model.url)" class="help is-danger">Please enter a valid URL.</p>
                 </div>
                 <div class="field">
                   <label class="label">Folder</label>
@@ -104,7 +109,12 @@
                 </div>
                 <div class="field is-grouped">
                   <div class="control">
-                    <button class="button is-link" type="submit">{{ isEditMode ? 'Update' : 'Create' }}</button>
+                    <button
+                      class="button is-link"
+                      type="submit"
+                      :disabled="!model.id || !model.url || (!isEditMode && idExists) || !isValidUrl(model.url)">
+                      {{ isEditMode ? 'Update' : 'Create' }}
+                    </button>
                   </div>
                   <div class="control">
                     <button class="button" @click="toggleModal()" type="button">Cancel</button>
@@ -159,6 +169,9 @@ export default {
     paginatedLinks() {
       const start = (this.currentPage - 1) * this.pageSize;
       return this.filteredLinks.slice(start, start + this.pageSize);
+    },
+    idExists() {
+      return this.$store.state.links.some(link => link.id === this.model.id);
     }
   },
   watch: {
@@ -192,11 +205,26 @@ export default {
       const dateStr = new Date(timestamp).toLocaleString('en-GB', options);
       return dateStr.replace(',', '').replace(' at', ':') + ' +0530';
     },
+    isValidUrl(url) {
+      try {
+        const u = new URL(url);
+        return u.protocol === "http:" || u.protocol === "https:";
+      } catch (_) {
+        return false;
+      }
+    },
     copy(url) {
       navigator.clipboard.writeText(url).then(() => {
         this.successMsg = "Copied!";
         setTimeout(() => (this.successMsg = null), 1000);
-      }).catch(() => alert("Failed to copy."));
+      }).catch(() => alert("Copy failed."));
+    },
+    copyShort(id) {
+      const shortUrl = `https://r.wecare.digital/${id}`;
+      navigator.clipboard.writeText(shortUrl).then(() => {
+        this.successMsg = "Short URL copied!";
+        setTimeout(() => (this.successMsg = null), 1000);
+      }).catch(() => alert("Copy failed."));
     },
     async createLink() {
       const now = new Date();
@@ -227,13 +255,36 @@ export default {
         alert("Network or server error. Check console.");
       }
     },
+    async deleteLink(id) {
+      if (!confirm("Are you sure you want to delete this link?")) return;
+
+      try {
+        const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+          },
+          body: JSON.stringify({ id })
+        });
+
+        if (response.ok) {
+          const ind = this.$store.state.links.findIndex(l => l.id === id);
+          if (ind > -1) this.$store.commit("removeLink", ind);
+          this.successMsg = "Deleted!";
+          setTimeout(() => (this.successMsg = null), 1500);
+        } else {
+          const error = await response.json();
+          alert("Delete failed: " + (error.message || response.statusText));
+        }
+      } catch (err) {
+        console.error("Delete error:", err);
+        alert("Network error while deleting.");
+      }
+    },
     editLink(link) {
       this.model = { ...link };
       this.toggleModal('edit');
-    },
-    deleteLink(id) {
-      const ind = this.$store.state.links.findIndex(l => l.id === id);
-      if (ind > -1) this.$store.commit("removeLink", ind);
     },
     selectFolder(folder) {
       this.selectedFolder = folder;
