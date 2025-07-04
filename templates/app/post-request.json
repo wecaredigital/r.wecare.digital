@@ -9,7 +9,7 @@
   "TableName": "SlipLink-LinkTable-A2SD9C321JCE",
   "ConditionExpression": "attribute_not_exists(id)",
   "Key": {
-    "id": { "S": $id }
+    "id": { "S": "123" }
   },
   "ExpressionAttributeNames": {
     "#u":  "url",
