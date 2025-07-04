@@ -1,7 +1,10 @@
+// Import Bulma framework
 @import "~bulma/bulma";
 
-.text-clip{
-    overflow:hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+// Single-line text clipping utility
+.text-clip {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%; // Ensures clipping works in responsive layouts
 }
