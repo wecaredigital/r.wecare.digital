@@ -1,10 +1,9 @@
-## post-request.json (API Gateway → DynamoDB UpdateItem/Create)
-
 #set( $email   = $context.authorizer.claims.email )
 #set( $rawId   = $input.json('$.id') )
 #set( $id      = "${rawId}_$email" )
 #set( $url     = "$input.json('$.url')" )
 #set( $remark  = $util.defaultIfNull($input.json('$.remark'), "") )
+#set( $folder  = $util.defaultIfNull($input.json('$.folder'), "") )
 
 {
   "TableName": "SlipLink-LinkTable-A2SD9C321JCE",
@@ -16,14 +15,16 @@
     "#u":  "url",
     "#o":  "owner",
     "#ts": "timestamp",
-    "#r":  "remark"
+    "#r":  "remark",
+    "#f":  "folder"
   },
   "ExpressionAttributeValues": {
     ":u":  { "S": "$url" },
     ":o":  { "S": "$email" },
     ":ts": { "S": "$context.requestTime" },
-    ":r":  { "S": "$remark" }
+    ":r":  { "S": "$remark" },
+    ":f":  { "S": "$folder" }
   },
-  "UpdateExpression": "SET #u = :u, #o = :o, #ts = :ts, #r = :r",
+  "UpdateExpression": "SET #u = :u, #o = :o, #ts = :ts, #r = :r, #f = :f",
   "ReturnValues": "ALL_NEW"
 }
