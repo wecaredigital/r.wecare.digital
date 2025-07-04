@@ -4,5 +4,6 @@
   "url": "$inputRoot.Attributes.url.S",
   "timestamp": "$inputRoot.Attributes.timestamp.S",
   "owner": "$inputRoot.Attributes.owner.S",
-  "remark":"$inputRoot.Attributes.remark.S"
+  "remark": "$inputRoot.Attributes.remark.S",
+  "folder": "$inputRoot.Attributes.folder.S"
 }
