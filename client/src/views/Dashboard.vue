@@ -29,17 +29,20 @@
         </div>
       </div>
 
-      <!-- Pagination above table -->
-      <nav class="pagination is-right mb-2" v-if="totalPages > 1">
-        <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
-        <a class="pagination-next" :disabled="currentPage === totalPages" @click="currentPage++">Next</a>
-        <ul class="pagination-list">
-          <li v-for="page in totalPages" :key="page">
-            <a class="pagination-link" :class="{ 'is-current': currentPage === page }" @click="goToPage(page)">{{ page }}</a>
-          </li>
-        </ul>
-      </nav>
-
+    <!-- Pagination above table -->
+<nav class="pagination is-right mb-2">
+  <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
+  <a class="pagination-next" :disabled="currentPage === totalPages || totalPages === 0" @click="currentPage++">Next</a>
+  <ul class="pagination-list">
+    <li v-for="page in totalPages || 1" :key="page">
+      <a
+        class="pagination-link"
+        :class="{ 'is-current': currentPage === page }"
+        @click="goToPage(page)"
+      >{{ page }}</a>
+    </li>
+  </ul>
+</nav>
       <table class="table is-fullwidth is-striped has-border">
         <thead>
           <tr>
