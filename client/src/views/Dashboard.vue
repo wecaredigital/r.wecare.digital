@@ -17,6 +17,17 @@
     <div class="column dashboard">
       <div v-if="successMsg" class="notification is-success is-light">{{ successMsg }}</div>
 
+      <!-- Pagination above table -->
+      <nav class="pagination is-right mb-2" role="navigation" aria-label="pagination">
+        <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
+        <a class="pagination-next" :disabled="currentPage === totalPages" @click="currentPage++">Next</a>
+        <ul class="pagination-list">
+          <li v-for="page in totalPages" :key="page">
+            <a class="pagination-link" :class="{ 'is-current': currentPage === page }" @click="goToPage(page)">{{ page }}</a>
+          </li>
+        </ul>
+      </nav>
+
       <div class="columns is-multiline is-mobile mb-2">
         <div class="column is-12-mobile is-6-tablet is-4-desktop">
           <h1 class="title is-size-4-mobile is-size-3-tablet">Shortcuts</h1>
@@ -29,22 +40,7 @@
         </div>
       </div>
 
-     <!-- Pagination above table -->
-<nav class="pagination is-right mb-2">
-  <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
-  <a class="pagination-next" :disabled="currentPage === totalPages || totalPages === 0" @click="currentPage++">Next</a>
-  <ul class="pagination-list">
-    <li v-for="page in totalPages || 1" :key="page">
-      <a
-        class="pagination-link"
-        :class="{ 'is-current': currentPage === page }"
-        @click="goToPage(page)"
-      >{{ page }}</a>
-    </li>
-  </ul>
-</nav>
-
-      <table class="table is-fullwidth is-striped has-border">
+      <table class="table is-fullwidth is-striped">
         <thead>
           <tr>
             <th>#</th>
@@ -89,31 +85,36 @@
             <form @submit.prevent="createLink">
               <div class="field">
                 <label class="label">ID</label>
-                <input class="input" v-model="model.id" :readonly="isEditMode" required />
+                <div class="control">
+                  <input class="input" v-model="model.id" :readonly="isEditMode" required />
+                </div>
                 <p v-if="idExists && !isEditMode" class="help is-danger">This ID already exists.</p>
               </div>
-
               <div class="field">
                 <label class="label">URL</label>
-                <input class="input" v-model="model.url" type="url" required />
-                <p v-if="model.url && !isValidUrl(model.url)" class="help is-danger">Invalid URL.</p>
+                <div class="control">
+                  <input class="input" v-model="model.url" type="url" required />
+                </div>
+                <p v-if="model.url && !isValidUrl(model.url)" class="help is-danger">Please enter a valid URL.</p>
               </div>
-
               <div class="field">
                 <label class="label">Folder</label>
-                <input class="input" v-model="model.folder" />
+                <div class="control">
+                  <input class="input" v-model="model.folder" />
+                </div>
               </div>
-
               <div class="field">
                 <label class="label">Remark</label>
-                <input class="input" v-model="model.remark" />
+                <div class="control">
+                  <input class="input" v-model="model.remark" />
+                </div>
               </div>
-
               <div class="field">
                 <label class="label">Owner</label>
-                <input class="input" v-model="model.owner" />
+                <div class="control">
+                  <input class="input" v-model="model.owner" />
+                </div>
               </div>
-
               <div class="field is-grouped">
                 <div class="control">
                   <button class="button is-link" type="submit"
@@ -175,7 +176,7 @@ export default {
       return this.filteredLinks.slice(start, start + this.pageSize);
     },
     totalPages() {
-      return Math.ceil(this.filteredLinks.length / this.pageSize);
+      return Math.max(1, Math.ceil(this.filteredLinks.length / this.pageSize));
     },
     idExists() {
       return this.$store.state.links.some(link => link.id === this.model.id);
@@ -226,39 +227,52 @@ export default {
       });
     },
     async createLink() {
+      const token = window.localStorage.getItem("cognitoIdentityToken");
+      if (!token) return alert("Missing authentication token.");
+
       const payload = { ...this.model, timestamp: new Date().toISOString() };
+
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+            Authorization: token
           },
           body: JSON.stringify(payload)
         });
+
+        const result = await response.json();
+
         if (response.ok) {
           this.$store.commit("addLink", payload);
           this.toggleModal();
+          this.successMsg = "Link saved!";
+          setTimeout(() => (this.successMsg = null), 1500);
         } else {
-          const error = await response.json();
-          alert("Failed to save: " + (error.message || response.statusText));
+          console.error("API Error:", result);
+          alert("Failed to save: " + (result.message || response.statusText));
         }
       } catch (err) {
+        console.error("Network error:", err);
         alert("Network or server error.");
-        console.error(err);
       }
     },
     async deleteLink(id) {
       if (!confirm("Are you sure you want to delete this link?")) return;
+
+      const token = window.localStorage.getItem("cognitoIdentityToken");
+
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+            Authorization: token
           },
           body: JSON.stringify({ id })
         });
+
         if (response.ok) {
           const ind = this.$store.state.links.findIndex(l => l.id === id);
           if (ind > -1) this.$store.commit("removeLink", ind);
@@ -285,12 +299,17 @@ export default {
       this.currentPage = n;
     },
     async fetchLinks() {
+      const token = window.localStorage.getItem("cognitoIdentityToken");
+      if (!token) {
+        this.$store.commit("drainLinks");
+        return;
+      }
+
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
-          headers: {
-            Authorization: window.localStorage.getItem("cognitoIdentityToken")
-          }
+          headers: { Authorization: token }
         });
+
         if (response.ok) {
           const data = await response.json();
           this.$store.commit("hydrateLinks", data);
@@ -298,8 +317,8 @@ export default {
           this.$store.commit("drainLinks");
         }
       } catch (err) {
+        console.error("Error fetching links:", err);
         this.$store.commit("drainLinks");
-        console.error("Failed to fetch links:", err);
       }
     }
   },
