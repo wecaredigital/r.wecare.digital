@@ -17,17 +17,6 @@
     <div class="column dashboard">
       <div v-if="successMsg" class="notification is-success is-light">{{ successMsg }}</div>
 
-      <!-- Pagination above table -->
-      <nav class="pagination is-right mb-2">
-        <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
-        <a class="pagination-next" :disabled="currentPage === totalPages" @click="currentPage++">Next</a>
-        <ul class="pagination-list">
-          <li v-for="page in totalPages" :key="page">
-            <a class="pagination-link" :class="{ 'is-current': currentPage === page }" @click="goToPage(page)">{{ page }}</a>
-          </li>
-        </ul>
-      </nav>
-
       <div class="columns is-multiline is-mobile mb-2">
         <div class="column is-12-mobile is-6-tablet is-4-desktop">
           <h1 class="title is-size-4-mobile is-size-3-tablet">Shortcuts</h1>
@@ -40,7 +29,22 @@
         </div>
       </div>
 
-      <table class="table is-fullwidth is-striped">
+      <!-- Pagination above table -->
+<nav class="pagination is-right mb-2">
+  <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
+  <a class="pagination-next" :disabled="currentPage === totalPages || totalPages === 0" @click="currentPage++">Next</a>
+  <ul class="pagination-list">
+    <li v-for="page in totalPages || 1" :key="page">
+      <a
+        class="pagination-link"
+        :class="{ 'is-current': currentPage === page }"
+        @click="goToPage(page)"
+      >{{ page }}</a>
+    </li>
+  </ul>
+</nav>
+
+      <table class="table is-fullwidth is-striped has-border">
         <thead>
           <tr>
             <th>#</th>
@@ -60,7 +64,7 @@
               {{ link.id }}
               <button class="button is-small is-white ml-2" @click="copyShort(link.id)">📋</button>
             </td>
-            <td style="word-break: break-all">
+            <td class="wrap-text">
               <a :href="link.url" target="_blank">{{ link.url }}</a>
               <button class="button is-small is-white ml-2" @click="copy(link.url)">📋</button>
             </td>
@@ -85,36 +89,31 @@
             <form @submit.prevent="createLink">
               <div class="field">
                 <label class="label">ID</label>
-                <div class="control">
-                  <input class="input" v-model="model.id" :readonly="isEditMode" required />
-                </div>
+                <input class="input" v-model="model.id" :readonly="isEditMode" required />
                 <p v-if="idExists && !isEditMode" class="help is-danger">This ID already exists.</p>
               </div>
+
               <div class="field">
                 <label class="label">URL</label>
-                <div class="control">
-                  <input class="input" v-model="model.url" type="url" required />
-                </div>
-                <p v-if="model.url && !isValidUrl(model.url)" class="help is-danger">Please enter a valid URL.</p>
+                <input class="input" v-model="model.url" type="url" required />
+                <p v-if="model.url && !isValidUrl(model.url)" class="help is-danger">Invalid URL.</p>
               </div>
+
               <div class="field">
                 <label class="label">Folder</label>
-                <div class="control">
-                  <input class="input" v-model="model.folder" />
-                </div>
+                <input class="input" v-model="model.folder" />
               </div>
+
               <div class="field">
                 <label class="label">Remark</label>
-                <div class="control">
-                  <input class="input" v-model="model.remark" />
-                </div>
+                <input class="input" v-model="model.remark" />
               </div>
+
               <div class="field">
                 <label class="label">Owner</label>
-                <div class="control">
-                  <input class="input" v-model="model.owner" />
-                </div>
+                <input class="input" v-model="model.owner" />
               </div>
+
               <div class="field is-grouped">
                 <div class="control">
                   <button class="button is-link" type="submit"
@@ -176,7 +175,7 @@ export default {
       return this.filteredLinks.slice(start, start + this.pageSize);
     },
     totalPages() {
-      return Math.ceil(this.filteredLinks.length / this.pageSize) || 1;
+      return Math.ceil(this.filteredLinks.length / this.pageSize);
     },
     idExists() {
       return this.$store.state.links.some(link => link.id === this.model.id);
@@ -237,7 +236,6 @@ export default {
           },
           body: JSON.stringify(payload)
         });
-
         if (response.ok) {
           this.$store.commit("addLink", payload);
           this.toggleModal();
@@ -252,7 +250,6 @@ export default {
     },
     async deleteLink(id) {
       if (!confirm("Are you sure you want to delete this link?")) return;
-
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "DELETE",
@@ -262,7 +259,6 @@ export default {
           },
           body: JSON.stringify({ id })
         });
-
         if (response.ok) {
           const ind = this.$store.state.links.findIndex(l => l.id === id);
           if (ind > -1) this.$store.commit("removeLink", ind);
@@ -295,7 +291,6 @@ export default {
             Authorization: window.localStorage.getItem("cognitoIdentityToken")
           }
         });
-
         if (response.ok) {
           const data = await response.json();
           this.$store.commit("hydrateLinks", data);
@@ -332,6 +327,10 @@ export default {
   border: 1px solid #ccc !important;
   padding: 0.5rem;
   vertical-align: top;
+}
+.wrap-text {
+  word-break: break-word;
+  white-space: normal;
 }
 @media screen and (max-width: 768px) {
   .table thead {
