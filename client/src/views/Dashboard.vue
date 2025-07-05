@@ -342,9 +342,16 @@ export default {
   .table {
   border: 1px solid #ddd;
 }
-.table td,
-.table th {
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table th,
+.table td {
   border: 1px solid #ccc !important;
+  padding: 0.5rem;
+  vertical-align: top;
 }
 }
 </style>
