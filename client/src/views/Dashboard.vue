@@ -269,7 +269,7 @@ export default {
     alert("Network error while deleting.");
     console.error(err);
   }
-}
+},
 
     editLink(link) {
       this.model = { ...link };
