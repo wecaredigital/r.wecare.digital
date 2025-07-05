@@ -247,31 +247,30 @@ export default {
         console.error(err);
       }
     },
-    async deleteLink(id) {
-      if (!confirm("Are you sure you want to delete this link?")) return;
-      try {
-        const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: window.localStorage.getItem("cognitoIdentityToken")
-          },
-          body: JSON.stringify({ id })
-        });
-        if (response.ok) {
-          const ind = this.$store.state.links.findIndex(l => l.id === id);
-          if (ind > -1) this.$store.commit("removeLink", ind);
-          this.successMsg = "Deleted!";
-          setTimeout(() => (this.successMsg = null), 1500);
-        } else {
-          const error = await response.json();
-          alert("Delete failed: " + (error.message || response.statusText));
-        }
-      } catch (err) {
-        alert("Network error while deleting.");
-        console.error(err);
+   async deleteLink(id) {
+  if (!confirm("Are you sure you want to delete this link?")) return;
+  try {
+    const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: window.localStorage.getItem("cognitoIdentityToken")
       }
-    },
+    });
+    if (response.ok) {
+      const ind = this.$store.state.links.findIndex(l => l.id === id);
+      if (ind > -1) this.$store.commit("removeLink", ind);
+      this.successMsg = "Deleted!";
+      setTimeout(() => (this.successMsg = null), 1500);
+    } else {
+      const error = await response.json();
+      alert("Delete failed: " + (error.message || response.statusText));
+    }
+  } catch (err) {
+    alert("Network error while deleting.");
+    console.error(err);
+  }
+}
+
     editLink(link) {
       this.model = { ...link };
       this.toggleModal('edit');
