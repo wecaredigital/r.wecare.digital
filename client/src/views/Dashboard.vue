@@ -125,6 +125,22 @@
 </template>
 
 <script>
+// Helper to generate IST timestamp in "YYYY-MM-DD HH:mm:ss +0530"
+function getISTTimestamp() {
+  const now = new Date();
+  // IST is UTC+5:30, so add that offset to current UTC time
+  const offset = 5.5 * 60; // in minutes
+  const istTime = new Date(now.getTime() + (offset + now.getTimezoneOffset()) * 60000);
+  const pad = n => n < 10 ? '0' + n : n;
+  return istTime.getFullYear() + '-' +
+         pad(istTime.getMonth() + 1) + '-' +
+         pad(istTime.getDate()) + ' ' +
+         pad(istTime.getHours()) + ':' +
+         pad(istTime.getMinutes()) + ':' +
+         pad(istTime.getSeconds()) +
+         ' +0530';
+}
+
 export default {
   data() {
     return {
@@ -176,23 +192,6 @@ export default {
       if (!this.modalIsActive) this.model = { id: "", url: "", folder: "", remark: "" };
       this.isEditMode = (mode === 'edit');
     },
-    formatDate(timestamp) {
-      try {
-        const options = {
-          timeZone: 'Asia/Kolkata',
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        };
-        return new Date(timestamp).toLocaleString('en-GB', options).replace(',', '') + ' +0530';
-      } catch {
-        return 'Invalid';
-      }
-    },
     isValidUrl(url) {
       try {
         const u = new URL(url);
@@ -215,7 +214,11 @@ export default {
       });
     },
     async createLink() {
-      const payload = { ...this.model, owner: "admin" }; // Add owner for backend
+      const payload = { 
+        ...this.model, 
+        owner: "r@wecare.digital",           // Owner is always sent, not in UI
+        timestamp: getISTTimestamp()         // Timestamp is always sent in IST, not in UI
+      };
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "POST",
