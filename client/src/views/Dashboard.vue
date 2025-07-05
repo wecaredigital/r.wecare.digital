@@ -29,20 +29,20 @@
         </div>
       </div>
 
-    <!-- Pagination above table -->
-<nav class="pagination is-right mb-2">
-  <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
-  <a class="pagination-next" :disabled="currentPage === totalPages || totalPages === 0" @click="currentPage++">Next</a>
-  <ul class="pagination-list">
-    <li v-for="page in totalPages || 1" :key="page">
-      <a
-        class="pagination-link"
-        :class="{ 'is-current': currentPage === page }"
-        @click="goToPage(page)"
-      >{{ page }}</a>
-    </li>
-  </ul>
-</nav>
+      <!-- Pagination above table -->
+      <nav class="pagination is-right mb-2">
+        <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
+        <a class="pagination-next" :disabled="currentPage === totalPages || totalPages === 0" @click="currentPage++">Next</a>
+        <ul class="pagination-list">
+          <li v-for="page in totalPages || 1" :key="page">
+            <a
+              class="pagination-link"
+              :class="{ 'is-current': currentPage === page }"
+              @click="goToPage(page)"
+            >{{ page }}</a>
+          </li>
+        </ul>
+      </nav>
       <table class="table is-fullwidth is-striped has-border">
         <thead>
           <tr>
@@ -51,8 +51,6 @@
             <th>URL</th>
             <th>Folder</th>
             <th>Remark</th>
-            <th>Owner</th>
-            <th>Timestamp</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -69,8 +67,6 @@
             </td>
             <td>{{ link.folder }}</td>
             <td>{{ link.remark }}</td>
-            <td>{{ link.owner }}</td>
-            <td>{{ formatDate(link.timestamp) }}</td>
             <td>
               <button class="button is-small is-info" @click="editLink(link)">Edit</button>
               <button class="button is-small is-danger" @click="deleteLink(link.id)">Delete</button>
@@ -108,11 +104,6 @@
                 <input class="input" v-model="model.remark" />
               </div>
 
-              <div class="field">
-                <label class="label">Owner</label>
-                <input class="input" v-model="model.owner" />
-              </div>
-
               <div class="field is-grouped">
                 <div class="control">
                   <button class="button is-link" type="submit"
@@ -139,7 +130,7 @@ export default {
     return {
       searchTerm: "",
       modalIsActive: false,
-      model: { id: "", url: "", folder: "", remark: "", owner: "" },
+      model: { id: "", url: "", folder: "", remark: "" }, // owner removed
       isEditMode: false,
       selectedFolder: "",
       currentPage: 1,
@@ -163,8 +154,7 @@ export default {
           link.id.toLowerCase().includes(term) ||
           (link.url && link.url.toLowerCase().includes(term)) ||
           (link.folder && link.folder.toLowerCase().includes(term)) ||
-          (link.remark && link.remark.toLowerCase().includes(term)) ||
-          (link.owner && link.owner.toLowerCase().includes(term))
+          (link.remark && link.remark.toLowerCase().includes(term))
         );
       }
       return arr;
@@ -183,7 +173,7 @@ export default {
   methods: {
     toggleModal(mode) {
       this.modalIsActive = !this.modalIsActive;
-      if (!this.modalIsActive) this.model = { id: "", url: "", folder: "", remark: "", owner: "" };
+      if (!this.modalIsActive) this.model = { id: "", url: "", folder: "", remark: "" };
       this.isEditMode = (mode === 'edit');
     },
     formatDate(timestamp) {
@@ -225,7 +215,7 @@ export default {
       });
     },
     async createLink() {
-      const payload = { ...this.model, timestamp: new Date().toISOString() };
+      const payload = { ...this.model };
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "POST",
@@ -247,29 +237,29 @@ export default {
         console.error(err);
       }
     },
-   async deleteLink(id) {
-  if (!confirm("Are you sure you want to delete this link?")) return;
-  try {
-    const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: window.localStorage.getItem("cognitoIdentityToken")
+    async deleteLink(id) {
+      if (!confirm("Are you sure you want to delete this link?")) return;
+      try {
+        const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+          }
+        });
+        if (response.ok) {
+          const ind = this.$store.state.links.findIndex(l => l.id === id);
+          if (ind > -1) this.$store.commit("removeLink", ind);
+          this.successMsg = "Deleted!";
+          setTimeout(() => (this.successMsg = null), 1500);
+        } else {
+          const error = await response.json();
+          alert("Delete failed: " + (error.message || response.statusText));
+        }
+      } catch (err) {
+        alert("Network error while deleting.");
+        console.error(err);
       }
-    });
-    if (response.ok) {
-      const ind = this.$store.state.links.findIndex(l => l.id === id);
-      if (ind > -1) this.$store.commit("removeLink", ind);
-      this.successMsg = "Deleted!";
-      setTimeout(() => (this.successMsg = null), 1500);
-    } else {
-      const error = await response.json();
-      alert("Delete failed: " + (error.message || response.statusText));
-    }
-  } catch (err) {
-    alert("Network error while deleting.");
-    console.error(err);
-  }
-},
+    },
 
     editLink(link) {
       this.model = { ...link };
