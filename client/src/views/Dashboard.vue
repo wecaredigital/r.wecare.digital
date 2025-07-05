@@ -29,7 +29,18 @@
         </div>
       </div>
 
-      <table class="table is-fullwidth is-striped">
+      <!-- Pagination above table -->
+      <nav class="pagination is-right mb-2" v-if="totalPages > 1">
+        <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
+        <a class="pagination-next" :disabled="currentPage === totalPages" @click="currentPage++">Next</a>
+        <ul class="pagination-list">
+          <li v-for="page in totalPages" :key="page">
+            <a class="pagination-link" :class="{ 'is-current': currentPage === page }" @click="goToPage(page)">{{ page }}</a>
+          </li>
+        </ul>
+      </nav>
+
+      <table class="table is-fullwidth is-striped has-border">
         <thead>
           <tr>
             <th>#</th>
@@ -49,7 +60,7 @@
               {{ link.id }}
               <button class="button is-small is-white ml-2" @click="copyShort(link.id)">📋</button>
             </td>
-            <td>
+            <td class="wrap-text">
               <a :href="link.url" target="_blank">{{ link.url }}</a>
               <button class="button is-small is-white ml-2" @click="copy(link.url)">📋</button>
             </td>
@@ -65,21 +76,6 @@
         </tbody>
       </table>
 
-      <!-- Pagination -->
-<nav class="pagination is-centered mt-4" role="navigation" aria-label="pagination" v-if="totalPages > 1">
-  <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
-  <a class="pagination-next" :disabled="currentPage === totalPages" @click="currentPage++">Next</a>
-  <ul class="pagination-list">
-    <li v-for="page in totalPages" :key="page">
-      <a
-        class="pagination-link"
-        :class="{ 'is-current': currentPage === page }"
-        @click="goToPage(page)"
-      >{{ page }}</a>
-    </li>
-  </ul>
-</nav>
-
       <!-- Modal -->
       <div v-if="modalIsActive" class="modal is-active">
         <div class="modal-background" @click="toggleModal()"></div>
@@ -89,36 +85,31 @@
             <form @submit.prevent="createLink">
               <div class="field">
                 <label class="label">ID</label>
-                <div class="control">
-                  <input class="input" v-model="model.id" :readonly="isEditMode" required />
-                </div>
+                <input class="input" v-model="model.id" :readonly="isEditMode" required />
                 <p v-if="idExists && !isEditMode" class="help is-danger">This ID already exists.</p>
               </div>
+
               <div class="field">
                 <label class="label">URL</label>
-                <div class="control">
-                  <input class="input" v-model="model.url" type="url" required />
-                </div>
-                <p v-if="model.url && !isValidUrl(model.url)" class="help is-danger">Please enter a valid URL.</p>
+                <input class="input" v-model="model.url" type="url" required />
+                <p v-if="model.url && !isValidUrl(model.url)" class="help is-danger">Invalid URL.</p>
               </div>
+
               <div class="field">
                 <label class="label">Folder</label>
-                <div class="control">
-                  <input class="input" v-model="model.folder" />
-                </div>
+                <input class="input" v-model="model.folder" />
               </div>
+
               <div class="field">
                 <label class="label">Remark</label>
-                <div class="control">
-                  <input class="input" v-model="model.remark" />
-                </div>
+                <input class="input" v-model="model.remark" />
               </div>
+
               <div class="field">
                 <label class="label">Owner</label>
-                <div class="control">
-                  <input class="input" v-model="model.owner" />
-                </div>
+                <input class="input" v-model="model.owner" />
               </div>
+
               <div class="field is-grouped">
                 <div class="control">
                   <button class="button is-link" type="submit"
@@ -217,8 +208,8 @@ export default {
         return false;
       }
     },
-    copy(url) {
-      navigator.clipboard.writeText(url).then(() => {
+    copy(text) {
+      navigator.clipboard.writeText(text).then(() => {
         this.successMsg = "Copied!";
         setTimeout(() => (this.successMsg = null), 1000);
       });
@@ -232,7 +223,6 @@ export default {
     },
     async createLink() {
       const payload = { ...this.model, timestamp: new Date().toISOString() };
-
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "POST",
@@ -242,7 +232,6 @@ export default {
           },
           body: JSON.stringify(payload)
         });
-
         if (response.ok) {
           this.$store.commit("addLink", payload);
           this.toggleModal();
@@ -257,7 +246,6 @@ export default {
     },
     async deleteLink(id) {
       if (!confirm("Are you sure you want to delete this link?")) return;
-
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "DELETE",
@@ -267,7 +255,6 @@ export default {
           },
           body: JSON.stringify({ id })
         });
-
         if (response.ok) {
           const ind = this.$store.state.links.findIndex(l => l.id === id);
           if (ind > -1) this.$store.commit("removeLink", ind);
@@ -300,7 +287,6 @@ export default {
             Authorization: window.localStorage.getItem("cognitoIdentityToken")
           }
         });
-
         if (response.ok) {
           const data = await response.json();
           this.$store.commit("hydrateLinks", data);
@@ -316,29 +302,6 @@ export default {
   created() {
     this.fetchLinks();
   }
-
-  data() {
-  return {
-    currentPage: 1,
-    pageSize: 500,
-    // ... other data
-  };
-},
-computed: {
-  totalPages() {
-    return Math.ceil(this.filteredLinks.length / this.pageSize);
-  },
-  paginatedLinks() {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.filteredLinks.slice(start, start + this.pageSize);
-  },
-},
-methods: {
-  goToPage(page) {
-    this.currentPage = page;
-  },
-  // ... other methods
-}
 };
 </script>
 
@@ -350,6 +313,21 @@ methods: {
 .dashboard {
   padding: 1rem;
 }
+.table {
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+.table th,
+.table td {
+  border: 1px solid #ccc !important;
+  padding: 0.5rem;
+  vertical-align: top;
+}
+.wrap-text {
+  word-break: break-word;
+  white-space: normal;
+}
 @media screen and (max-width: 768px) {
   .table thead {
     display: none;
@@ -357,7 +335,6 @@ methods: {
   .table tr {
     display: block;
     margin-bottom: 1rem;
-    border: 1px solid #ddd;
   }
   .table td {
     display: flex;
@@ -365,19 +342,5 @@ methods: {
     padding: 0.5rem;
     word-break: break-word;
   }
-  .table {
-  border: 1px solid #ddd;
-}
-.table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-.table th,
-.table td {
-  border: 1px solid #ccc !important;
-  padding: 0.5rem;
-  vertical-align: top;
-}
 }
 </style>
