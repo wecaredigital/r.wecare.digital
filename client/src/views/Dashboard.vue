@@ -18,7 +18,7 @@
       <div v-if="successMsg" class="notification is-success is-light">{{ successMsg }}</div>
 
       <!-- Pagination above table -->
-      <nav class="pagination is-right mb-2" role="navigation" aria-label="pagination">
+      <nav class="pagination is-right mb-2">
         <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
         <a class="pagination-next" :disabled="currentPage === totalPages" @click="currentPage++">Next</a>
         <ul class="pagination-list">
@@ -60,7 +60,7 @@
               {{ link.id }}
               <button class="button is-small is-white ml-2" @click="copyShort(link.id)">📋</button>
             </td>
-            <td class="wrap-text">
+            <td style="word-break: break-all">
               <a :href="link.url" target="_blank">{{ link.url }}</a>
               <button class="button is-small is-white ml-2" @click="copy(link.url)">📋</button>
             </td>
@@ -176,7 +176,7 @@ export default {
       return this.filteredLinks.slice(start, start + this.pageSize);
     },
     totalPages() {
-      return Math.max(1, Math.ceil(this.filteredLinks.length / this.pageSize));
+      return Math.ceil(this.filteredLinks.length / this.pageSize) || 1;
     },
     idExists() {
       return this.$store.state.links.some(link => link.id === this.model.id);
@@ -227,48 +227,38 @@ export default {
       });
     },
     async createLink() {
-      const token = window.localStorage.getItem("cognitoIdentityToken");
-      if (!token) return alert("Missing authentication token.");
-
       const payload = { ...this.model, timestamp: new Date().toISOString() };
-
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: token
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
           },
           body: JSON.stringify(payload)
         });
 
-        const result = await response.json();
-
         if (response.ok) {
           this.$store.commit("addLink", payload);
           this.toggleModal();
-          this.successMsg = "Link saved!";
-          setTimeout(() => (this.successMsg = null), 1500);
         } else {
-          console.error("API Error:", result);
-          alert("Failed to save: " + (result.message || response.statusText));
+          const error = await response.json();
+          alert("Failed to save: " + (error.message || response.statusText));
         }
       } catch (err) {
-        console.error("Network error:", err);
         alert("Network or server error.");
+        console.error(err);
       }
     },
     async deleteLink(id) {
       if (!confirm("Are you sure you want to delete this link?")) return;
-
-      const token = window.localStorage.getItem("cognitoIdentityToken");
 
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Authorization: token
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
           },
           body: JSON.stringify({ id })
         });
@@ -299,15 +289,11 @@ export default {
       this.currentPage = n;
     },
     async fetchLinks() {
-      const token = window.localStorage.getItem("cognitoIdentityToken");
-      if (!token) {
-        this.$store.commit("drainLinks");
-        return;
-      }
-
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
-          headers: { Authorization: token }
+          headers: {
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+          }
         });
 
         if (response.ok) {
@@ -317,8 +303,8 @@ export default {
           this.$store.commit("drainLinks");
         }
       } catch (err) {
-        console.error("Error fetching links:", err);
         this.$store.commit("drainLinks");
+        console.error("Failed to fetch links:", err);
       }
     }
   },
@@ -346,10 +332,6 @@ export default {
   border: 1px solid #ccc !important;
   padding: 0.5rem;
   vertical-align: top;
-}
-.wrap-text {
-  word-break: break-word;
-  white-space: normal;
 }
 @media screen and (max-width: 768px) {
   .table thead {
