@@ -5,25 +5,25 @@
 #set( $remark  = $util.defaultIfNull($input.json('$.remark'), "") )
 #set( $folder  = $util.defaultIfNull($input.json('$.folder'), "") )
 
+#set($inputRoot = $input.path('$'))
 {
-  "TableName": "SlipLink-LinkTable-A2SD9C321JCE",
-  "ConditionExpression": "attribute_not_exists(id)",
+  "TableName": "r-wecare-digital-LinkTable-YPF44B2N1ONI",
   "Key": {
-    "id": { "S": "123" }
+    "id": { "S": "$inputRoot.id" }
   },
   "ExpressionAttributeNames": {
-    "#u":  "url",
-    "#o":  "owner",
+    "#u": "url",
+    "#o": "owner",
     "#ts": "timestamp",
-    "#r":  "remark",
-    "#f":  "folder"
+    "#r": "remark",
+    "#f": "folder"
   },
   "ExpressionAttributeValues": {
-    ":u":  { "S": $url },
-    ":o":  { "S": $email },
-    ":ts": { "S": "$context.requestTime" },
-    ":r":  { "S": $remark },
-    ":f":  { "S": $folder }
+    ":u": { "S": "$inputRoot.url" },
+    ":o": { "S": "$inputRoot.owner" },
+    ":ts": { "S": "$inputRoot.timestamp" },
+    ":r": { "S": "$inputRoot.remark" },
+    ":f": { "S": "$inputRoot.folder" }
   },
   "UpdateExpression": "SET #u = :u, #o = :o, #ts = :ts, #r = :r, #f = :f",
   "ReturnValues": "ALL_NEW"
