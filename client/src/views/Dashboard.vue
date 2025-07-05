@@ -130,7 +130,7 @@ export default {
     return {
       searchTerm: "",
       modalIsActive: false,
-      model: { id: "", url: "", folder: "", remark: "" }, // owner removed
+      model: { id: "", url: "", folder: "", remark: "" },
       isEditMode: false,
       selectedFolder: "",
       currentPage: 1,
@@ -215,7 +215,7 @@ export default {
       });
     },
     async createLink() {
-      const payload = { ...this.model };
+      const payload = { ...this.model, owner: "admin" }; // Add owner for backend
       try {
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "POST",
@@ -260,7 +260,6 @@ export default {
         console.error(err);
       }
     },
-
     editLink(link) {
       this.model = { ...link };
       this.toggleModal('edit');
