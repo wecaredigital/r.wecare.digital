@@ -65,17 +65,20 @@
         </tbody>
       </table>
 
-      <nav class="pagination is-centered mt-4" v-if="filteredLinks.length > pageSize">
-        <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
-        <ul class="pagination-list">
-          <li v-for="page in totalPages" :key="page">
-            <a class="pagination-link" :class="{ 'is-current': currentPage === page }" @click="goToPage(page)">
-              {{ page }}
-            </a>
-          </li>
-        </ul>
-        <a class="pagination-next" :disabled="currentPage === totalPages" @click="currentPage++">Next</a>
-      </nav>
+      <!-- Pagination -->
+<nav class="pagination is-centered mt-4" role="navigation" aria-label="pagination" v-if="totalPages > 1">
+  <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
+  <a class="pagination-next" :disabled="currentPage === totalPages" @click="currentPage++">Next</a>
+  <ul class="pagination-list">
+    <li v-for="page in totalPages" :key="page">
+      <a
+        class="pagination-link"
+        :class="{ 'is-current': currentPage === page }"
+        @click="goToPage(page)"
+      >{{ page }}</a>
+    </li>
+  </ul>
+</nav>
 
       <!-- Modal -->
       <div v-if="modalIsActive" class="modal is-active">
@@ -313,6 +316,29 @@ export default {
   created() {
     this.fetchLinks();
   }
+
+  data() {
+  return {
+    currentPage: 1,
+    pageSize: 500,
+    // ... other data
+  };
+},
+computed: {
+  totalPages() {
+    return Math.ceil(this.filteredLinks.length / this.pageSize);
+  },
+  paginatedLinks() {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredLinks.slice(start, start + this.pageSize);
+  },
+},
+methods: {
+  goToPage(page) {
+    this.currentPage = page;
+  },
+  // ... other methods
+}
 };
 </script>
 
