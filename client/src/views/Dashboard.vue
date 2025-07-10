@@ -213,73 +213,86 @@ export default {
         setTimeout(() => (this.successMsg = null), 1000);
       });
     },
-   async createLink() {
-  // Safe trim for all fields
-  this.model.id = (this.model.id || '').trim();
-  this.model.url = (this.model.url || '').trim();
-  this.model.folder = (this.model.folder || '').trim();
-  this.model.remark = (this.model.remark || '').trim();
+    async createLink() {
+      // Safe trim for all fields
+      this.model.id = (this.model.id || '').trim();
+      this.model.url = (this.model.url || '').trim();
+      this.model.folder = (this.model.folder || '').trim();
+      this.model.remark = (this.model.remark || '').trim();
 
-  if (!this.model.id || !this.model.url) {
-    alert("ID and URL cannot be empty.");
-    return;
-  }
-
-  const payload = { 
-    ...this.model, 
-    owner: "r@wecare.digital",
-    timestamp: getISTTimestamp()
-  };
-  try {
-    const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: window.localStorage.getItem("cognitoIdentityToken")
-      },
-      body: JSON.stringify(payload)
-    });
-    if (response.ok) {
-      this.$store.commit("addLink", payload);
-      this.toggleModal();
-    } else {
-      const error = await response.json();
-      alert("Failed to save: " + (error.message || response.statusText));
-    }
-  } catch (err) {
-    alert("Network or server error.");
-    console.error(err);
-  }
-},
-
-async deleteLink(id) {
-  id = (id || '').trim();
-  if (!id) {
-    alert("Invalid ID.");
-    return;
-  }
-  if (!confirm("Are you sure you want to delete this link?")) return;
-  try {
-    const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: window.localStorage.getItem("cognitoIdentityToken")
+      if (!this.model.id || !this.model.url) {
+        alert("ID and URL cannot be empty.");
+        return;
       }
-    });
-    if (response.ok) {
-      const ind = this.$store.state.links.findIndex(l => l.id === id);
-      if (ind > -1) this.$store.commit("removeLink", ind);
-      this.successMsg = "Deleted!";
-      setTimeout(() => (this.successMsg = null), 1500);
-    } else {
-      const error = await response.json();
-      alert("Delete failed: " + (error.message || response.statusText));
-    }
-  } catch (err) {
-    alert("Network error while deleting.");
-    console.error(err);
-  }
-}
+
+      const payload = { 
+        ...this.model, 
+        owner: "r@wecare.digital",
+        timestamp: getISTTimestamp()
+      };
+
+      try {
+        const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+          },
+          body: JSON.stringify(payload)
+        });
+        if (response.ok) {
+          this.$store.commit("addLink", payload);
+          this.toggleModal();
+        } else {
+          const errorText = await response.text();
+          let errorMsg = "";
+          try {
+            const error = JSON.parse(errorText);
+            errorMsg = error.message || errorText || response.statusText;
+          } catch (e) {
+            errorMsg = errorText || response.statusText;
+          }
+          alert("Failed to save: " + errorMsg);
+        }
+      } catch (err) {
+        alert("Network or server error.");
+        console.error(err);
+      }
+    },
+    async deleteLink(id) {
+      id = (id || '').trim();
+      if (!id) {
+        alert("Invalid ID.");
+        return;
+      }
+      if (!confirm("Are you sure you want to delete this link?")) return;
+      try {
+        const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+          }
+        });
+        if (response.ok) {
+          const ind = this.$store.state.links.findIndex(l => l.id === id);
+          if (ind > -1) this.$store.commit("removeLink", ind);
+          this.successMsg = "Deleted!";
+          setTimeout(() => (this.successMsg = null), 1500);
+        } else {
+          const errorText = await response.text();
+          let errorMsg = "";
+          try {
+            const error = JSON.parse(errorText);
+            errorMsg = error.message || errorText || response.statusText;
+          } catch (e) {
+            errorMsg = errorText || response.statusText;
+          }
+          alert("Delete failed: " + errorMsg);
+        }
+      } catch (err) {
+        alert("Network error while deleting.");
+        console.error(err);
+      }
     },
     editLink(link) {
       this.model = { ...link };
@@ -310,7 +323,7 @@ async deleteLink(id) {
         console.error("Failed to fetch links:", err);
       }
     }
-  },
+  }, // <--- THIS COMMA closes the methods object!
   created() {
     this.fetchLinks();
   }
