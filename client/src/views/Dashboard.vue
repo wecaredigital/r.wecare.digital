@@ -213,55 +213,65 @@ export default {
         setTimeout(() => (this.successMsg = null), 1000);
       });
     },
-    async createLink() {
-      const payload = { 
-        ...this.model, 
-        owner: "r@wecare.digital",           // Owner is always sent, not in UI
-        timestamp: getISTTimestamp()         // Timestamp is always sent in IST, not in UI
-      };
-      try {
-        const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: window.localStorage.getItem("cognitoIdentityToken")
-          },
-          body: JSON.stringify(payload)
-        });
-        if (response.ok) {
-          this.$store.commit("addLink", payload);
-          this.toggleModal();
-        } else {
-          const error = await response.json();
-          alert("Failed to save: " + (error.message || response.statusText));
-        }
-      } catch (err) {
-        alert("Network or server error.");
-        console.error(err);
+   async createLink() {
+  // Trim start/end spaces for all fields before submitting
+  this.model.id = this.model.id.trim();
+  this.model.url = this.model.url.trim();
+  this.model.folder = this.model.folder.trim();
+  this.model.remark = this.model.remark.trim();
+
+  const payload = { 
+    ...this.model, 
+    owner: "r@wecare.digital",           // Owner is always sent, not in UI
+    timestamp: getISTTimestamp()         // Timestamp is always sent in IST, not in UI
+  };
+  try {
+    const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: window.localStorage.getItem("cognitoIdentityToken")
+      },
+      body: JSON.stringify(payload)
+    });
+    if (response.ok) {
+      this.$store.commit("addLink", payload);
+      this.toggleModal();
+    } else {
+      const error = await response.json();
+      alert("Failed to save: " + (error.message || response.statusText));
+    }
+  } catch (err) {
+    alert("Network or server error.");
+    console.error(err);
+  }
+},
+
+async deleteLink(id) {
+  // Trim start/end spaces from id before deleting
+  id = id.trim();
+  if (!confirm("Are you sure you want to delete this link?")) return;
+  try {
+    const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: window.localStorage.getItem("cognitoIdentityToken")
       }
-    },
-    async deleteLink(id) {
-      if (!confirm("Are you sure you want to delete this link?")) return;
-      try {
-        const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: window.localStorage.getItem("cognitoIdentityToken")
-          }
-        });
-        if (response.ok) {
-          const ind = this.$store.state.links.findIndex(l => l.id === id);
-          if (ind > -1) this.$store.commit("removeLink", ind);
-          this.successMsg = "Deleted!";
-          setTimeout(() => (this.successMsg = null), 1500);
-        } else {
-          const error = await response.json();
-          alert("Delete failed: " + (error.message || response.statusText));
-        }
-      } catch (err) {
-        alert("Network error while deleting.");
-        console.error(err);
-      }
+    });
+    if (response.ok) {
+      const ind = this.$store.state.links.findIndex(l => l.id === id);
+      if (ind > -1) this.$store.commit("removeLink", ind);
+      this.successMsg = "Deleted!";
+      setTimeout(() => (this.successMsg = null), 1500);
+    } else {
+      const error = await response.json();
+      alert("Delete failed: " + (error.message || response.statusText));
+    }
+  } catch (err) {
+    alert("Network error while deleting.");
+    console.error(err);
+  }
+}
     },
     editLink(link) {
       this.model = { ...link };
