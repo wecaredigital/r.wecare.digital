@@ -214,16 +214,21 @@ export default {
       });
     },
    async createLink() {
-  // Trim start/end spaces for all fields before submitting
-  this.model.id = this.model.id.trim();
-  this.model.url = this.model.url.trim();
-  this.model.folder = this.model.folder.trim();
-  this.model.remark = this.model.remark.trim();
+  // Safe trim for all fields
+  this.model.id = (this.model.id || '').trim();
+  this.model.url = (this.model.url || '').trim();
+  this.model.folder = (this.model.folder || '').trim();
+  this.model.remark = (this.model.remark || '').trim();
+
+  if (!this.model.id || !this.model.url) {
+    alert("ID and URL cannot be empty.");
+    return;
+  }
 
   const payload = { 
     ...this.model, 
-    owner: "r@wecare.digital",           // Owner is always sent, not in UI
-    timestamp: getISTTimestamp()         // Timestamp is always sent in IST, not in UI
+    owner: "r@wecare.digital",
+    timestamp: getISTTimestamp()
   };
   try {
     const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
@@ -248,8 +253,11 @@ export default {
 },
 
 async deleteLink(id) {
-  // Trim start/end spaces from id before deleting
-  id = id.trim();
+  id = (id || '').trim();
+  if (!id) {
+    alert("Invalid ID.");
+    return;
+  }
   if (!confirm("Are you sure you want to delete this link?")) return;
   try {
     const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${id}`, {
