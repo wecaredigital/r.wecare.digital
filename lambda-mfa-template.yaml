@@ -1,0 +1,128 @@
+# Additional CloudFormation resources for MFA Lambda functions
+# Add these resources to your template.yaml file
+
+Resources:
+  # Lambda function for MFA setup
+  MFASetupFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-MFASetup
+      Handler: mfa-setup.handler
+      Runtime: nodejs18.x
+      CodeUri: ./lambda
+      Timeout: 30
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LinkTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LinkTable
+      Events:
+        MFASetupAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SiteAPI
+            Path: /app/mfa/setup
+            Method: POST
+            Auth:
+              Authorizer: UserAuthorizer
+
+  # Lambda function for MFA verification
+  MFAVerifyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-MFAVerify
+      Handler: mfa-verify.handler
+      Runtime: nodejs18.x
+      CodeUri: ./lambda
+      Timeout: 30
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LinkTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LinkTable
+      Events:
+        MFAVerifyAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SiteAPI
+            Path: /app/mfa/verify
+            Method: POST
+            Auth:
+              Authorizer: UserAuthorizer
+
+  # Lambda function for MFA authentication
+  MFAAuthenticateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-MFAAuthenticate
+      Handler: mfa-authenticate.handler
+      Runtime: nodejs18.x
+      CodeUri: ./lambda
+      Timeout: 30
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LinkTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref LinkTable
+      Events:
+        MFAAuthenticateAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SiteAPI
+            Path: /app/mfa/authenticate
+            Method: POST
+            Auth:
+              Authorizer: UserAuthorizer
+
+  # Lambda function for MFA status check
+  MFAStatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-MFAStatus
+      Handler: mfa-status.handler
+      Runtime: nodejs18.x
+      CodeUri: ./lambda
+      Timeout: 30
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LinkTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref LinkTable
+      Events:
+        MFAStatusAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SiteAPI
+            Path: /app/mfa/status
+            Method: GET
+            Auth:
+              Authorizer: UserAuthorizer
+
+  # Lambda function for MFA disable
+  MFADisableFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppName}-MFADisable
+      Handler: mfa-disable.handler
+      Runtime: nodejs18.x
+      CodeUri: ./lambda
+      Timeout: 30
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LinkTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LinkTable
+      Events:
+        MFADisableAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SiteAPI
+            Path: /app/mfa/disable
+            Method: POST
+            Auth:
+              Authorizer: UserAuthorizer
