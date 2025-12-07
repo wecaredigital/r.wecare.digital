@@ -26,6 +26,9 @@ Parameters:
     Type: String
     Description: Name of application (no spaces). Value must be globally unique
     Default: shortener
+  CustomDomainName:
+    Type: String
+    Description: Name of custom domain
   UseLocalClient:
     Type: String
     Description: Enables public client and local client for testing. (Less secure)
@@ -119,10 +122,10 @@ Resources:
           Required: false
 
   ##   Cognito user pool domain
-  UserPoolDomain:
+ UserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
     Properties: 
-      Domain: !Sub ${AppName}-${AWS::AccountId}
+      Domain: !Sub ${CustomDomainName}
       UserPoolId: !Ref UserPool
 
   ##   Cognito user pool client
