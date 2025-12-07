@@ -29,6 +29,7 @@ Parameters:
   CustomDomainName:
     Type: String
     Description: Name of custom domain
+    Default: user.wecare.digital
   UseLocalClient:
     Type: String
     Description: Enables public client and local client for testing. (Less secure)
