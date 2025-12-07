@@ -126,8 +126,11 @@ Resources:
   UserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
     Properties: 
-      Domain: !Sub ${CustomDomainName}
+      Domain: user.wecare.digital
       UserPoolId: !Ref UserPool
+      ManagedLoginVersion: 2
+      CustomDomainConfig:
+        CertificateArn: arn:aws:acm:us-east-1:010526260063:certificate/ab0fdc4d-ccbe-4aaf-a2e8-67ba98787223
 
   ##   Cognito user pool client
   UserPoolClient:
