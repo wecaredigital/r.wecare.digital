@@ -121,9 +121,9 @@ Resources:
         - AttributeDataType: String 
           Name: email 
           Required: false
-
+          
   ##   Cognito user pool domain
- UserPoolDomain:
+  UserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
     Properties: 
       Domain: !Sub ${CustomDomainName}
