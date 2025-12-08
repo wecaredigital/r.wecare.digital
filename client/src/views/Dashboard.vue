@@ -451,23 +451,21 @@ export default {
           await this.fetchLinks();
           console.log('Links fetched, store now has:', this.$store.state.links.length);
         } else {
-          if (response.status === 403) {
-            this.errorMsg = "Session expired. Please refresh the page and try again.";
-            setTimeout(() => {
-              window.location.reload();
-            }, 2000);
-          } else {
-            const errorText = await response.text();
-            let errorMsg = "";
-            try {
-              const error = JSON.parse(errorText);
-              errorMsg = error.message || errorText || response.statusText;
-            } catch (e) {
-              errorMsg = errorText || response.statusText;
-            }
-            this.errorMsg = `Failed to create link: ${errorMsg}`;
-            setTimeout(() => (this.errorMsg = null), 5000);
+          const errorText = await response.text();
+          let errorMsg = "";
+          try {
+            const error = JSON.parse(errorText);
+            errorMsg = error.message || errorText || response.statusText;
+          } catch (e) {
+            errorMsg = errorText || response.statusText;
           }
+          
+          if (response.status === 403) {
+            this.errorMsg = "Session expired. Please sign out and sign in again.";
+          } else {
+            this.errorMsg = `Failed to create link: ${errorMsg}`;
+          }
+          setTimeout(() => (this.errorMsg = null), 5000);
         }
       } catch (err) {
         this.errorMsg = "Network error. Please check your connection.";
@@ -647,11 +645,8 @@ export default {
           
         } else {
           if (response.status === 401 || response.status === 403) {
-            console.error('Authentication error - attempting page reload to refresh token');
-            this.errorMsg = "Session expired. Refreshing...";
-            setTimeout(() => {
-              window.location.reload();
-            }, 1500);
+            console.error('Authentication error - token may be expired');
+            this.errorMsg = "Session expired. Please sign out and sign in again.";
           } else if (response.status === 404) {
             this.$store.commit("hydrateLinks", []);
           } else {
