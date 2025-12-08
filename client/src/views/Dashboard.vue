@@ -75,7 +75,6 @@
             </span>
           </h1>
           <p class="subtitle is-6 has-text-grey">{{ filteredLinks.length }} link{{ filteredLinks.length !== 1 ? 's' : '' }}</p>
-
         </div>
         <div class="column is-12-mobile is-6-tablet is-4-desktop">
           <div class="field">
