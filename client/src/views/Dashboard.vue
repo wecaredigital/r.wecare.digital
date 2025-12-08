@@ -63,20 +63,8 @@
       </div>
 
       <!-- MFA Settings Section -->
-      <div v-if="showMFASettings" class="box mb-5">
-        <h2 class="title is-4 mb-4">
-          <span class="icon-text">
-            <span class="icon"><i class="fas fa-shield-alt"></i></span>
-            <span>Multi-Factor Authentication</span>
-          </span>
-        </h2>
-        <div class="content">
-          <p class="mb-4">Secure your account with two-factor authentication using an authenticator app.</p>
-          <div class="notification is-info is-light">
-            <p><strong>Coming Soon:</strong> MFA functionality will be available in the next update. 
-            Your account is currently secured with strong password authentication.</p>
-          </div>
-        </div>
+      <div v-if="showMFASettings" class="mb-5">
+        <MFASettings @success="handleMFASuccess" @error="handleMFAError" />
       </div>
 
       <!-- Header Section -->
@@ -99,7 +87,7 @@
               </span>
             </div>
             <div class="control" v-if="searchTerm">
-              <button class="button" @click="searchTerm = ''">
+              <button class="button is-white" @click="searchTerm = ''">
                 <span class="icon">
                   <i class="fas fa-times"></i>
                 </span>
@@ -108,7 +96,7 @@
           </div>
         </div>
         <div class="column is-12-mobile is-12-tablet is-4-desktop">
-          <button class="button is-primary is-fullwidth" @click="toggleModal('create')">
+          <button class="button is-fullwidth" @click="toggleModal('create')">
             <span class="icon">
               <i class="fas fa-plus"></i>
             </span>
@@ -118,18 +106,54 @@
       </div>
 
       <!-- Pagination above table -->
-      <nav class="pagination is-right mb-2">
-        <a class="pagination-previous" :disabled="currentPage === 1" @click="currentPage--">Previous</a>
-        <a class="pagination-next" :disabled="currentPage === totalPages || totalPages === 0" @click="currentPage++">Next</a>
+      <nav class="pagination is-centered mb-4" v-if="totalPages > 1">
+        <a class="pagination-previous" 
+           :disabled="currentPage === 1" 
+           @click="previousPage"
+           :class="{ 'is-disabled': currentPage === 1 }">
+          <span class="icon is-small">
+            <i class="fas fa-chevron-left"></i>
+          </span>
+          <span class="is-hidden-mobile">Previous</span>
+        </a>
+        <a class="pagination-next" 
+           :disabled="currentPage === totalPages" 
+           @click="nextPage"
+           :class="{ 'is-disabled': currentPage === totalPages }">
+          <span class="is-hidden-mobile">Next</span>
+          <span class="icon is-small">
+            <i class="fas fa-chevron-right"></i>
+          </span>
+        </a>
         <ul class="pagination-list">
-          <li v-for="page in totalPages || 1" :key="page">
-            <a
-              class="pagination-link"
-              :class="{ 'is-current': currentPage === page }"
-              @click="goToPage(page)"
-            >{{ page }}</a>
+          <!-- First page -->
+          <li v-if="currentPage > 3">
+            <a class="pagination-link" @click="goToPage(1)">1</a>
+          </li>
+          <li v-if="currentPage > 4">
+            <span class="pagination-ellipsis">&hellip;</span>
+          </li>
+          
+          <!-- Pages around current -->
+          <li v-for="page in visiblePages" :key="page">
+            <a class="pagination-link" 
+               :class="{ 'is-current': currentPage === page }"
+               @click="goToPage(page)">{{ page }}</a>
+          </li>
+          
+          <!-- Last page -->
+          <li v-if="currentPage < totalPages - 3">
+            <span class="pagination-ellipsis">&hellip;</span>
+          </li>
+          <li v-if="currentPage < totalPages - 2">
+            <a class="pagination-link" @click="goToPage(totalPages)">{{ totalPages }}</a>
           </li>
         </ul>
+        
+        <!-- Page info -->
+        <div class="pagination-info has-text-grey is-size-7 mt-2">
+          Showing {{ startItem }}-{{ endItem }} of {{ filteredLinks.length }} links
+        </div>
       </nav>
       <!-- Links Table -->
       <div class="table-container">
@@ -158,7 +182,7 @@
             <td>{{ link.folder }}</td>
             <td>{{ link.remark }}</td>
             <td>
-              <button class="button is-small is-info" @click="editLink(link)">Edit</button>
+              <button class="button is-small" @click="editLink(link)">Edit</button>
               <button class="button is-small is-danger" @click="deleteLink(link.id)">Delete</button>
             </td>
           </tr>
@@ -197,13 +221,13 @@
 
               <div class="field is-grouped">
                 <div class="control">
-                  <button class="button is-link" type="submit"
+                  <button class="button" type="submit"
                     :disabled="!model.id || !model.url || (!isEditMode && idExists) || !isValidUrl(model.url)">
                     {{ isEditMode ? 'Update' : 'Create' }}
                   </button>
                 </div>
                 <div class="control">
-                  <button class="button" type="button" @click="toggleModal()">Cancel</button>
+                  <button class="button is-light" type="button" @click="toggleModal()">Cancel</button>
                 </div>
               </div>
             </form>
@@ -216,6 +240,8 @@
 </template>
 
 <script>
+import MFASettings from '@/components/MFASettings.vue';
+
 // Helper to generate IST timestamp in "YYYY-MM-DD HH:mm:ss +0530"
 function getISTTimestamp() {
   const now = new Date();
@@ -233,6 +259,9 @@ function getISTTimestamp() {
 }
 
 export default {
+  components: {
+    MFASettings
+  },
   data() {
     return {
       searchTerm: "",
@@ -241,7 +270,7 @@ export default {
       isEditMode: false,
       selectedFolder: "",
       currentPage: 1,
-      pageSize: 500,
+      pageSize: 25,
       successMsg: null,
       errorMsg: null,
       showSidebar: false,
@@ -275,6 +304,22 @@ export default {
     },
     totalPages() {
       return Math.ceil(this.filteredLinks.length / this.pageSize);
+    },
+    visiblePages() {
+      const pages = [];
+      const start = Math.max(1, this.currentPage - 2);
+      const end = Math.min(this.totalPages, this.currentPage + 2);
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      return pages;
+    },
+    startItem() {
+      return (this.currentPage - 1) * this.pageSize + 1;
+    },
+    endItem() {
+      return Math.min(this.currentPage * this.pageSize, this.filteredLinks.length);
     },
     idExists() {
       return this.$store.state.links.some(link => link.id === this.model.id);
@@ -412,8 +457,30 @@ export default {
         this.showSidebar = false;
       }
     },
+    handleMFASuccess(message) {
+      this.successMsg = message;
+      setTimeout(() => (this.successMsg = null), 5000);
+    },
+    handleMFAError(message) {
+      this.errorMsg = message;
+      setTimeout(() => (this.errorMsg = null), 5000);
+    },
     goToPage(n) {
       this.currentPage = n;
+      // Scroll to top on page change
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     },
     async fetchLinks() {
       try {
@@ -513,6 +580,20 @@ export default {
   max-width: 200px;
 }
 
+/* Pagination Styles */
+.pagination-info {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.pagination-link.is-disabled,
+.pagination-previous.is-disabled,
+.pagination-next.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Mobile Responsiveness */
 @media screen and (max-width: 768px) {
   .sidebar-folders {
@@ -538,6 +619,7 @@ export default {
   
   .table-container {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   .table {
@@ -558,6 +640,26 @@ export default {
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
   }
+  
+  /* Mobile pagination */
+  .pagination-list {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .pagination-list li {
+    margin: 0.125rem;
+  }
+  
+  .pagination-link {
+    min-width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  /* Hide some pagination elements on very small screens */
+  .pagination-ellipsis {
+    display: none;
+  }
 }
 
 @media screen and (max-width: 480px) {
@@ -571,6 +673,30 @@ export default {
   
   .dashboard {
     padding: 0.25rem;
+  }
+  
+  /* Stack columns on very small screens */
+  .columns.is-mobile .column {
+    padding: 0.25rem;
+  }
+  
+  /* Smaller buttons on mobile */
+  .button {
+    font-size: 0.875rem;
+  }
+  
+  .title.is-size-4-mobile {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Mobile-friendly pagination */
+  .pagination {
+    flex-wrap: wrap;
+  }
+  
+  .pagination-previous,
+  .pagination-next {
+    margin-bottom: 0.5rem;
   }
 }
 </style>

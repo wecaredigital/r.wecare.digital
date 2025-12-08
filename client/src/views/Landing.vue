@@ -42,13 +42,13 @@
                 </div>
 
                 <div class="buttons is-centered">
-                  <a :href="signUpUrl" class="button is-primary is-large is-rounded">
+                  <a :href="signUpUrl" class="button is-large">
                     <span class="icon">
                       <i class="fas fa-user-plus"></i>
                     </span>
                     <span>Get Started</span>
                   </a>
-                  <router-link to="/login" class="button is-light is-large is-rounded">
+                  <router-link to="/login" class="button is-light is-large">
                     <span class="icon">
                       <i class="fas fa-sign-in-alt"></i>
                     </span>
@@ -121,7 +121,7 @@
         <p class="subtitle is-5 has-text-white mb-5">
           Join thousands creating smarter, shorter links
         </p>
-        <a :href="signUpUrl" class="button is-white is-large is-rounded">
+        <a :href="signUpUrl" class="button is-white is-large">
           <span class="icon">
             <i class="fas fa-rocket"></i>
           </span>

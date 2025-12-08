@@ -28,3 +28,196 @@ $primary: #667eea;
 $info: #3298dc;
 $success: #48c774;
 $warning: #ffdd57;
+
+// Loading screen styles
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Global button styles - Black buttons with white text and 30px radius
+.button {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 30px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    background-color: #333333 !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 0.125em rgba(0, 0, 0, 0.25) !important;
+  }
+  
+  &.is-disabled,
+  &:disabled {
+    background-color: #666666 !important;
+    color: #ffffff !important;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  // Special cases for specific button types
+  &.is-white {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    
+    &:hover {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+    }
+  }
+  
+  &.is-light {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    
+    &:hover {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+    }
+  }
+  
+  &.is-outlined {
+    background-color: transparent !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    
+    &:hover {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+    }
+  }
+  
+  // Danger buttons (red background, white text)
+  &.is-danger {
+    background-color: #ff3860 !important;
+    color: #ffffff !important;
+    
+    &:hover {
+      background-color: #ff1443 !important;
+    }
+    
+    &.is-outlined {
+      background-color: transparent !important;
+      color: #ff3860 !important;
+      border: 2px solid #ff3860 !important;
+      
+      &:hover {
+        background-color: #ff3860 !important;
+        color: #ffffff !important;
+      }
+    }
+  }
+  
+  // Success buttons (green background, white text)
+  &.is-success {
+    background-color: #48c774 !important;
+    color: #ffffff !important;
+    
+    &:hover {
+      background-color: #3ec46d !important;
+    }
+  }
+  
+  // Warning buttons (yellow background, black text)
+  &.is-warning {
+    background-color: #ffdd57 !important;
+    color: #000000 !important;
+    
+    &:hover {
+      background-color: #ffd83d !important;
+    }
+  }
+  
+  // Info buttons (blue background, white text)
+  &.is-info {
+    background-color: #3298dc !important;
+    color: #ffffff !important;
+    
+    &:hover {
+      background-color: #2793da !important;
+    }
+  }
+  
+  // Primary buttons (purple background, white text)
+  &.is-primary {
+    background-color: #667eea !important;
+    color: #ffffff !important;
+    
+    &:hover {
+      background-color: #5a6fd8 !important;
+    }
+  }
+}
+
+// Pagination buttons
+.pagination-link,
+.pagination-previous,
+.pagination-next {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  border-radius: 30px !important;
+  
+  &:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+  
+  &.is-current {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+}
+
+// Delete button (X button in notifications)
+.delete {
+  background-color: transparent !important;
+  border-radius: 50% !important;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+  }
+}

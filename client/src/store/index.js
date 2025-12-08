@@ -6,6 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     authorized: false,
+    loading: true,
     links: []
   },
 
@@ -15,6 +16,9 @@ export default new Vuex.Store({
     },
     deAuthorize(state) {
       state.authorized = false;
+    },
+    setLoading(state, loading) {
+      state.loading = loading;
     },
     hydrateLinks(state, links) {
       state.links = links;

@@ -29,11 +29,25 @@ const routes = [
     name: 'landing',
     component: Landing,
     beforeEnter: (_to, _from, next) => {
-      // If user is already authorized, redirect to dashboard
-      if (store.state.authorized) {
-        next('/dashboard')
+      // Wait for auth to load
+      if (store.state.loading) {
+        const unwatch = store.watch(
+          (state) => state.loading,
+          (loading) => {
+            if (!loading) {
+              unwatch();
+              if (store.state.authorized) {
+                next('/dashboard');
+              } else {
+                next();
+              }
+            }
+          }
+        );
+      } else if (store.state.authorized) {
+        next('/dashboard');
       } else {
-        next()
+        next();
       }
     }
   },
@@ -42,11 +56,25 @@ const routes = [
     name: 'login',
     component: Login,
     beforeEnter: (_to, _from, next) => {
-      // If user is already authorized, redirect to dashboard
-      if (store.state.authorized) {
-        next('/dashboard')
+      // Wait for auth to load
+      if (store.state.loading) {
+        const unwatch = store.watch(
+          (state) => state.loading,
+          (loading) => {
+            if (!loading) {
+              unwatch();
+              if (store.state.authorized) {
+                next('/dashboard');
+              } else {
+                next();
+              }
+            }
+          }
+        );
+      } else if (store.state.authorized) {
+        next('/dashboard');
       } else {
-        next()
+        next();
       }
     }
   },
@@ -55,11 +83,25 @@ const routes = [
     name: 'dashboard',
     component: Dashboard,
     beforeEnter: (_to, _from, next) => {
-      // Protect dashboard route - require authorization
-      if (store.state.authorized) {
-        next()
+      // Wait for auth to load
+      if (store.state.loading) {
+        const unwatch = store.watch(
+          (state) => state.loading,
+          (loading) => {
+            if (!loading) {
+              unwatch();
+              if (store.state.authorized) {
+                next();
+              } else {
+                next('/');
+              }
+            }
+          }
+        );
+      } else if (store.state.authorized) {
+        next();
       } else {
-        next('/')
+        next('/');
       }
     }
   }

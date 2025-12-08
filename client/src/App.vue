@@ -68,11 +68,22 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
         </div>
       </nav>
     </section>
-    <section class="section" v-if="authorized">
+    <!-- Loading State -->
+    <div v-if="loading" class="loading-screen">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <p class="has-text-grey mt-4">Loading...</p>
+      </div>
+    </div>
+    
+    <!-- Authorized Content -->
+    <section class="section" v-else-if="authorized">
       <div class="container">
         <router-view />
       </div>
     </section>
+    
+    <!-- Non-authorized Content -->
     <router-view v-else />
   </div>
 </template>
@@ -102,14 +113,19 @@ export default {
     };
   },
   created() {
+    // Set loading state
+    this.$store.commit('setLoading', true);
+    
     if (cognitoCode) {
       this.exchangeToken().then(() => {
+        this.$store.commit('setLoading', false);
         if (this.$store.state.authorized) {
           this.$router.push('/dashboard');
         }
       });
     } else {
       this.exchangeRefreshToken().then(() => {
+        this.$store.commit('setLoading', false);
         if (this.$store.state.authorized && this.$route.path === '/') {
           this.$router.push('/dashboard');
         }
@@ -188,7 +204,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(["authorized"]),
+    ...mapState(["authorized", "loading"]),
   },
 };
 </script>
