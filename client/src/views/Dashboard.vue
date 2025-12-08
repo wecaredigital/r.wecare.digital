@@ -95,6 +95,16 @@
             <span class="is-hidden-mobile">Refresh</span>
           </button>
         </div>
+        
+        <!-- Debug: Test API button (remove after testing) -->
+        <div class="column is-12-mobile is-6-tablet is-2-desktop">
+          <button class="button is-fullwidth is-info" @click="testAPI">
+            <span class="icon">
+              <i class="fas fa-vial"></i>
+            </span>
+            <span>Test API</span>
+          </button>
+        </div>
 
 
         <div class="column is-12-mobile is-6-tablet is-2-desktop">
@@ -722,6 +732,58 @@ export default {
         this.refreshing = false;
         console.log('Force refresh completed');
       }
+    },
+    async testAPI() {
+      const token = localStorage.getItem("cognitoIdentityToken");
+      console.log('=== API TEST ===');
+      console.log('Token exists:', !!token);
+      console.log('Token length:', token?.length);
+      console.log('Token preview:', token?.substring(0, 50) + '...');
+      
+      // Test current URL (Prod)
+      try {
+        console.log('\n--- Testing: /Prod/app ---');
+        const response1 = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
+          method: "GET",
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json"
+          }
+        });
+        console.log('Status:', response1.status, response1.statusText);
+        if (response1.ok) {
+          const data = await response1.json();
+          console.log('✅ /Prod/app works! Data:', data);
+        } else {
+          console.log('❌ /Prod/app failed:', await response1.text());
+        }
+      } catch (err) {
+        console.error('❌ /Prod/app error:', err);
+      }
+      
+      // Test old URL (Pro - without 'd')
+      try {
+        console.log('\n--- Testing: /Pro/app ---');
+        const response2 = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Pro/app", {
+          method: "GET",
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json"
+          }
+        });
+        console.log('Status:', response2.status, response2.statusText);
+        if (response2.ok) {
+          const data = await response2.json();
+          console.log('✅ /Pro/app works! Data:', data);
+        } else {
+          console.log('❌ /Pro/app failed:', await response2.text());
+        }
+      } catch (err) {
+        console.error('❌ /Pro/app error:', err);
+      }
+      
+      console.log('=== END API TEST ===');
+      alert('API test complete! Check console for results.');
     }
 }
 }
