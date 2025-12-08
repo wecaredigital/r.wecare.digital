@@ -392,8 +392,8 @@ export default {
         return;
       }
 
-      // Check for duplicate ID by calling the API
-      if (await this.checkIdExists(this.model.id)) {
+      // Check for duplicate ID in local store first (faster and no API call)
+      if (this.$store.state.links.some(link => link.id === this.model.id)) {
         this.errorMsg = `ID "${this.model.id}" already exists. Please choose a different ID.`;
         setTimeout(() => (this.errorMsg = null), 5000);
         return;
@@ -429,16 +429,23 @@ export default {
             this.fetchLinks();
           }, 1000);
         } else {
-          const errorText = await response.text();
-          let errorMsg = "";
-          try {
-            const error = JSON.parse(errorText);
-            errorMsg = error.message || errorText || response.statusText;
-          } catch (e) {
-            errorMsg = errorText || response.statusText;
+          if (response.status === 403) {
+            this.errorMsg = "Session expired. Please refresh the page and try again.";
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            const errorText = await response.text();
+            let errorMsg = "";
+            try {
+              const error = JSON.parse(errorText);
+              errorMsg = error.message || errorText || response.statusText;
+            } catch (e) {
+              errorMsg = errorText || response.statusText;
+            }
+            this.errorMsg = `Failed to create link: ${errorMsg}`;
+            setTimeout(() => (this.errorMsg = null), 5000);
           }
-          this.errorMsg = `Failed to create link: ${errorMsg}`;
-          setTimeout(() => (this.errorMsg = null), 5000);
         }
       } catch (err) {
         this.errorMsg = "Network error. Please check your connection.";
@@ -631,9 +638,11 @@ export default {
           
         } else {
           if (response.status === 401 || response.status === 403) {
-            this.errorMsg = "Authentication expired. Please sign in again.";
-            localStorage.removeItem("cognitoIdentityToken");
-            localStorage.removeItem("cognitoRefreshToken");
+            console.error('Authentication error - attempting page reload to refresh token');
+            this.errorMsg = "Session expired. Refreshing...";
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
           } else if (response.status === 404) {
             this.$store.commit("hydrateLinks", []);
           } else {
