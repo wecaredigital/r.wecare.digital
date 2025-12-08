@@ -157,6 +157,15 @@
           Showing {{ startItem }}-{{ endItem }} of {{ filteredLinks.length }} links
         </div>
       </nav>
+      <!-- Debug info -->
+      <div class="notification is-info is-light mb-4" v-if="true">
+        <strong>Debug:</strong> 
+        Store: {{ storeLinks.length }} | 
+        Filtered: {{ filteredLinks.length }} | 
+        Paginated: {{ paginatedLinks.length }} |
+        Page: {{ currentPage }}/{{ totalPages }}
+      </div>
+      
       <!-- Links Table -->
       <div class="table-container">
         <table class="table is-fullwidth is-striped">
