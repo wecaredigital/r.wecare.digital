@@ -417,14 +417,17 @@ export default {
           body: JSON.stringify(payload)
         });
         if (response.ok) {
+          console.log('Link created successfully:', payload.id);
           // Add to store immediately
           this.$store.commit("addLink", payload);
+          console.log('Added to store, now has:', this.$store.state.links.length, 'links');
           this.toggleModal();
           this.successMsg = `Link created: r.wecare.digital/${payload.id}`;
           setTimeout(() => (this.successMsg = null), 5000);
           
           // Simple refresh after creation
           setTimeout(() => {
+            console.log('Fetching links after creation...');
             this.fetchLinks();
           }, 1000);
         } else {
@@ -592,26 +595,35 @@ export default {
         if (response.ok) {
           const data = await response.json();
           
+          console.log('fetchLinks response:', data);
+          
           // Handle DynamoDB Query API response format
           // According to AWS DynamoDB API docs, Query returns: { Items: [...], Count: n, ScannedCount: n }
           let linksArray = [];
           
           if (data && data.Items && Array.isArray(data.Items)) {
+            console.log('Using data.Items format, count:', data.Items.length);
             linksArray = data.Items;
           } else if (Array.isArray(data)) {
+            console.log('Using direct array format, count:', data.length);
             linksArray = data;
           } else if (data && data.body) {
             const bodyData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
             if (bodyData && bodyData.Items && Array.isArray(bodyData.Items)) {
+              console.log('Using bodyData.Items format, count:', bodyData.Items.length);
               linksArray = bodyData.Items;
             } else if (Array.isArray(bodyData)) {
+              console.log('Using bodyData array format, count:', bodyData.length);
               linksArray = bodyData;
             }
           } else if (data && typeof data === 'object' && !Array.isArray(data)) {
+            console.log('Single object, converting to array');
             linksArray = [data];
           }
           
+          console.log('Committing to store:', linksArray.length, 'links');
           this.$store.commit("hydrateLinks", linksArray);
+          console.log('Store now has:', this.$store.state.links.length, 'links');
           
         } else {
           if (response.status === 401 || response.status === 403) {
