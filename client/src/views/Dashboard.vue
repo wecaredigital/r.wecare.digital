@@ -251,6 +251,22 @@ const clientId = process.env.VUE_APP_CLIENT_ID;
 const authDomain = process.env.VUE_APP_AUTH_DOMAIN;
 const redUrl = window.location.origin;
 
+// Helper to get user email from JWT token
+function getUserEmail() {
+  const token = window.localStorage.getItem("cognitoIdentityToken");
+  if (!token || token === 'null') return null;
+  
+  try {
+    // JWT format: header.payload.signature
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded.email || null;
+  } catch (err) {
+    console.error('Error decoding token:', err);
+    return null;
+  }
+}
+
 // Helper to generate IST timestamp in "YYYY-MM-DD HH:mm:ss +0530"
 function getISTTimestamp() {
   const now = new Date();
@@ -416,9 +432,16 @@ export default {
         return;
       }
 
+      const userEmail = getUserEmail();
+      if (!userEmail) {
+        this.errorMsg = "Unable to get user email. Please sign in again.";
+        setTimeout(() => (this.errorMsg = null), 5000);
+        return;
+      }
+
       const payload = { 
         ...this.model, 
-        owner: "r@wecare.digital",
+        owner: userEmail,
         timestamp: getISTTimestamp()
       };
 
@@ -467,9 +490,16 @@ export default {
       }
     },
     async updateLink() {
+      const userEmail = getUserEmail();
+      if (!userEmail) {
+        this.errorMsg = "Unable to get user email. Please sign in again.";
+        setTimeout(() => (this.errorMsg = null), 5000);
+        return;
+      }
+
       const payload = { 
         ...this.model, 
-        owner: "r@wecare.digital",
+        owner: userEmail,
         timestamp: getISTTimestamp()
       };
 
