@@ -40,44 +40,20 @@
 
         <!-- Setup Instructions -->
         <div v-if="showSetup" class="notification is-info is-light">
-          <h4 class="title is-6">Setup Instructions:</h4>
-          <ol>
-            <li>Download an authenticator app (Google Authenticator, Authy, etc.)</li>
-            <li>Scan the QR code below or enter the secret key manually</li>
-            <li>Enter the 6-digit code from your app to verify</li>
-          </ol>
-        </div>
-
-        <!-- QR Code Section -->
-        <div v-if="showSetup" class="has-text-centered mb-4">
-          <div class="qr-placeholder">
-            <div class="box has-background-light">
-              <span class="icon is-large has-text-grey">
-                <i class="fas fa-qrcode fa-3x"></i>
-              </span>
-              <p class="mt-2 has-text-grey">QR Code would appear here</p>
-              <p class="is-size-7 has-text-grey">Secret: DEMO-SECRET-KEY-123</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Verification -->
-        <div v-if="showSetup" class="field has-addons">
-          <div class="control is-expanded">
-            <input class="input" 
-                   type="text" 
-                   v-model="verificationCode" 
-                   placeholder="Enter 6-digit code"
-                   maxlength="6">
-          </div>
-          <div class="control">
-            <button class="button is-success" 
-                    @click="verifyCode"
-                    :disabled="verificationCode.length !== 6 || loading">
-              <span v-if="!loading">Verify</span>
-              <span v-else>Verifying...</span>
+          <h4 class="title is-6">MFA Setup:</h4>
+          <p>Two-factor authentication will enhance your account security by requiring a second form of verification when logging in.</p>
+          <div class="mt-3">
+            <button class="button" @click="enableMFA" :disabled="loading">
+              <span v-if="!loading">Enable MFA</span>
+              <span v-else>Setting up...</span>
             </button>
           </div>
+        </div>
+
+        <!-- MFA Setup Notice -->
+        <div v-if="showSetup" class="notification is-info is-light">
+          <p><strong>MFA Setup:</strong> Two-factor authentication setup will be available in a future update. 
+          This feature is currently under development.</p>
         </div>
 
 
@@ -108,7 +84,6 @@ export default {
     return {
       mfaEnabled: false,
       showSetup: false,
-      verificationCode: '',
       loading: false
     };
   },
@@ -120,21 +95,15 @@ export default {
         this.disableMFA();
       }
     },
-    verifyCode() {
+    enableMFA() {
       this.loading = true;
       
-      // Simulate verification
+      // Simulate MFA enablement
       setTimeout(() => {
-        if (this.verificationCode === '123456') {
-          this.showSetup = false;
-          this.mfaEnabled = true;
-          this.$emit('success', 'MFA enabled successfully!');
-        } else {
-          this.$emit('error', 'Invalid verification code. Try 123456 for demo.');
-          this.mfaEnabled = false;
-        }
+        this.showSetup = false;
+        this.mfaEnabled = true;
+        this.$emit('success', 'MFA feature will be available in a future update.');
         this.loading = false;
-        this.verificationCode = '';
       }, 1000);
     },
     disableMFA() {
@@ -149,7 +118,6 @@ export default {
     cancelSetup() {
       this.showSetup = false;
       this.mfaEnabled = false;
-      this.verificationCode = '';
     }
   }
 };
