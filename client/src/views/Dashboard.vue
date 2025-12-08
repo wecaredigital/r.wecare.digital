@@ -343,6 +343,23 @@ export default {
       return this.$store.state.links.some(link => link.id === this.model.id);
     }
   },
+  created() {
+    console.log("Dashboard created, checking auth status");
+    console.log("Store authorized:", this.$store.state.authorized);
+    console.log("Token exists:", !!window.localStorage.getItem("cognitoIdentityToken"));
+    console.log("Current token value:", window.localStorage.getItem("cognitoIdentityToken"));
+    this.testApiConnection();
+    this.fetchLinks();
+  },
+  mounted() {
+    // Add a small delay to ensure everything is loaded
+    setTimeout(() => {
+      if (this.$store.state.links.length === 0) {
+        console.log("No links loaded, attempting refresh");
+        this.fetchLinks();
+      }
+    }, 2000);
+  },
   methods: {
     toggleModal(mode) {
       this.modalIsActive = !this.modalIsActive;
@@ -679,24 +696,6 @@ export default {
       }
     }
   }, // <--- THIS COMMA closes the methods object!
-  created() {
-    console.log("Dashboard created, checking auth status");
-    console.log("Store authorized:", this.$store.state.authorized);
-    console.log("Token exists:", !!window.localStorage.getItem("cognitoIdentityToken"));
-    console.log("Current token value:", window.localStorage.getItem("cognitoIdentityToken"));
-    this.testApiConnection();
-    this.fetchLinks();
-  },
-  mounted() {
-    // Add a small delay to ensure everything is loaded
-    setTimeout(() => {
-      if (this.$store.state.links.length === 0) {
-        console.log("No links loaded, attempting refresh");
-        this.fetchLinks();
-      }
-    }, 2000);
-  },
-  methods: {
     async testApiConnection() {
       try {
         console.log("Testing API connection...");
@@ -757,8 +756,8 @@ export default {
       }
       
       console.log("=== END DEBUG ===");
-    },
-};
+    }
+  },
 </script>
 
 <style scoped>
