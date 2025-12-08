@@ -1,31 +1,119 @@
 <template>
   <div class="columns is-mobile">
-    <div class="column is-12-mobile is-2-tablet is-narrow sidebar-folders">
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle is-hidden-tablet">
+      <button class="button is-white" @click="showSidebar = !showSidebar">
+        <span class="icon">
+          <i class="fas fa-bars"></i>
+        </span>
+      </button>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="column is-12-mobile is-2-tablet is-narrow sidebar-folders" 
+         :class="{ 'is-hidden-mobile': !showSidebar }">
       <aside class="menu">
-        <p class="menu-label">Folders</p>
+        <p class="menu-label">
+          <span>Folders</span>
+          <button class="button is-small is-white is-hidden-tablet mobile-close" @click="showSidebar = false">
+            <span class="icon is-small">
+              <i class="fas fa-times"></i>
+            </span>
+          </button>
+        </p>
         <ul class="menu-list">
           <li>
-            <a :class="{ 'is-active': selectedFolder === '' }" @click="selectFolder('')" href="#">All Folders</a>
+            <a :class="{ 'is-active': selectedFolder === '' }" @click="selectFolder('')" href="#">
+              <span class="icon"><i class="fas fa-folder-open"></i></span>
+              <span>All Links</span>
+            </a>
           </li>
           <li v-for="folder in folderList" :key="folder">
-            <a :class="{ 'is-active': selectedFolder === folder }" @click="selectFolder(folder)" href="#">{{ folder }}</a>
+            <a :class="{ 'is-active': selectedFolder === folder }" @click="selectFolder(folder)" href="#">
+              <span class="icon"><i class="fas fa-folder"></i></span>
+              <span>{{ folder }}</span>
+            </a>
+          </li>
+        </ul>
+        
+        <!-- MFA Settings Section -->
+        <p class="menu-label mt-5">Security</p>
+        <ul class="menu-list">
+          <li>
+            <a @click="showMFASettings = !showMFASettings" href="#" 
+               :class="{ 'is-active': showMFASettings }">
+              <span class="icon"><i class="fas fa-shield-alt"></i></span>
+              <span>MFA Settings</span>
+            </a>
           </li>
         </ul>
       </aside>
     </div>
 
+    <!-- Main Content -->
     <div class="column dashboard">
-      <div v-if="successMsg" class="notification is-success is-light">{{ successMsg }}</div>
+      <!-- Success/Error Notifications -->
+      <div v-if="successMsg" class="notification is-success is-light mb-4">
+        <button class="delete" @click="successMsg = null"></button>
+        <strong>Success!</strong> {{ successMsg }}
+      </div>
+      <div v-if="errorMsg" class="notification is-danger is-light mb-4">
+        <button class="delete" @click="errorMsg = null"></button>
+        <strong>Error:</strong> {{ errorMsg }}
+      </div>
 
-      <div class="columns is-multiline is-mobile mb-2">
+      <!-- MFA Settings Section -->
+      <div v-if="showMFASettings" class="box mb-5">
+        <h2 class="title is-4 mb-4">
+          <span class="icon-text">
+            <span class="icon"><i class="fas fa-shield-alt"></i></span>
+            <span>Multi-Factor Authentication</span>
+          </span>
+        </h2>
+        <div class="content">
+          <p class="mb-4">Secure your account with two-factor authentication using an authenticator app.</p>
+          <div class="notification is-info is-light">
+            <p><strong>Coming Soon:</strong> MFA functionality will be available in the next update. 
+            Your account is currently secured with strong password authentication.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Section -->
+      <div class="columns is-multiline is-mobile mb-4">
         <div class="column is-12-mobile is-6-tablet is-4-desktop">
-          <h1 class="title is-size-4-mobile is-size-3-tablet">Shortcuts</h1>
+          <h1 class="title is-size-4-mobile is-size-3-tablet">
+            <span class="icon-text">
+              <span class="icon"><i class="fas fa-link"></i></span>
+              <span>My Links</span>
+            </span>
+          </h1>
+          <p class="subtitle is-6 has-text-grey">{{ filteredLinks.length }} link{{ filteredLinks.length !== 1 ? 's' : '' }}</p>
         </div>
         <div class="column is-12-mobile is-6-tablet is-4-desktop">
-          <input class="input" v-model="searchTerm" type="text" placeholder="Search shortcuts…" />
+          <div class="field has-addons">
+            <div class="control has-icons-left is-expanded">
+              <input class="input" v-model="searchTerm" type="text" placeholder="Search links..." />
+              <span class="icon is-small is-left">
+                <i class="fas fa-search"></i>
+              </span>
+            </div>
+            <div class="control" v-if="searchTerm">
+              <button class="button" @click="searchTerm = ''">
+                <span class="icon">
+                  <i class="fas fa-times"></i>
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
         <div class="column is-12-mobile is-12-tablet is-4-desktop">
-          <button class="button is-info is-outlined is-fullwidth" @click="toggleModal('create')">New Shortcut</button>
+          <button class="button is-primary is-fullwidth" @click="toggleModal('create')">
+            <span class="icon">
+              <i class="fas fa-plus"></i>
+            </span>
+            <span>Create Link</span>
+          </button>
         </div>
       </div>
 
@@ -43,7 +131,9 @@
           </li>
         </ul>
       </nav>
-      <table class="table is-fullwidth is-striped has-border">
+      <!-- Links Table -->
+      <div class="table-container">
+        <table class="table is-fullwidth is-striped">
         <thead>
           <tr>
             <th>#</th>
@@ -73,7 +163,8 @@
             </td>
           </tr>
         </tbody>
-      </table>
+        </table>
+      </div>
 
       <!-- Modal -->
       <div v-if="modalIsActive" class="modal is-active">
@@ -151,7 +242,10 @@ export default {
       selectedFolder: "",
       currentPage: 1,
       pageSize: 500,
-      successMsg: null
+      successMsg: null,
+      errorMsg: null,
+      showSidebar: false,
+      showMFASettings: false
     };
   },
   computed: {
@@ -202,15 +296,21 @@ export default {
     },
     copy(text) {
       navigator.clipboard.writeText(text).then(() => {
-        this.successMsg = "Copied!";
-        setTimeout(() => (this.successMsg = null), 1000);
+        this.successMsg = "Link copied to clipboard";
+        setTimeout(() => (this.successMsg = null), 3000);
+      }).catch(() => {
+        this.errorMsg = "Failed to copy link";
+        setTimeout(() => (this.errorMsg = null), 3000);
       });
     },
     copyShort(id) {
       const shortUrl = `https://r.wecare.digital/${id}`;
       navigator.clipboard.writeText(shortUrl).then(() => {
-        this.successMsg = "Short URL copied!";
-        setTimeout(() => (this.successMsg = null), 1000);
+        this.successMsg = `Short link copied: r.wecare.digital/${id}`;
+        setTimeout(() => (this.successMsg = null), 3000);
+      }).catch(() => {
+        this.errorMsg = "Failed to copy short link";
+        setTimeout(() => (this.errorMsg = null), 3000);
       });
     },
     async createLink() {
@@ -243,6 +343,8 @@ export default {
         if (response.ok) {
           this.$store.commit("addLink", payload);
           this.toggleModal();
+          this.successMsg = `Link created: r.wecare.digital/${payload.id}`;
+          setTimeout(() => (this.successMsg = null), 5000);
         } else {
           const errorText = await response.text();
           let errorMsg = "";
@@ -252,10 +354,12 @@ export default {
           } catch (e) {
             errorMsg = errorText || response.statusText;
           }
-          alert("Failed to save: " + errorMsg);
+          this.errorMsg = `Failed to create link: ${errorMsg}`;
+          setTimeout(() => (this.errorMsg = null), 5000);
         }
       } catch (err) {
-        alert("Network or server error.");
+        this.errorMsg = "Network error. Please check your connection.";
+        setTimeout(() => (this.errorMsg = null), 5000);
         console.error(err);
       }
     },
@@ -276,8 +380,8 @@ export default {
         if (response.ok) {
           const ind = this.$store.state.links.findIndex(l => l.id === id);
           if (ind > -1) this.$store.commit("removeLink", ind);
-          this.successMsg = "Deleted!";
-          setTimeout(() => (this.successMsg = null), 1500);
+          this.successMsg = "Link deleted successfully";
+          setTimeout(() => (this.successMsg = null), 3000);
         } else {
           const errorText = await response.text();
           let errorMsg = "";
@@ -287,10 +391,12 @@ export default {
           } catch (e) {
             errorMsg = errorText || response.statusText;
           }
-          alert("Delete failed: " + errorMsg);
+          this.errorMsg = `Failed to delete link: ${errorMsg}`;
+          setTimeout(() => (this.errorMsg = null), 5000);
         }
       } catch (err) {
-        alert("Network error while deleting.");
+        this.errorMsg = "Network error while deleting. Please try again.";
+        setTimeout(() => (this.errorMsg = null), 5000);
         console.error(err);
       }
     },
@@ -301,6 +407,10 @@ export default {
     selectFolder(folder) {
       this.selectedFolder = folder;
       this.currentPage = 1;
+      // Close sidebar on mobile after selection
+      if (window.innerWidth <= 768) {
+        this.showSidebar = false;
+      }
     },
     goToPage(n) {
       this.currentPage = n;
@@ -331,41 +441,136 @@ export default {
 </script>
 
 <style scoped>
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  position: fixed;
+  top: 70px;
+  left: 10px;
+  z-index: 1000;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Sidebar */
 .sidebar-folders {
   border-right: 1px solid #eee;
   height: 100vh;
+  position: relative;
 }
+
+.mobile-close {
+  float: right;
+}
+
+.menu-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-list a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-list .icon {
+  width: 16px;
+  min-width: 16px;
+}
+
+/* Dashboard */
 .dashboard {
   padding: 1rem;
 }
+
+/* Table Styles */
 .table {
   border-collapse: collapse;
-  border: 1px solid #ccc;
+  border: 1px solid #dbdbdb;
   width: 100%;
+  background: white;
+  border-radius: 6px;
+  overflow: hidden;
 }
+
 .table th,
 .table td {
-  border: 1px solid #ccc !important;
-  padding: 0.5rem;
-  vertical-align: top;
+  border: 1px solid #dbdbdb !important;
+  padding: 0.75rem;
+  vertical-align: middle;
 }
+
+.table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
 .wrap-text {
   word-break: break-word;
   white-space: normal;
+  max-width: 200px;
 }
+
+/* Mobile Responsiveness */
 @media screen and (max-width: 768px) {
-  .table thead {
-    display: none;
+  .sidebar-folders {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    z-index: 999;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
   }
-  .table tr {
-    display: block;
-    margin-bottom: 1rem;
+  
+  .sidebar-folders:not(.is-hidden-mobile) {
+    transform: translateX(0);
   }
-  .table td {
-    display: flex;
-    justify-content: space-between;
+  
+  .dashboard {
     padding: 0.5rem;
-    word-break: break-word;
+    margin-top: 60px;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .table {
+    min-width: 600px;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .wrap-text {
+    max-width: 150px;
+  }
+  
+  .button.is-small {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .table {
+    min-width: 500px;
+  }
+  
+  .wrap-text {
+    max-width: 120px;
+  }
+  
+  .dashboard {
+    padding: 0.25rem;
   }
 }
 </style>

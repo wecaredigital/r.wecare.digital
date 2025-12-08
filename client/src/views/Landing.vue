@@ -13,7 +13,7 @@
                     WECARE.DIGITAL
                   </h1>
                   <p class="subtitle is-4 is-size-5-mobile has-text-grey">
-                    Shorten, Share, and Manage Your URLs
+                    Create short, memorable links instantly
                   </p>
                 </div>
 
@@ -23,21 +23,21 @@
                       <i class="fas fa-bolt"></i>
                     </span>
                     <p class="has-text-weight-semibold">Lightning Fast</p>
-                    <p class="is-size-7 has-text-grey">Instant URL shortening</p>
+                    <p class="is-size-7 has-text-grey">Create links in seconds</p>
                   </div>
                   <div class="feature-item">
                     <span class="icon is-large has-text-success">
                       <i class="fas fa-shield-alt"></i>
                     </span>
                     <p class="has-text-weight-semibold">Secure & Private</p>
-                    <p class="is-size-7 has-text-grey">Your data is protected</p>
+                    <p class="is-size-7 has-text-grey">Enterprise-grade security</p>
                   </div>
                   <div class="feature-item">
                     <span class="icon is-large has-text-warning">
                       <i class="fas fa-chart-line"></i>
                     </span>
-                    <p class="has-text-weight-semibold">Easy Management</p>
-                    <p class="is-size-7 has-text-grey">Organize with folders</p>
+                    <p class="has-text-weight-semibold">Smart Organization</p>
+                    <p class="is-size-7 has-text-grey">Folders, search & analytics</p>
                   </div>
                 </div>
 
@@ -69,7 +69,7 @@
     <!-- Features Section -->
     <section class="section features-section">
       <div class="container">
-        <h2 class="title is-3 has-text-centered mb-6">Why Choose WECARE.DIGITAL?</h2>
+        <h2 class="title is-3 has-text-centered mb-6">Powerful Features</h2>
         <div class="columns is-multiline">
           <div class="column is-4-desktop is-12-mobile">
             <div class="box feature-box">
@@ -80,7 +80,7 @@
               </div>
               <h3 class="title is-5 has-text-centered">Custom Short Links</h3>
               <p class="has-text-centered has-text-grey">
-                Create memorable, branded short URLs that are easy to share and remember.
+                Create branded, memorable URLs that boost click-through rates.
               </p>
             </div>
           </div>
@@ -91,9 +91,9 @@
                   <i class="fas fa-folder fa-2x"></i>
                 </span>
               </div>
-              <h3 class="title is-5 has-text-centered">Organize with Folders</h3>
+              <h3 class="title is-5 has-text-centered">Smart Organization</h3>
               <p class="has-text-centered has-text-grey">
-                Keep your links organized with folders and tags for easy management.
+                Organize links with folders, search instantly, and track performance.
               </p>
             </div>
           </div>
@@ -104,9 +104,9 @@
                   <i class="fas fa-search fa-2x"></i>
                 </span>
               </div>
-              <h3 class="title is-5 has-text-centered">Powerful Search</h3>
+              <h3 class="title is-5 has-text-centered">Advanced Analytics</h3>
               <p class="has-text-centered has-text-grey">
-                Quickly find any link with our advanced search functionality.
+                Track clicks, monitor performance, and optimize your campaigns.
               </p>
             </div>
           </div>
@@ -117,9 +117,9 @@
     <!-- CTA Section -->
     <section class="section cta-section has-background-primary">
       <div class="container has-text-centered">
-        <h2 class="title is-3 has-text-white mb-4">Ready to Get Started?</h2>
+        <h2 class="title is-3 has-text-white mb-4">Start Shortening Today</h2>
         <p class="subtitle is-5 has-text-white mb-5">
-          Join thousands of users managing their URLs efficiently
+          Join thousands creating smarter, shorter links
         </p>
         <a :href="signUpUrl" class="button is-white is-large is-rounded">
           <span class="icon">
