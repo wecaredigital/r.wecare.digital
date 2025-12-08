@@ -13,33 +13,45 @@
     <div class="column is-12-mobile is-2-tablet is-narrow sidebar-folders" 
          :class="{ 'is-hidden-mobile': !showSidebar }">
       <aside class="menu">
-        <p class="menu-label">
-          <span>Folders</span>
+        <div class="menu-header">
+          <p class="menu-label">
+            <span class="icon-text">
+              <span class="icon"><i class="fas fa-folder-tree"></i></span>
+              <span>Folders</span>
+            </span>
+          </p>
           <button class="button is-small is-white is-hidden-tablet mobile-close" @click="showSidebar = false">
             <span class="icon is-small">
               <i class="fas fa-times"></i>
             </span>
           </button>
-        </p>
+        </div>
         <ul class="menu-list">
           <li>
             <a :class="{ 'is-active': selectedFolder === '' }" @click="selectFolder('')" href="#">
-              <span class="icon"><i class="fas fa-folder-open"></i></span>
+              <span class="icon"><i class="fas fa-layer-group"></i></span>
               <span>All Links</span>
+              <span class="tag is-rounded is-light ml-auto">{{ storeLinks.length }}</span>
             </a>
           </li>
           <li v-for="folder in folderList" :key="folder">
             <a :class="{ 'is-active': selectedFolder === folder }" @click="selectFolder(folder)" href="#">
               <span class="icon"><i class="fas fa-folder"></i></span>
               <span>{{ folder }}</span>
+              <span class="tag is-rounded is-light ml-auto">{{ getFolderCount(folder) }}</span>
             </a>
           </li>
         </ul>
         
-
+        <div class="menu-divider"></div>
 
         <!-- Account Section -->
-        <p class="menu-label mt-5">Account</p>
+        <p class="menu-label">
+          <span class="icon-text">
+            <span class="icon"><i class="fas fa-user-circle"></i></span>
+            <span>Account</span>
+          </span>
+        </p>
         <ul class="menu-list">
           <li>
             <a @click="logout" href="#" class="logout-link">
@@ -66,44 +78,52 @@
 
 
       <!-- Header Section -->
-      <div class="columns is-multiline is-mobile mb-4">
-        <div class="column is-12-mobile is-6-tablet is-4-desktop">
-          <h1 class="title is-size-4-mobile is-size-3-tablet">
-            <span class="icon-text">
-              <span class="icon"><i class="fas fa-link"></i></span>
-              <span>My Links</span>
-            </span>
-          </h1>
-          <p class="subtitle is-6 has-text-grey">{{ filteredLinks.length }} link{{ filteredLinks.length !== 1 ? 's' : '' }}</p>
-        </div>
-        <div class="column is-12-mobile is-6-tablet is-4-desktop">
-          <div class="field">
-            <div class="control">
-              <input class="input" 
-                     v-model="searchTerm" 
-                     type="text" 
-                     placeholder="Type to search links..." 
-                     @input="onSearchInput" />
+      <div class="header-card mb-5">
+        <div class="columns is-multiline is-mobile is-vcentered">
+          <div class="column is-12-mobile is-6-tablet is-4-desktop">
+            <h1 class="title is-size-4-mobile is-size-2-tablet has-text-weight-bold mb-2">
+              <span class="icon-text">
+                <span class="icon has-text-primary is-large"><i class="fas fa-link"></i></span>
+                <span class="gradient-text">WECARE.DIGITAL</span>
+              </span>
+            </h1>
+            <p class="subtitle is-6 has-text-grey-dark">
+              <span class="icon-text">
+                <span class="icon is-small"><i class="fas fa-database"></i></span>
+                <span class="has-text-weight-semibold">{{ filteredLinks.length }} link{{ filteredLinks.length !== 1 ? 's' : '' }}</span>
+              </span>
+            </p>
+          </div>
+          <div class="column is-12-mobile is-6-tablet is-4-desktop">
+            <div class="field">
+              <div class="control has-icons-left">
+                <input class="input is-rounded search-input" 
+                       v-model="searchTerm" 
+                       type="text" 
+                       placeholder="🔍 Search links..." 
+                       @input="onSearchInput" />
+                <span class="icon is-left">
+                  <i class="fas fa-search"></i>
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="column is-12-mobile is-6-tablet is-2-desktop">
-          <button class="button is-fullwidth" @click="forceRefresh" :class="{ 'is-loading': refreshing }">
-            <span class="icon">
-              <i class="fas fa-sync-alt"></i>
-            </span>
-            <span class="is-hidden-mobile">Refresh</span>
-          </button>
-        </div>
-
-
-        <div class="column is-12-mobile is-6-tablet is-2-desktop">
-          <button class="button is-fullwidth" @click="toggleModal('create')">
-            <span class="icon">
-              <i class="fas fa-plus"></i>
-            </span>
-            <span>Create Link</span>
-          </button>
+          <div class="column is-12-mobile is-6-tablet is-2-desktop">
+            <button class="button is-fullwidth is-rounded btn-refresh" @click="forceRefresh" :class="{ 'is-loading': refreshing }">
+              <span class="icon">
+                <i class="fas fa-sync-alt"></i>
+              </span>
+              <span class="is-hidden-mobile">Refresh</span>
+            </button>
+          </div>
+          <div class="column is-12-mobile is-6-tablet is-2-desktop">
+            <button class="button is-fullwidth is-rounded btn-create" @click="toggleModal('create')">
+              <span class="icon">
+                <i class="fas fa-plus-circle"></i>
+              </span>
+              <span>Create Link</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -185,9 +205,17 @@
             </td>
             <td>{{ link.folder }}</td>
             <td>{{ link.remark }}</td>
-            <td>
-              <button class="button is-small" @click="editLink(link)">Edit</button>
-              <button class="button is-small is-danger" @click="deleteLink(link.id)">Delete</button>
+            <td class="action-buttons">
+              <button class="button is-small is-rounded btn-edit" @click="editLink(link)" title="Edit link">
+                <span class="icon is-small">
+                  <i class="fas fa-pen"></i>
+                </span>
+              </button>
+              <button class="button is-small is-rounded btn-delete ml-2" @click="deleteLink(link.id)" title="Delete link">
+                <span class="icon is-small">
+                  <i class="fas fa-trash-alt"></i>
+                </span>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -723,6 +751,10 @@ export default {
       } finally {
         this.refreshing = false;
       }
+    },
+    
+    getFolderCount(folder) {
+      return this.storeLinks.filter(link => (link.folder || "") === folder).length;
     }
 }
 }
@@ -745,35 +777,93 @@ export default {
 .sidebar-folders {
   height: 100vh;
   position: relative;
-  padding: 1rem;
-  background-color: #fafafa;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .mobile-close {
   float: right;
 }
 
-.menu-label {
+.menu-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
+}
+
+.menu-label {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  margin-bottom: 1rem !important;
+}
+
+.menu-divider {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 1.5rem 0;
+  border-radius: 2px;
 }
 
 .menu-list a {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 15px !important;
+  padding: 0.875rem 1rem !important;
+  margin-bottom: 0.5rem !important;
+  transition: all 0.3s ease !important;
+  font-weight: 500 !important;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.menu-list a:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  transform: translateX(8px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.menu-list a.is-active {
+  background: #ffffff !important;
+  color: #667eea !important;
+  font-weight: 700 !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+  border-color: #ffffff;
+}
+
+.menu-list a.is-active .icon {
+  color: #667eea !important;
+}
+
+.menu-list a.is-active .tag {
+  background-color: #667eea !important;
+  color: #ffffff !important;
 }
 
 .menu-list .icon {
-  width: 16px;
-  min-width: 16px;
+  width: 20px;
+  min-width: 20px;
+  font-size: 1.1rem;
+}
+
+.menu-list .tag {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 /* Dashboard */
 .dashboard {
   padding: 2rem;
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
 }
 
@@ -784,12 +874,38 @@ export default {
   width: 100%;
   background: white;
   margin-bottom: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
 }
 
-.wrap-text {
-  word-break: break-word;
-  white-space: normal;
-  max-width: 200px;
+.table thead th {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-size: 0.875rem !important;
+  padding: 1.25rem 1rem !important;
+  border: none !important;
+}
+
+.table tbody tr {
+  transition: all 0.3s ease !important;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9ff !important;
+  transform: scale(1.01) !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15) !important;
+}
+
+.action-buttons {
+  white-space: nowrap;
+}
+
+.action-buttons .button {
+  min-width: 40px;
+  height: 40px;
+  padding: 0.5rem;
 }
 
 .wrap-text {
@@ -926,20 +1042,24 @@ export default {
 
 /* Logout link styling */
 .logout-link {
-  color: #e53e3e !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  background: rgba(239, 68, 68, 0.2) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
 }
 
 .logout-link:hover {
-  background-color: #fed7d7 !important;
-  color: #c53030 !important;
+  background: rgba(239, 68, 68, 0.9) !important;
+  color: #ffffff !important;
+  border-color: rgba(239, 68, 68, 1) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
 }
 
 .logout-link .icon {
-  color: #e53e3e !important;
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .logout-link:hover .icon {
-  color: #c53030 !important;
+  color: #ffffff !important;
 }
 
 /* Fast search input styling */
@@ -957,5 +1077,194 @@ export default {
 .input[placeholder*="search"]:not(:placeholder-shown) {
   border-color: #48c774 !important;
   background-color: #f0fff4 !important;
+}
+
+/* Header Card Styling */
+.header-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 2px solid #e9ecef;
+}
+
+/* Gradient Text for WECARE.DIGITAL */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+/* Button Styling */
+.btn-edit {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+  border: none !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3) !important;
+}
+
+.btn-edit:hover {
+  transform: translateY(-2px) scale(1.05) !important;
+  box-shadow: 0 6px 16px rgba(79, 172, 254, 0.5) !important;
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+  border: none !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3) !important;
+}
+
+.btn-delete:hover {
+  transform: translateY(-2px) scale(1.05) !important;
+  box-shadow: 0 6px 16px rgba(245, 87, 108, 0.5) !important;
+}
+
+.btn-refresh {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+  border: 2px solid #667eea !important;
+  color: #667eea !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-refresh:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+}
+
+.btn-create {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+}
+
+.btn-create:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+}
+
+/* Search Input Enhanced */
+.search-input {
+  border: 2px solid #e9ecef !important;
+  transition: all 0.3s ease !important;
+  font-size: 1rem !important;
+  padding: 1.5rem 1rem 1.5rem 3rem !important;
+}
+
+.search-input:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 0.2em rgba(102, 126, 234, 0.25) !important;
+}
+
+/* Table Container with Border */
+.table-container {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid #e9ecef;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: white;
+}
+
+/* Pagination Enhanced */
+.pagination {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 20px;
+  border: 2px solid #e9ecef;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.pagination-link,
+.pagination-previous,
+.pagination-next {
+  border: 2px solid #e9ecef !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.pagination-link:hover,
+.pagination-previous:hover,
+.pagination-next:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border-color: #667eea !important;
+  transform: translateY(-2px) !important;
+}
+
+.pagination-link.is-current {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: #667eea !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+}
+
+/* Modal Styling */
+.modal-content .box {
+  border-radius: 20px;
+  border: 2px solid #e9ecef;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content .box .subtitle {
+  color: #667eea;
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-content .input {
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.modal-content .input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2em rgba(102, 126, 234, 0.25);
+}
+
+.modal-content .button {
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 1.25rem 2rem;
+  transition: all 0.3s ease;
+}
+
+.modal-content .button[type="submit"] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+.modal-content .button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Notification Styling */
+.notification {
+  border-radius: 15px;
+  border: 2px solid;
+  font-weight: 500;
+}
+
+.notification.is-success {
+  border-color: #48c774;
+}
+
+.notification.is-danger {
+  border-color: #f14668;
 }
 </style>
