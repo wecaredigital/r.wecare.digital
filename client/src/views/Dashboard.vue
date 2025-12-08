@@ -643,10 +643,8 @@ export default {
       } catch (err) {
         return false; // On error, allow creation
       }
-    }
-  },
-  
-  async forceRefresh() {
+    },
+    async forceRefresh() {
     this.refreshing = true;
     
     try {
