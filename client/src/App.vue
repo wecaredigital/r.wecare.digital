@@ -61,8 +61,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
             <a class="navbar-item" v-if="!authorized" v-bind:href="signUpUrl"
               >Sign up</a
             >
-            <a class="navbar-item" v-if="!authorized" v-bind:href="logInUrl"
-              >Log in</a
+            <router-link class="navbar-item" v-if="!authorized" to="/login"
+              >Log in</router-link
             >
           </div>
         </div>

@@ -17,6 +17,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Landing from '../views/Landing.vue'
+import Login from '../views/Login.vue'
 import Dashboard from '../views/Dashboard.vue'
 import store from '../store'
 
@@ -27,6 +28,19 @@ const routes = [
     path: '/',
     name: 'landing',
     component: Landing,
+    beforeEnter: (_to, _from, next) => {
+      // If user is already authorized, redirect to dashboard
+      if (store.state.authorized) {
+        next('/dashboard')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login,
     beforeEnter: (_to, _from, next) => {
       // If user is already authorized, redirect to dashboard
       if (store.state.authorized) {

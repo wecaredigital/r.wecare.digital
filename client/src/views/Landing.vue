@@ -48,12 +48,12 @@
                     </span>
                     <span>Get Started</span>
                   </a>
-                  <a :href="logInUrl" class="button is-light is-large is-rounded">
+                  <router-link to="/login" class="button is-light is-large is-rounded">
                     <span class="icon">
                       <i class="fas fa-sign-in-alt"></i>
                     </span>
                     <span>Sign In</span>
-                  </a>
+                  </router-link>
                 </div>
 
                 <p class="is-size-7 has-text-grey mt-5">
