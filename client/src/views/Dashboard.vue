@@ -107,6 +107,13 @@
         </div>
       </div>
 
+      <!-- TEMPORARY DEBUG - Remove after fixing -->
+      <div v-if="debugInfo" class="notification is-warning mb-4">
+        <button class="delete" @click="debugInfo = null"></button>
+        <strong>API Debug Info:</strong>
+        <pre style="max-height: 400px; overflow: auto; background: white; padding: 1rem; margin-top: 0.5rem; font-size: 11px;">{{ debugInfo }}</pre>
+      </div>
+
       <!-- Pagination above table -->
       <nav class="pagination is-centered mb-4" v-if="totalPages > 1">
         <a class="pagination-previous" 
@@ -280,7 +287,8 @@ export default {
       successMsg: null,
       errorMsg: null,
       showSidebar: false,
-      refreshing: false
+      refreshing: false,
+      debugInfo: null
     };
   },
   computed: {
@@ -607,6 +615,15 @@ export default {
           const data = await response.json();
           
           console.log('fetchLinks response:', data);
+          
+          // TEMPORARY: Show raw API response in UI for debugging
+          this.debugInfo = JSON.stringify({
+            rawResponse: data,
+            responseType: Array.isArray(data) ? 'array' : typeof data,
+            hasItems: data?.Items ? true : false,
+            hasBody: data?.body ? true : false,
+            storeLinksCount: this.$store.state.links.length
+          }, null, 2);
           
           // Handle DynamoDB Query API response format
           // According to AWS DynamoDB API docs, Query returns: { Items: [...], Count: n, ScannedCount: n }
