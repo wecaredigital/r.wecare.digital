@@ -16,52 +16,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
 
 <template>
   <div id="app">
-    <!-- Show navbar only for authorized users (dashboard) -->
-    <section class="section" v-if="authorized && !loading">
-      <nav
-        class="navbar is-fixed-top is-dark"
-        role="navigation"
-        aria-label="main navigation"
-      >
-        <div class="navbar-brand">
-          <div class="navbar-item">
-            <h1 class="title has-text-white">{{ appName }}</h1>
-          </div>
-          <a
-            role="button"
-            class="navbar-burger burger"
-            aria-label="menu"
-            aria-expanded="false"
-            data-target="navbarCollapse"
-            v-bind:class="{ 'is-active': isOpen }"
-            @click="isOpen = !isOpen"
-          >
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-          </a>
-        </div>
-
-        <div
-          id="navbarCollapse"
-          class="navbar-menu"
-          v-bind:class="{ 'is-active': isOpen }"
-        >
-          <div class="navbar-start">
-            <!-- <router-link class="navbar-item" to="/">Dashboard</router-link> -->
-          </div>
-
-          <div class="navbar-end">
-            <a
-              class="navbar-item"
-              v-on:click="logout()"
-              v-bind:href="logOutUrl"
-              >Log Out</a
-            >
-          </div>
-        </div>
-      </nav>
-    </section>
     <!-- Loading State -->
     <div v-if="loading" class="loading-screen">
       <div class="loading-content">
@@ -71,11 +25,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
     </div>
     
     <!-- Authorized Content -->
-    <section class="section" v-else-if="authorized">
-      <div class="container">
-        <router-view />
-      </div>
-    </section>
+    <router-view v-else-if="authorized" />
     
     <!-- Non-authorized Content -->
     <router-view v-else />

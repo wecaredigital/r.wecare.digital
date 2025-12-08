@@ -47,6 +47,17 @@
             </a>
           </li>
         </ul>
+
+        <!-- Account Section -->
+        <p class="menu-label mt-5">Account</p>
+        <ul class="menu-list">
+          <li>
+            <a @click="logout" href="#" class="logout-link">
+              <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+              <span>Sign Out</span>
+            </a>
+          </li>
+        </ul>
       </aside>
     </div>
 
@@ -241,6 +252,11 @@
 
 <script>
 import MFASettings from '@/components/MFASettings.vue';
+
+// Set Cognito Vars for logout
+const clientId = process.env.VUE_APP_CLIENT_ID;
+const authDomain = process.env.VUE_APP_AUTH_DOMAIN;
+const redUrl = window.location.origin;
 
 // Helper to generate IST timestamp in "YYYY-MM-DD HH:mm:ss +0530"
 function getISTTimestamp() {
@@ -558,6 +574,12 @@ export default {
         this.$store.commit("drainLinks");
         console.error("Failed to fetch links:", err);
       }
+    },
+    logout() {
+      localStorage.setItem("cognitoIdentityToken", null);
+      localStorage.setItem("cognitoRefreshToken", null);
+      const logOutUrl = `${authDomain}/logout?client_id=${clientId}&logout_uri=${redUrl}`;
+      window.location.href = logOutUrl;
     }
   }, // <--- THIS COMMA closes the methods object!
   created() {
@@ -570,7 +592,7 @@ export default {
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
   position: fixed;
-  top: 80px;
+  top: 20px;
   left: 15px;
   z-index: 1000;
   background: white;
@@ -676,7 +698,7 @@ export default {
   
   .dashboard {
     padding: 0.5rem;
-    margin-top: 60px;
+    margin-top: 0;
   }
   
   .table-container {
@@ -760,5 +782,23 @@ export default {
   .pagination-next {
     margin-bottom: 0.5rem;
   }
+}
+
+/* Logout link styling */
+.logout-link {
+  color: #e53e3e !important;
+}
+
+.logout-link:hover {
+  background-color: #fed7d7 !important;
+  color: #c53030 !important;
+}
+
+.logout-link .icon {
+  color: #e53e3e !important;
+}
+
+.logout-link:hover .icon {
+  color: #c53030 !important;
 }
 </style>
