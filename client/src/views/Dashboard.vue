@@ -77,19 +77,13 @@
           <p class="subtitle is-6 has-text-grey">{{ filteredLinks.length }} link{{ filteredLinks.length !== 1 ? 's' : '' }}</p>
         </div>
         <div class="column is-12-mobile is-6-tablet is-4-desktop">
-          <div class="field has-addons">
-            <div class="control has-icons-left is-expanded">
-              <input class="input" v-model="searchTerm" type="text" placeholder="Search links..." />
-              <span class="icon is-small is-left">
-                <i class="fas fa-search"></i>
-              </span>
-            </div>
-            <div class="control" v-if="searchTerm">
-              <button class="button is-white" @click="searchTerm = ''">
-                <span class="icon">
-                  <i class="fas fa-times"></i>
-                </span>
-              </button>
+          <div class="field">
+            <div class="control">
+              <input class="input" 
+                     v-model="searchTerm" 
+                     type="text" 
+                     placeholder="Type to search links..." 
+                     @input="onSearchInput" />
             </div>
           </div>
         </div>
@@ -282,7 +276,6 @@ export default {
       successMsg: null,
       errorMsg: null,
       showSidebar: false
-
     };
   },
   computed: {
@@ -292,18 +285,26 @@ export default {
     },
     filteredLinks() {
       let arr = this.$store.state.links;
+      
+      // Apply folder filter first
       if (this.selectedFolder) {
         arr = arr.filter(link => (link.folder || "") === this.selectedFolder);
       }
-      if (this.searchTerm) {
-        const term = this.searchTerm.toLowerCase();
-        arr = arr.filter(link =>
-          link.id.toLowerCase().includes(term) ||
-          (link.url && link.url.toLowerCase().includes(term)) ||
-          (link.folder && link.folder.toLowerCase().includes(term)) ||
-          (link.remark && link.remark.toLowerCase().includes(term))
-        );
+      
+      // Apply search filter with optimized search
+      if (this.searchTerm && this.searchTerm.trim()) {
+        const term = this.searchTerm.toLowerCase().trim();
+        arr = arr.filter(link => {
+          // Fast string matching - check most common fields first
+          return (
+            link.id.toLowerCase().includes(term) ||
+            (link.url && link.url.toLowerCase().includes(term)) ||
+            (link.folder && link.folder.toLowerCase().includes(term)) ||
+            (link.remark && link.remark.toLowerCase().includes(term))
+          );
+        });
       }
+      
       return arr;
     },
     paginatedLinks() {
@@ -589,6 +590,10 @@ export default {
       localStorage.setItem("cognitoRefreshToken", null);
       const logOutUrl = `${authDomain}/logout?client_id=${clientId}&logout_uri=${redUrl}`;
       window.location.href = logOutUrl;
+    },
+    onSearchInput() {
+      // Reset to first page when searching
+      this.currentPage = 1;
     }
   }, // <--- THIS COMMA closes the methods object!
   created() {
@@ -821,5 +826,22 @@ export default {
 
 .logout-link:hover .icon {
   color: #c53030 !important;
+}
+
+/* Fast search input styling */
+.input[placeholder*="search"] {
+  transition: all 0.2s ease !important;
+  border: 2px solid #e2e8f0 !important;
+}
+
+.input[placeholder*="search"]:focus {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 0.125em rgba(0, 0, 0, 0.25) !important;
+  transform: scale(1.02) !important;
+}
+
+.input[placeholder*="search"]:not(:placeholder-shown) {
+  border-color: #48c774 !important;
+  background-color: #f0fff4 !important;
 }
 </style>
