@@ -28,7 +28,7 @@ Parameters:
     Default: shortener
   CustomDomainName:
     Type: String
-    Description: Name of custom domain
+    Description: Name of custom Cognito auth domain (FQDN, e.g. user.wecare.digital)
     Default: user.wecare.digital
   UseLocalClient:
     Type: String
@@ -57,7 +57,7 @@ Conditions:
 ##   Template Resources                                                                          ##
 ###################################################################################################
 Resources:
-  ##   API Gateway                                                                                 
+  ##   API Gateway
   SiteAPI:
     Type: AWS::Serverless::Api
     Properties:
@@ -104,29 +104,37 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-  
+
   ##   Cognito user pool
   UserPool:
-    Type: AWS::Cognito::UserPool 
-    Properties: 
-      UserPoolName: !Sub ${AppName}-UserPool 
-      Policies: 
-        PasswordPolicy: 
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${AppName}-UserPool
+
+      # === TOTP MFA configuration (software token) ===
+      MfaConfiguration: ON
+      EnabledMfas:
+        - SOFTWARE_TOKEN_MFA
+      SoftwareTokenMfaConfiguration:
+        Enabled: true
+
+      Policies:
+        PasswordPolicy:
           MinimumLength: 8
       AutoVerifiedAttributes:
         - email
-      UsernameAttributes: 
-        - email 
-      Schema: 
-        - AttributeDataType: String 
-          Name: email 
+      UsernameAttributes:
+        - email
+      Schema:
+        - AttributeDataType: String
+          Name: email
           Required: false
-          
-  ##   Cognito user pool domain
+
+  ##   Cognito user pool domain (custom domain)
   UserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
-    Properties: 
-      Domain: user.wecare.digital
+    Properties:
+      Domain: !Ref CustomDomainName
       UserPoolId: !Ref UserPool
       ManagedLoginVersion: 2
       CustomDomainConfig:
@@ -134,10 +142,10 @@ Resources:
 
   ##   Cognito user pool client
   UserPoolClient:
-    Type: AWS::Cognito::UserPoolClient 
-    Properties: 
-      UserPoolId: !Ref UserPool 
-      ClientName: !Sub ${AppName}-UserPoolClient 
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub ${AppName}-UserPoolClient
       GenerateSecret: false
       SupportedIdentityProviders:
         - COGNITO
@@ -159,7 +167,7 @@ Resources:
   ##   CloudFront distribution
   CloudFrontDistro:
     Type: AWS::CloudFront::Distribution
-    Properties: 
+    Properties:
       DistributionConfig:
         Comment: URL Shortener CDN
         DefaultCacheBehavior:
@@ -169,20 +177,20 @@ Resources:
           DefaultTTL: 0
           ForwardedValues:
             Headers:
-            - Access-Control-Request-Headers
-            - Access-Control-Request-Method
-            - Origin
-            - Authorization
+              - Access-Control-Request-Headers
+              - Access-Control-Request-Method
+              - Origin
+              - Authorization
             QueryString: false
           TargetOriginId: "URLShortenerAPIGW"
           ViewerProtocolPolicy: redirect-to-https
         CustomErrorResponses:
-        - ErrorCachingMinTTL: 0
-          ErrorCode: 400
-        - ErrorCachingMinTTL: 1
-          ErrorCode: 403
-        - ErrorCachingMinTTL: 5
-          ErrorCode: 500
+          - ErrorCachingMinTTL: 0
+            ErrorCode: 400
+          - ErrorCachingMinTTL: 1
+            ErrorCode: 403
+          - ErrorCachingMinTTL: 5
+            ErrorCode: 500
         Logging:
           Bucket: !GetAtt CloudFrontAccessLogsBucket.DomainName
         Enabled: true
@@ -197,10 +205,10 @@ Resources:
   CloudFrontAccessLogsBucket:
     Type: AWS::S3::Bucket
     Properties:
-     OwnershipControls:
+      OwnershipControls:
         Rules:
           - ObjectOwnership: ObjectWriter
-          
+
   ##   Amplify Application for hosting
   AmplifyApp:
     Type: AWS::Amplify::App
@@ -253,7 +261,7 @@ Resources:
             Effect: "Allow"
             Principal:
               Service: "apigateway.amazonaws.com"
-            Action: 
+            Action:
               - "sts:AssumeRole"
       Policies:
         - PolicyName: DDBReadPolicy
@@ -261,9 +269,9 @@ Resources:
             Version: '2012-10-17'
             Statement:
               Action:
-              - dynamodb:GetItem
-              - dynamodb:Scan
-              - dynamodb:Query
+                - dynamodb:GetItem
+                - dynamodb:Scan
+                - dynamodb:Query
               Effect: Allow
               Resource:
                 - !GetAtt LinkTable.Arn
@@ -282,7 +290,7 @@ Resources:
             Effect: "Allow"
             Principal:
               Service: "apigateway.amazonaws.com"
-            Action: 
+            Action:
               - "sts:AssumeRole"
       Policies:
         - PolicyName: DDBCrudPolicy
@@ -290,8 +298,8 @@ Resources:
             Version: '2012-10-17'
             Statement:
               Action:
-              - dynamodb:DeleteItem
-              - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:UpdateItem
               Effect: Allow
               Resource: !GetAtt LinkTable.Arn
 
@@ -317,12 +325,12 @@ Resources:
                 Action: "amplify:*"
                 Resource: "*"
 
-## CloudWatchRole for aws gateway account
+  ## CloudWatchRole for aws gateway account
   Account:
     Type: 'AWS::ApiGateway::Account'
     Properties:
       CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
-      
+
   CloudWatchRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -353,8 +361,8 @@ Resources:
       MetricName: "4XXError"
       Namespace: "AWS/ApiGateway"
       Dimensions:
-          - Name: "ApiName"
-            Value: "URL Shortener API"
+        - Name: "ApiName"
+          Value: "URL Shortener API"
       Statistic: "Average"
       Period: 60
       EvaluationPeriods: 1
@@ -371,8 +379,8 @@ Resources:
       MetricName: "5XXError"
       Namespace: "AWS/ApiGateway"
       Dimensions:
-          - Name: "ApiName"
-            Value: "URL Shortener API"
+        - Name: "ApiName"
+          Value: "URL Shortener API"
       Statistic: "Average"
       Period: 60
       EvaluationPeriods: 1
@@ -389,8 +397,8 @@ Resources:
       MetricName: "Latency"
       Namespace: "AWS/ApiGateway"
       Dimensions:
-          - Name: "ApiName"
-            Value: "URL Shortener API"
+        - Name: "ApiName"
+          Value: "URL Shortener API"
       ExtendedStatistic: "p99"
       Period: 300
       EvaluationPeriods: 1
@@ -407,8 +415,8 @@ Resources:
       MetricName: "SystemErrors"
       Namespace: "AWS/DynamoDB"
       Dimensions:
-          - Name: "TableName"
-            Value: !Ref LinkTable
+        - Name: "TableName"
+          Value: !Ref LinkTable
       Statistic: "Average"
       Period: 60
       EvaluationPeriods: 1
@@ -425,8 +433,8 @@ Resources:
       MetricName: "UserErrors"
       Namespace: "AWS/DynamoDB"
       Dimensions:
-          - Name: "TableName"
-            Value: !Ref LinkTable
+        - Name: "TableName"
+          Value: !Ref LinkTable
       Statistic: "Average"
       Period: 60
       EvaluationPeriods: 1
@@ -471,7 +479,6 @@ Resources:
       AlarmActions:
         - !Ref NotifyTopic
 
-
 ###################################################################################################
 ##   Template outputs                                                                            ##
 ###################################################################################################
@@ -484,12 +491,12 @@ Outputs:
   VueAppAPIRoot:
     Description: API Gateway endpoint URL for linker
     Value: !Sub "https://${CloudFrontDistro.DomainName}"
- 
-  VueAppAuthDomain: 
-    Description: Domain used for authentication
-    Value: !Sub https://${AppName}-${AWS::AccountId}.auth.${AWS::Region}.amazoncognito.com
 
-  VueAppClientId: 
+  VueAppAuthDomain:
+    Description: Domain used for authentication
+    Value: !Sub https://${CustomDomainName}
+
+  VueAppClientId:
     Description: Cognito User Pool Client Id
     Value: !Ref UserPoolClient
 
@@ -500,14 +507,14 @@ Outputs:
   AmplifyAppId:
     Description: Amplify application ID
     Value: !GetAtt AmplifyApp.AppId
-  
+
   AmplifyEnvironmentUpdateCommand:
     Description: Command to add environment variables to the Amplify application
     Value: !Sub
       - aws amplify update-app --app-id ${AmplifyID} --environment-variables VUE_APP_NAME=${AppName},VUE_APP_CLIENT_ID=${UserPoolClient},VUE_APP_API_ROOT=${APIRoot},VUE_APP_AUTH_DOMAIN=${APIAuthDomain}
       - AmplifyID: !GetAtt AmplifyApp.AppId
         APIRoot: !Join ["", [ "https://", !GetAtt CloudFrontDistro.DomainName]]
-        APIAuthDomain: !Sub https://${AppName}-${AWS::AccountId}.auth.${AWS::Region}.amazoncognito.com
+        APIAuthDomain: !Sub https://${CustomDomainName}
 
   AmplifyDeployCommand:
     Description: Command to deploy the Amplify application
