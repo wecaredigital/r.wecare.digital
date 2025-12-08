@@ -36,17 +36,7 @@
           </li>
         </ul>
         
-        <!-- MFA Settings Section -->
-        <p class="menu-label mt-5">Security</p>
-        <ul class="menu-list">
-          <li>
-            <a @click="showMFASettings = !showMFASettings" href="#" 
-               :class="{ 'is-active': showMFASettings }">
-              <span class="icon"><i class="fas fa-shield-alt"></i></span>
-              <span>MFA Settings</span>
-            </a>
-          </li>
-        </ul>
+
 
         <!-- Account Section -->
         <p class="menu-label mt-5">Account</p>
@@ -73,10 +63,7 @@
         <strong>Error:</strong> {{ errorMsg }}
       </div>
 
-      <!-- MFA Settings Section -->
-      <div v-if="showMFASettings" class="mb-5">
-        <MFASettings @success="handleMFASuccess" @error="handleMFAError" />
-      </div>
+
 
       <!-- Header Section -->
       <div class="columns is-multiline is-mobile mb-4">
@@ -106,7 +93,15 @@
             </div>
           </div>
         </div>
-        <div class="column is-12-mobile is-12-tablet is-4-desktop">
+        <div class="column is-12-mobile is-6-tablet is-2-desktop">
+          <button class="button is-fullwidth" @click="fetchLinks">
+            <span class="icon">
+              <i class="fas fa-sync-alt"></i>
+            </span>
+            <span class="is-hidden-mobile">Refresh</span>
+          </button>
+        </div>
+        <div class="column is-12-mobile is-6-tablet is-2-desktop">
           <button class="button is-fullwidth" @click="toggleModal('create')">
             <span class="icon">
               <i class="fas fa-plus"></i>
@@ -251,7 +246,7 @@
 </template>
 
 <script>
-import MFASettings from '@/components/MFASettings.vue';
+
 
 // Set Cognito Vars for logout
 const clientId = process.env.VUE_APP_CLIENT_ID;
@@ -275,9 +270,6 @@ function getISTTimestamp() {
 }
 
 export default {
-  components: {
-    MFASettings
-  },
   data() {
     return {
       searchTerm: "",
@@ -289,8 +281,8 @@ export default {
       pageSize: 20,
       successMsg: null,
       errorMsg: null,
-      showSidebar: false,
-      showMFASettings: false
+      showSidebar: false
+
     };
   },
   computed: {
@@ -338,6 +330,7 @@ export default {
       return Math.min(this.currentPage * this.pageSize, this.filteredLinks.length);
     },
     idExists() {
+      if (!this.model.id || this.isEditMode) return false;
       return this.$store.state.links.some(link => link.id === this.model.id);
     }
   },
@@ -532,14 +525,7 @@ export default {
         this.showSidebar = false;
       }
     },
-    handleMFASuccess(message) {
-      this.successMsg = message;
-      setTimeout(() => (this.successMsg = null), 5000);
-    },
-    handleMFAError(message) {
-      this.errorMsg = message;
-      setTimeout(() => (this.errorMsg = null), 5000);
-    },
+
     goToPage(n) {
       this.currentPage = n;
       // Scroll to top on page change
@@ -559,20 +545,43 @@ export default {
     },
     async fetchLinks() {
       try {
+        const token = window.localStorage.getItem("cognitoIdentityToken");
+        console.log("Fetching links with token:", token ? "Token exists" : "No token");
+        
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           headers: {
-            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+            Authorization: token
           }
         });
+        
+        console.log("Fetch response status:", response.status);
+        
         if (response.ok) {
           const data = await response.json();
-          this.$store.commit("hydrateLinks", data);
+          console.log("Fetched links data:", data);
+          
+          // Ensure data is an array
+          const linksArray = Array.isArray(data) ? data : (data.Items || []);
+          this.$store.commit("hydrateLinks", linksArray);
+          
+          if (linksArray.length === 0) {
+            console.log("No links found in database");
+          }
         } else {
+          const errorText = await response.text();
+          console.error("Failed to fetch links - Status:", response.status, "Error:", errorText);
           this.$store.commit("drainLinks");
+          
+          if (response.status === 401) {
+            this.errorMsg = "Authentication expired. Please sign in again.";
+            setTimeout(() => (this.errorMsg = null), 5000);
+          }
         }
       } catch (err) {
+        console.error("Network error while fetching links:", err);
         this.$store.commit("drainLinks");
-        console.error("Failed to fetch links:", err);
+        this.errorMsg = "Failed to load links. Please check your connection.";
+        setTimeout(() => (this.errorMsg = null), 5000);
       }
     },
     logout() {
@@ -583,7 +592,19 @@ export default {
     }
   }, // <--- THIS COMMA closes the methods object!
   created() {
+    console.log("Dashboard created, checking auth status");
+    console.log("Store authorized:", this.$store.state.authorized);
+    console.log("Token exists:", !!window.localStorage.getItem("cognitoIdentityToken"));
     this.fetchLinks();
+  },
+  mounted() {
+    // Add a small delay to ensure everything is loaded
+    setTimeout(() => {
+      if (this.$store.state.links.length === 0) {
+        console.log("No links loaded, attempting refresh");
+        this.fetchLinks();
+      }
+    }, 1000);
   }
 };
 </script>
