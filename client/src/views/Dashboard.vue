@@ -251,23 +251,21 @@ const clientId = process.env.VUE_APP_CLIENT_ID;
 const authDomain = process.env.VUE_APP_AUTH_DOMAIN;
 const redUrl = window.location.origin;
 
-// Helper to get organization owner email
-// All links are owned by the organization domain for shared access
+// Helper to get user email from JWT token
+// Each user sees only their own links
 function getOwnerEmail() {
-  // Option 1: Use a fixed organizational owner
-  return "links@wecare.digital";
+  const token = window.localStorage.getItem("cognitoIdentityToken");
+  if (!token || token === 'null') return null;
   
-  // Option 2: Use the logged-in user's email (uncomment to enable per-user links)
-  // const token = window.localStorage.getItem("cognitoIdentityToken");
-  // if (!token || token === 'null') return null;
-  // try {
-  //   const payload = token.split('.')[1];
-  //   const decoded = JSON.parse(atob(payload));
-  //   return decoded.email || null;
-  // } catch (err) {
-  //   console.error('Error decoding token:', err);
-  //   return null;
-  // }
+  try {
+    // JWT format: header.payload.signature
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded.email || null;
+  } catch (err) {
+    console.error('Error decoding token:', err);
+    return null;
+  }
 }
 
 // Helper to generate IST timestamp in "YYYY-MM-DD HH:mm:ss +0530"

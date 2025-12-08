@@ -4,7 +4,7 @@
   "KeyConditionExpression": "#n_owner = :v_owner",
   "ExpressionAttributeValues": {
     ":v_owner": {
-      "S": "links@wecare.digital"
+      "S": "$context.authorizer.claims.email"
     }
   },
   "ExpressionAttributeNames": {
