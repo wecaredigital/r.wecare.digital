@@ -665,27 +665,35 @@ export default {
       }
     },
     async forceRefresh() {
-    this.refreshing = true;
-    
-    try {
-      // Clear current links first
-      this.$store.commit("drainLinks");
+      this.refreshing = true;
+      console.log('Force refresh started...');
       
-      // Wait a moment then fetch
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await this.fetchLinks();
-      
-      this.successMsg = `Refreshed! Found ${this.$store.state.links.length} links.`;
-      setTimeout(() => (this.successMsg = null), 3000);
-      
-    } catch (err) {
-      console.error("Force refresh failed:", err);
-      this.errorMsg = "Refresh failed. Please try again.";
-      setTimeout(() => (this.errorMsg = null), 3000);
-    } finally {
-      this.refreshing = false;
+      try {
+        // Clear current links first
+        this.$store.commit("drainLinks");
+        console.log('Links drained from store');
+        
+        // Wait a moment then fetch
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await this.fetchLinks();
+        
+        console.log('After fetchLinks, store has:', this.$store.state.links.length, 'links');
+        
+        this.successMsg = `Refreshed! Found ${this.$store.state.links.length} links.`;
+        setTimeout(() => (this.successMsg = null), 3000);
+        
+        // Force Vue to update
+        this.$forceUpdate();
+        
+      } catch (err) {
+        console.error("Force refresh failed:", err);
+        this.errorMsg = "Refresh failed. Please try again.";
+        setTimeout(() => (this.errorMsg = null), 3000);
+      } finally {
+        this.refreshing = false;
+        console.log('Force refresh completed');
+      }
     }
-  }
 }
 }
 </script>
