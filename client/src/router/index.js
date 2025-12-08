@@ -28,7 +28,13 @@ const routes = [
     path: '/',
     name: 'landing',
     component: Landing,
-    beforeEnter: (_to, _from, next) => {
+    beforeEnter: (to, from, next) => {
+      // Prevent redirect loop
+      if (from.path === to.path) {
+        next();
+        return;
+      }
+      
       // Wait for auth to load
       if (store.state.loading) {
         const unwatch = store.watch(
@@ -55,7 +61,13 @@ const routes = [
     path: '/login',
     name: 'login',
     component: Login,
-    beforeEnter: (_to, _from, next) => {
+    beforeEnter: (to, from, next) => {
+      // Prevent redirect loop
+      if (from.path === to.path) {
+        next();
+        return;
+      }
+      
       // Wait for auth to load
       if (store.state.loading) {
         const unwatch = store.watch(
@@ -82,7 +94,13 @@ const routes = [
     path: '/dashboard',
     name: 'dashboard',
     component: Dashboard,
-    beforeEnter: (_to, _from, next) => {
+    beforeEnter: (to, from, next) => {
+      // Prevent redirect loop
+      if (from.path === to.path) {
+        next();
+        return;
+      }
+      
       // Wait for auth to load
       if (store.state.loading) {
         const unwatch = store.watch(
