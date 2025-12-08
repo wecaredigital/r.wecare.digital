@@ -75,6 +75,13 @@
             </span>
           </h1>
           <p class="subtitle is-6 has-text-grey">{{ filteredLinks.length }} link{{ filteredLinks.length !== 1 ? 's' : '' }}</p>
+          <!-- Debug info -->
+          <div class="notification is-info is-light" v-if="$store.state.links.length === 0 && $store.state.dataLoaded">
+            <p><strong>Debug:</strong> Data loaded but no links found. Check API response format.</p>
+          </div>
+          <div class="notification is-warning is-light" v-if="!$store.state.dataLoaded">
+            <p><strong>Debug:</strong> Data not loaded yet. Store state: {{ $store.state.links.length }} links</p>
+          </div>
         </div>
         <div class="column is-12-mobile is-6-tablet is-4-desktop">
           <div class="field">
@@ -93,6 +100,14 @@
               <i class="fas fa-sync-alt"></i>
             </span>
             <span class="is-hidden-mobile">Refresh</span>
+          </button>
+        </div>
+        <div class="column is-12-mobile is-6-tablet is-2-desktop">
+          <button class="button is-fullwidth is-info" @click="testApiResponse">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+            <span class="is-hidden-mobile">Test API</span>
           </button>
         </div>
 
@@ -578,19 +593,48 @@ export default {
         if (response.ok) {
           const data = await response.json();
           
-          // Handle different response formats from DynamoDB
+          // Temporary debug logging to understand response format
+          console.log("=== API RESPONSE DEBUG ===");
+          console.log("Raw response:", data);
+          console.log("Type:", typeof data);
+          console.log("Is Array:", Array.isArray(data));
+          console.log("Keys:", data ? Object.keys(data) : "null");
+          
+          // Handle DynamoDB Query API response format
+          // According to AWS DynamoDB API docs, Query returns: { Items: [...], Count: n, ScannedCount: n }
           let linksArray = [];
           
-          if (Array.isArray(data)) {
-            linksArray = data;
-          } else if (data && data.Items && Array.isArray(data.Items)) {
+          if (data && data.Items && Array.isArray(data.Items)) {
+            // Standard DynamoDB Query response format
             linksArray = data.Items;
+            console.log("Using DynamoDB Query format - Items array");
+            console.log("Count:", data.Count, "ScannedCount:", data.ScannedCount);
+          } else if (Array.isArray(data)) {
+            // Direct array (might be from Scan or different API)
+            linksArray = data;
+            console.log("Using direct array format");
           } else if (data && data.body) {
+            // Lambda proxy integration format
             const bodyData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
-            linksArray = Array.isArray(bodyData) ? bodyData : (bodyData.Items || []);
-          } else if (data && typeof data === 'object') {
+            if (bodyData && bodyData.Items && Array.isArray(bodyData.Items)) {
+              linksArray = bodyData.Items;
+              console.log("Using Lambda proxy + DynamoDB format");
+            } else if (Array.isArray(bodyData)) {
+              linksArray = bodyData;
+              console.log("Using Lambda proxy + array format");
+            }
+          } else if (data && typeof data === 'object' && !Array.isArray(data)) {
+            // Single item response (shouldn't happen with Query, but handle it)
             linksArray = [data];
+            console.log("Using single object format");
+          } else {
+            console.log("Unknown response format, using empty array");
+            console.log("Response structure:", Object.keys(data || {}));
           }
+          
+          console.log("Final linksArray:", linksArray);
+          console.log("Links count:", linksArray.length);
+          console.log("=== END DEBUG ===");
           
           this.$store.commit("hydrateLinks", linksArray);
           
@@ -662,11 +706,11 @@ export default {
         this.refreshing = false;
       }
     },
-    async testConnection() {
-      console.log("Testing API connection and DynamoDB access...");
+    async testApiResponse() {
+      console.log("=== TESTING API RESPONSE ===");
+      const token = window.localStorage.getItem("cognitoIdentityToken");
       
       try {
-        const token = window.localStorage.getItem("cognitoIdentityToken");
         
         // Test 1: Basic API connectivity
         console.log("Test 1: Basic API connectivity");
@@ -689,10 +733,34 @@ export default {
         console.log("GET response headers:", Object.fromEntries(getResponse.headers.entries()));
         
         const responseText = await getResponse.text();
-        console.log("GET response body:", responseText);
+        console.log("Raw response text:", responseText);
         
         if (getResponse.ok) {
-          this.successMsg = "API connection successful! Check console for details.";
+          try {
+            const jsonData = JSON.parse(responseText);
+            console.log("Parsed JSON:", jsonData);
+            console.log("JSON type:", typeof jsonData);
+            console.log("Is array:", Array.isArray(jsonData));
+            
+            // Check for DynamoDB Query format
+            if (jsonData && jsonData.Items) {
+              console.log("✅ DynamoDB Query format detected");
+              console.log("Items array:", jsonData.Items);
+              console.log("Items count:", jsonData.Items.length);
+              console.log("Count:", jsonData.Count);
+              console.log("ScannedCount:", jsonData.ScannedCount);
+            } else if (Array.isArray(jsonData)) {
+              console.log("✅ Direct array format detected");
+              console.log("Array length:", jsonData.length);
+            } else {
+              console.log("❌ Unknown format - not DynamoDB Query or array");
+              console.log("Object keys:", Object.keys(jsonData));
+            }
+          } catch (parseErr) {
+            console.error("❌ JSON parse error:", parseErr);
+          }
+          
+          this.successMsg = "API test completed! Check console for DynamoDB format analysis.";
         } else {
           this.errorMsg = `API test failed with status ${getResponse.status}. Check console.`;
         }
