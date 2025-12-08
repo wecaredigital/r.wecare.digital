@@ -16,7 +16,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
 
 <template>
   <div id="app">
-    <section class="section">
+    <!-- Show navbar only for authorized users (dashboard) -->
+    <section class="section" v-if="authorized && !loading">
       <nav
         class="navbar is-fixed-top is-dark"
         role="navigation"
@@ -53,16 +54,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
           <div class="navbar-end">
             <a
               class="navbar-item"
-              v-if="authorized"
               v-on:click="logout()"
               v-bind:href="logOutUrl"
               >Log Out</a
-            >
-            <a class="navbar-item" v-if="!authorized" v-bind:href="signUpUrl"
-              >Sign up</a
-            >
-            <router-link class="navbar-item" v-if="!authorized" to="/login"
-              >Log in</router-link
             >
           </div>
         </div>

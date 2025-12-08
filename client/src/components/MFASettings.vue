@@ -80,11 +80,7 @@
           </div>
         </div>
 
-        <!-- Demo Notice -->
-        <div class="notification is-warning is-light mt-4">
-          <p><strong>Demo Mode:</strong> This is a demonstration of MFA settings. 
-          In production, this would connect to a real TOTP service.</p>
-        </div>
+
 
         <!-- Actions -->
         <div class="field is-grouped mt-4">

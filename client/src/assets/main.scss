@@ -283,11 +283,19 @@ $warning: #ffdd57;
     color: #4a5568 !important;
     font-weight: 500 !important;
     
+    .icon {
+      color: #4a5568 !important;
+    }
+    
     &:hover {
       background-color: #f7fafc !important;
       color: #2d3748 !important;
       transform: translateX(4px) !important;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+      
+      .icon {
+        color: #2d3748 !important;
+      }
     }
     
     &.is-active {
@@ -296,9 +304,17 @@ $warning: #ffdd57;
       font-weight: 600 !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
       
+      .icon {
+        color: #ffffff !important;
+      }
+      
       &:hover {
         background-color: #333333 !important;
         transform: translateX(4px) !important;
+        
+        .icon {
+          color: #ffffff !important;
+        }
       }
     }
   }

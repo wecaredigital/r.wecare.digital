@@ -370,6 +370,11 @@ export default {
         return;
       }
 
+      if (this.isEditMode) {
+        await this.updateLink();
+        return;
+      }
+
       const payload = { 
         ...this.model, 
         owner: "r@wecare.digital",
@@ -386,10 +391,16 @@ export default {
           body: JSON.stringify(payload)
         });
         if (response.ok) {
+          // Add to store immediately
           this.$store.commit("addLink", payload);
           this.toggleModal();
           this.successMsg = `Link created: r.wecare.digital/${payload.id}`;
           setTimeout(() => (this.successMsg = null), 5000);
+          
+          // Refresh the links from server to ensure consistency
+          setTimeout(() => {
+            this.fetchLinks();
+          }, 1000);
         } else {
           const errorText = await response.text();
           let errorMsg = "";
@@ -400,6 +411,54 @@ export default {
             errorMsg = errorText || response.statusText;
           }
           this.errorMsg = `Failed to create link: ${errorMsg}`;
+          setTimeout(() => (this.errorMsg = null), 5000);
+        }
+      } catch (err) {
+        this.errorMsg = "Network error. Please check your connection.";
+        setTimeout(() => (this.errorMsg = null), 5000);
+        console.error(err);
+      }
+    },
+    async updateLink() {
+      const payload = { 
+        ...this.model, 
+        owner: "r@wecare.digital",
+        timestamp: getISTTimestamp()
+      };
+
+      try {
+        const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${this.model.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: window.localStorage.getItem("cognitoIdentityToken")
+          },
+          body: JSON.stringify(payload)
+        });
+        if (response.ok) {
+          // Update in store
+          const linkIndex = this.$store.state.links.findIndex(l => l.id === this.model.id);
+          if (linkIndex > -1) {
+            this.$store.commit("updateLink", { link: payload, ind: linkIndex });
+          }
+          this.toggleModal();
+          this.successMsg = `Link updated: r.wecare.digital/${payload.id}`;
+          setTimeout(() => (this.successMsg = null), 5000);
+          
+          // Refresh the links from server to ensure consistency
+          setTimeout(() => {
+            this.fetchLinks();
+          }, 1000);
+        } else {
+          const errorText = await response.text();
+          let errorMsg = "";
+          try {
+            const error = JSON.parse(errorText);
+            errorMsg = error.message || errorText || response.statusText;
+          } catch (e) {
+            errorMsg = errorText || response.statusText;
+          }
+          this.errorMsg = `Failed to update link: ${errorMsg}`;
           setTimeout(() => (this.errorMsg = null), 5000);
         }
       } catch (err) {
