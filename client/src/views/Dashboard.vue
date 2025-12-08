@@ -95,16 +95,6 @@
             <span class="is-hidden-mobile">Refresh</span>
           </button>
         </div>
-        
-        <!-- Debug: Test API button (remove after testing) -->
-        <div class="column is-12-mobile is-6-tablet is-2-desktop">
-          <button class="button is-fullwidth is-info" @click="testAPI">
-            <span class="icon">
-              <i class="fas fa-vial"></i>
-            </span>
-            <span>Test API</span>
-          </button>
-        </div>
 
 
         <div class="column is-12-mobile is-6-tablet is-2-desktop">
@@ -417,7 +407,6 @@ export default {
 
       try {
         const token = window.localStorage.getItem("cognitoIdentityToken");
-        console.log('Creating link with token:', token ? 'Token exists' : 'No token');
         
         const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "POST",
@@ -603,46 +592,24 @@ export default {
         if (response.ok) {
           const data = await response.json();
           
-          console.log('=== FETCH LINKS DEBUG ===');
-          console.log('Raw response data:', data);
-          console.log('Data type:', typeof data);
-          console.log('Is array:', Array.isArray(data));
-          if (data) {
-            console.log('Data keys:', Object.keys(data));
-            if (data.Items) {
-              console.log('Items found:', data.Items.length);
-              console.log('First item:', data.Items[0]);
-            }
-          }
-          
           // Handle DynamoDB Query API response format
           // According to AWS DynamoDB API docs, Query returns: { Items: [...], Count: n, ScannedCount: n }
           let linksArray = [];
           
           if (data && data.Items && Array.isArray(data.Items)) {
-            console.log('✅ Using data.Items format');
             linksArray = data.Items;
           } else if (Array.isArray(data)) {
-            console.log('✅ Using direct array format');
             linksArray = data;
           } else if (data && data.body) {
-            console.log('✅ Checking data.body format');
             const bodyData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
             if (bodyData && bodyData.Items && Array.isArray(bodyData.Items)) {
-              console.log('✅ Using bodyData.Items format');
               linksArray = bodyData.Items;
             } else if (Array.isArray(bodyData)) {
-              console.log('✅ Using bodyData array format');
               linksArray = bodyData;
             }
           } else if (data && typeof data === 'object' && !Array.isArray(data)) {
-            console.log('⚠️ Single object, converting to array');
             linksArray = [data];
           }
-          
-          console.log('Final linksArray:', linksArray);
-          console.log('Links count:', linksArray.length);
-          console.log('=== END DEBUG ===');
           
           this.$store.commit("hydrateLinks", linksArray);
           
@@ -705,18 +672,14 @@ export default {
     },
     async forceRefresh() {
       this.refreshing = true;
-      console.log('Force refresh started...');
       
       try {
         // Clear current links first
         this.$store.commit("drainLinks");
-        console.log('Links drained from store');
         
         // Wait a moment then fetch
         await new Promise(resolve => setTimeout(resolve, 500));
         await this.fetchLinks();
-        
-        console.log('After fetchLinks, store has:', this.$store.state.links.length, 'links');
         
         this.successMsg = `Refreshed! Found ${this.$store.state.links.length} links.`;
         setTimeout(() => (this.successMsg = null), 3000);
@@ -730,60 +693,7 @@ export default {
         setTimeout(() => (this.errorMsg = null), 3000);
       } finally {
         this.refreshing = false;
-        console.log('Force refresh completed');
       }
-    },
-    async testAPI() {
-      const token = localStorage.getItem("cognitoIdentityToken");
-      console.log('=== API TEST ===');
-      console.log('Token exists:', !!token);
-      console.log('Token length:', token?.length);
-      console.log('Token preview:', token?.substring(0, 50) + '...');
-      
-      // Test current URL (Prod)
-      try {
-        console.log('\n--- Testing: /Prod/app ---');
-        const response1 = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
-          method: "GET",
-          headers: {
-            Authorization: token,
-            "Content-Type": "application/json"
-          }
-        });
-        console.log('Status:', response1.status, response1.statusText);
-        if (response1.ok) {
-          const data = await response1.json();
-          console.log('✅ /Prod/app works! Data:', data);
-        } else {
-          console.log('❌ /Prod/app failed:', await response1.text());
-        }
-      } catch (err) {
-        console.error('❌ /Prod/app error:', err);
-      }
-      
-      // Test old URL (Pro - without 'd')
-      try {
-        console.log('\n--- Testing: /Pro/app ---');
-        const response2 = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Pro/app", {
-          method: "GET",
-          headers: {
-            Authorization: token,
-            "Content-Type": "application/json"
-          }
-        });
-        console.log('Status:', response2.status, response2.statusText);
-        if (response2.ok) {
-          const data = await response2.json();
-          console.log('✅ /Pro/app works! Data:', data);
-        } else {
-          console.log('❌ /Pro/app failed:', await response2.text());
-        }
-      } catch (err) {
-        console.error('❌ /Pro/app error:', err);
-      }
-      
-      console.log('=== END API TEST ===');
-      alert('API test complete! Check console for results.');
     }
 }
 }
