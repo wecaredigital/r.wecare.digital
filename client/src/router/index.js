@@ -27,7 +27,7 @@ const routes = [
     path: '/',
     name: 'landing',
     component: Landing,
-    beforeEnter: (to, from, next) => {
+    beforeEnter: (_to, _from, next) => {
       // If user is already authorized, redirect to dashboard
       if (store.state.authorized) {
         next('/dashboard')
@@ -40,7 +40,7 @@ const routes = [
     path: '/dashboard',
     name: 'dashboard',
     component: Dashboard,
-    beforeEnter: (to, from, next) => {
+    beforeEnter: (_to, _from, next) => {
       // Protect dashboard route - require authorization
       if (store.state.authorized) {
         next()
