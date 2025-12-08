@@ -16,15 +16,38 @@
 
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Landing from '../views/Landing.vue'
 import Dashboard from '../views/Dashboard.vue'
+import store from '../store'
 
 Vue.use(VueRouter)
 
 const routes = [
-    {
+  {
     path: '/',
+    name: 'landing',
+    component: Landing,
+    beforeEnter: (to, from, next) => {
+      // If user is already authorized, redirect to dashboard
+      if (store.state.authorized) {
+        next('/dashboard')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: '/dashboard',
     name: 'dashboard',
-    component: Dashboard
+    component: Dashboard,
+    beforeEnter: (to, from, next) => {
+      // Protect dashboard route - require authorization
+      if (store.state.authorized) {
+        next()
+      } else {
+        next('/')
+      }
+    }
   }
 ]
 

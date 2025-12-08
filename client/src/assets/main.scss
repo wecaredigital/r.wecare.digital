@@ -1,6 +1,10 @@
 // Import Bulma framework
 @import "~bulma/bulma";
 
+// Import Font Awesome (CDN loaded in index.html)
+// If you want to use Font Awesome, add this to public/index.html:
+// <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 // Single-line text clipping utility
 .text-clip {
   overflow: hidden;
@@ -8,3 +12,19 @@
   white-space: nowrap;
   max-width: 100%; // Ensures clipping works in responsive layouts
 }
+
+// Global styles
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+// Smooth scrolling
+html {
+  scroll-behavior: smooth;
+}
+
+// Custom primary color override (optional)
+$primary: #667eea;
+$info: #3298dc;
+$success: #48c774;
+$warning: #ffdd57;

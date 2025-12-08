@@ -68,22 +68,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
         </div>
       </nav>
     </section>
-    <section class="section">
+    <section class="section" v-if="authorized">
       <div class="container">
-        <div v-if="authorized">
-          <router-view />
-        </div>
-        <div v-else>
-          <h1 class="title">Welcome to {{ appName }}</h1>
-          <h2 class="subtitle">r.wecare.digital</h2>
-          <p v-if="linkNotFound">
-            We're sorry, that link could not be found.
-            <a v-bind:href="signUpUrl">Sign up</a> or
-            <a v-bind:href="logInUrl">Log in</a> to register it?
-          </p>
-        </div>
+        <router-view />
       </div>
     </section>
+    <router-view v-else />
   </div>
 </template>
 
@@ -112,8 +102,19 @@ export default {
     };
   },
   created() {
-    if (cognitoCode) this.exchangeToken();
-    else this.exchangeRefreshToken();
+    if (cognitoCode) {
+      this.exchangeToken().then(() => {
+        if (this.$store.state.authorized) {
+          this.$router.push('/dashboard');
+        }
+      });
+    } else {
+      this.exchangeRefreshToken().then(() => {
+        if (this.$store.state.authorized && this.$route.path === '/') {
+          this.$router.push('/dashboard');
+        }
+      });
+    }
   },
   methods: {
     convertJSON: function (json) {

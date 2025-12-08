@@ -18,25 +18,15 @@
       <div v-if="successMsg" class="notification is-success is-light">{{ successMsg }}</div>
 
       <div class="columns is-multiline is-mobile mb-2">
-        <div class="column is-12-mobile is-6-tablet is-3-desktop">
+        <div class="column is-12-mobile is-6-tablet is-4-desktop">
           <h1 class="title is-size-4-mobile is-size-3-tablet">Shortcuts</h1>
         </div>
-        <div class="column is-12-mobile is-6-tablet is-3-desktop">
+        <div class="column is-12-mobile is-6-tablet is-4-desktop">
           <input class="input" v-model="searchTerm" type="text" placeholder="Search shortcuts…" />
         </div>
-        <div class="column is-12-mobile is-6-tablet is-3-desktop">
+        <div class="column is-12-mobile is-12-tablet is-4-desktop">
           <button class="button is-info is-outlined is-fullwidth" @click="toggleModal('create')">New Shortcut</button>
         </div>
-        <div class="column is-12-mobile is-6-tablet is-3-desktop">
-          <button class="button is-warning is-outlined is-fullwidth" @click="showMFASettings = !showMFASettings">
-            🔐 MFA Settings
-          </button>
-        </div>
-      </div>
-
-      <!-- MFA Settings Section -->
-      <div v-if="showMFASettings" class="mb-4">
-        <MFASetup />
       </div>
 
       <!-- Pagination above table -->
@@ -135,8 +125,6 @@
 </template>
 
 <script>
-import MFASetup from '@/components/MFASetup.vue';
-
 // Helper to generate IST timestamp in "YYYY-MM-DD HH:mm:ss +0530"
 function getISTTimestamp() {
   const now = new Date();
@@ -154,9 +142,6 @@ function getISTTimestamp() {
 }
 
 export default {
-  components: {
-    MFASetup
-  },
   data() {
     return {
       searchTerm: "",
@@ -166,8 +151,7 @@ export default {
       selectedFolder: "",
       currentPage: 1,
       pageSize: 500,
-      successMsg: null,
-      showMFASettings: false
+      successMsg: null
     };
   },
   computed: {
