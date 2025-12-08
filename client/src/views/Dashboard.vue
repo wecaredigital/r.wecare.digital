@@ -88,21 +88,14 @@
           </div>
         </div>
         <div class="column is-12-mobile is-6-tablet is-2-desktop">
-          <button class="button is-fullwidth" @click="fetchLinks">
+          <button class="button is-fullwidth" @click="forceRefresh" :class="{ 'is-loading': refreshing }">
             <span class="icon">
               <i class="fas fa-sync-alt"></i>
             </span>
             <span class="is-hidden-mobile">Refresh</span>
           </button>
         </div>
-        <div class="column is-12-mobile is-6-tablet is-2-desktop">
-          <button class="button is-fullwidth is-info" @click="debugApiCall">
-            <span class="icon">
-              <i class="fas fa-bug"></i>
-            </span>
-            <span class="is-hidden-mobile">Debug API</span>
-          </button>
-        </div>
+
         <div class="column is-12-mobile is-6-tablet is-2-desktop">
           <button class="button is-fullwidth" @click="toggleModal('create')">
             <span class="icon">
@@ -283,7 +276,8 @@ export default {
       pageSize: 20,
       successMsg: null,
       errorMsg: null,
-      showSidebar: false
+      showSidebar: false,
+      refreshing: false
     };
   },
   computed: {
@@ -344,22 +338,9 @@ export default {
     }
   },
   created() {
-    console.log("Dashboard created, checking auth status");
-    console.log("Store authorized:", this.$store.state.authorized);
-    console.log("Token exists:", !!window.localStorage.getItem("cognitoIdentityToken"));
-    console.log("Current token value:", window.localStorage.getItem("cognitoIdentityToken"));
-    this.testApiConnection();
     this.fetchLinks();
   },
-  mounted() {
-    // Add a small delay to ensure everything is loaded
-    setTimeout(() => {
-      if (this.$store.state.links.length === 0) {
-        console.log("No links loaded, attempting refresh");
-        this.fetchLinks();
-      }
-    }, 2000);
-  },
+
   methods: {
     toggleModal(mode) {
       this.modalIsActive = !this.modalIsActive;
@@ -439,7 +420,7 @@ export default {
           this.successMsg = `Link created: r.wecare.digital/${payload.id}`;
           setTimeout(() => (this.successMsg = null), 5000);
           
-          // Refresh the links from server to ensure consistency
+          // Simple refresh after creation
           setTimeout(() => {
             this.fetchLinks();
           }, 1000);
@@ -579,10 +560,8 @@ export default {
     async fetchLinks() {
       try {
         const token = window.localStorage.getItem("cognitoIdentityToken");
-        console.log("Fetching links with token:", token ? "Token exists" : "No token");
         
         if (!token || token === 'null') {
-          console.error("No valid authentication token");
           this.errorMsg = "Please sign in to view your links.";
           setTimeout(() => (this.errorMsg = null), 5000);
           return;
@@ -596,14 +575,8 @@ export default {
           }
         });
         
-        console.log("Fetch response status:", response.status);
-        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-        
         if (response.ok) {
           const data = await response.json();
-          console.log("Raw API response:", data);
-          console.log("Response type:", typeof data);
-          console.log("Is array:", Array.isArray(data));
           
           // Handle different response formats from DynamoDB
           let linksArray = [];
@@ -613,45 +586,29 @@ export default {
           } else if (data && data.Items && Array.isArray(data.Items)) {
             linksArray = data.Items;
           } else if (data && data.body) {
-            // Sometimes the response is wrapped in a body field
             const bodyData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
             linksArray = Array.isArray(bodyData) ? bodyData : (bodyData.Items || []);
           } else if (data && typeof data === 'object') {
-            // Single item response
             linksArray = [data];
           }
           
-          console.log("Processed links array:", linksArray);
-          console.log("Number of links:", linksArray.length);
-          
           this.$store.commit("hydrateLinks", linksArray);
           
-          if (linksArray.length === 0) {
-            console.log("No links found in database - this might be normal for new users");
-          } else {
-            console.log(`Successfully loaded ${linksArray.length} links`);
-          }
         } else {
-          const errorText = await response.text();
-          console.error("Failed to fetch links - Status:", response.status, "Error:", errorText);
-          
           if (response.status === 401 || response.status === 403) {
             this.errorMsg = "Authentication expired. Please sign in again.";
-            // Clear invalid token
             localStorage.removeItem("cognitoIdentityToken");
             localStorage.removeItem("cognitoRefreshToken");
           } else if (response.status === 404) {
-            console.log("No links endpoint found - might be normal for new setup");
             this.$store.commit("hydrateLinks", []);
           } else {
-            this.errorMsg = `Failed to load links (${response.status}). Please try refreshing.`;
+            this.errorMsg = `Failed to load links. Please try refreshing.`;
           }
           setTimeout(() => (this.errorMsg = null), 5000);
         }
       } catch (err) {
-        console.error("Network error while fetching links:", err);
         this.$store.commit("drainLinks");
-        this.errorMsg = "Network error. Please check your connection and try again.";
+        this.errorMsg = "Network error. Please check your connection.";
         setTimeout(() => (this.errorMsg = null), 5000);
       }
     },
@@ -674,56 +631,53 @@ export default {
           }
         });
         
-        // If we get a 200 response, the ID exists
-        if (response.ok) {
-          console.log(`ID "${id}" already exists in database`);
-          return true;
-        }
-        
-        // If we get a 404, the ID doesn't exist (which is what we want)
-        if (response.status === 404) {
-          console.log(`ID "${id}" is available`);
-          return false;
-        }
-        
-        // For other status codes, log and assume it might exist to be safe
-        console.log(`Unexpected response when checking ID "${id}":`, response.status);
-        return false;
+        return response.ok; // If 200, ID exists; if 404, ID doesn't exist
       } catch (err) {
-        console.error("Error checking ID existence:", err);
-        // On network error, don't block creation but log the issue
-        return false;
+        return false; // On error, allow creation
       }
     }
   }, // <--- THIS COMMA closes the methods object!
-    async testApiConnection() {
+
+
+    async forceRefresh() {
+      this.refreshing = true;
+      console.log("Force refreshing links...");
+      
       try {
-        console.log("Testing API connection...");
-        const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
-          method: "OPTIONS"
-        });
-        console.log("API OPTIONS response:", response.status);
+        // Clear current links first
+        this.$store.commit("drainLinks");
+        
+        // Wait a moment then fetch
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await this.fetchLinks();
+        
+        this.successMsg = `Refreshed! Found ${this.$store.state.links.length} links.`;
+        setTimeout(() => (this.successMsg = null), 3000);
+        
       } catch (err) {
-        console.error("API connection test failed:", err);
+        console.error("Force refresh failed:", err);
+        this.errorMsg = "Refresh failed. Please try again.";
+        setTimeout(() => (this.errorMsg = null), 3000);
+      } finally {
+        this.refreshing = false;
       }
     },
-    async debugApiCall() {
-      console.log("=== DEBUG API CALL ===");
-      const token = window.localStorage.getItem("cognitoIdentityToken");
+    async testConnection() {
+      console.log("Testing API connection and DynamoDB access...");
       
-      console.log("1. Token check:");
-      console.log("   - Token exists:", !!token);
-      console.log("   - Token length:", token ? token.length : 0);
-      console.log("   - Token preview:", token ? token.substring(0, 50) + "..." : "null");
-      
-      console.log("2. Store state:");
-      console.log("   - Authorized:", this.$store.state.authorized);
-      console.log("   - Links count:", this.$store.state.links.length);
-      console.log("   - Links data:", this.$store.state.links);
-      
-      console.log("3. Making API call...");
       try {
-        const response = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
+        const token = window.localStorage.getItem("cognitoIdentityToken");
+        
+        // Test 1: Basic API connectivity
+        console.log("Test 1: Basic API connectivity");
+        const optionsResponse = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
+          method: "OPTIONS"
+        });
+        console.log("OPTIONS response:", optionsResponse.status);
+        
+        // Test 2: Authenticated GET request
+        console.log("Test 2: Authenticated GET request");
+        const getResponse = await fetch("https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app", {
           method: "GET",
           headers: {
             "Authorization": token,
@@ -731,31 +685,27 @@ export default {
           }
         });
         
-        console.log("4. Response details:");
-        console.log("   - Status:", response.status);
-        console.log("   - Status text:", response.statusText);
-        console.log("   - Headers:", Object.fromEntries(response.headers.entries()));
+        console.log("GET response status:", getResponse.status);
+        console.log("GET response headers:", Object.fromEntries(getResponse.headers.entries()));
         
-        const responseText = await response.text();
-        console.log("   - Raw response:", responseText);
+        const responseText = await getResponse.text();
+        console.log("GET response body:", responseText);
         
-        try {
-          const jsonData = JSON.parse(responseText);
-          console.log("   - Parsed JSON:", jsonData);
-        } catch (parseErr) {
-          console.log("   - JSON parse error:", parseErr.message);
+        if (getResponse.ok) {
+          this.successMsg = "API connection successful! Check console for details.";
+        } else {
+          this.errorMsg = `API test failed with status ${getResponse.status}. Check console.`;
         }
         
-        this.successMsg = "Debug info logged to console. Check browser developer tools.";
-        setTimeout(() => (this.successMsg = null), 5000);
-        
       } catch (err) {
-        console.error("5. Network error:", err);
-        this.errorMsg = "Debug failed. Check console for details.";
-        setTimeout(() => (this.errorMsg = null), 5000);
+        console.error("Connection test failed:", err);
+        this.errorMsg = "Connection test failed. Check console for details.";
       }
       
-      console.log("=== END DEBUG ===");
+      setTimeout(() => {
+        this.successMsg = null;
+        this.errorMsg = null;
+      }, 5000);
     }
   },
 </script>
