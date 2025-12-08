@@ -157,14 +157,7 @@
           Showing {{ startItem }}-{{ endItem }} of {{ filteredLinks.length }} links
         </div>
       </nav>
-      <!-- Debug info -->
-      <div class="notification is-info is-light mb-4" v-if="true">
-        <strong>Debug:</strong> 
-        Store: {{ storeLinks.length }} | 
-        Filtered: {{ filteredLinks.length }} | 
-        Paginated: {{ paginatedLinks.length }} |
-        Page: {{ currentPage }}/{{ totalPages }}
-      </div>
+
       
       <!-- Links Table -->
       <div class="table-container">
@@ -670,33 +663,7 @@ export default {
       // Reset to first page when searching
       this.currentPage = 1;
     },
-    async checkIdExists(id) {
-      try {
-        const token = window.localStorage.getItem("cognitoIdentityToken");
-        console.log('Checking ID exists with token:', token ? 'Token exists' : 'No token');
-        
-        const response = await fetch(`https://xbj96ig388.execute-api.ap-south-1.amazonaws.com/Prod/app/${id}`, {
-          method: "GET",
-          headers: {
-            Authorization: token
-          }
-        });
-        
-        console.log('checkIdExists response status:', response.status);
-        
-        if (response.status === 403) {
-          console.error('403 Forbidden - Token might be expired or invalid');
-          this.errorMsg = "Authentication error. Please refresh the page and try again.";
-          setTimeout(() => (this.errorMsg = null), 5000);
-          return false;
-        }
-        
-        return response.ok; // If 200, ID exists; if 404, ID doesn't exist
-      } catch (err) {
-        console.error('checkIdExists error:', err);
-        return false; // On error, allow creation
-      }
-    },
+
     async forceRefresh() {
       this.refreshing = true;
       
