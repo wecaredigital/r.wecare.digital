@@ -442,18 +442,14 @@ export default {
         });
         if (response.ok) {
           console.log('Link created successfully:', payload.id);
-          // Add to store immediately
-          this.$store.commit("addLink", payload);
-          console.log('Added to store, now has:', this.$store.state.links.length, 'links');
           this.toggleModal();
           this.successMsg = `Link created: r.wecare.digital/${payload.id}`;
           setTimeout(() => (this.successMsg = null), 5000);
           
-          // Simple refresh after creation
-          setTimeout(() => {
-            console.log('Fetching links after creation...');
-            this.fetchLinks();
-          }, 1000);
+          // Fetch links immediately to get the saved data
+          console.log('Fetching links after creation...');
+          await this.fetchLinks();
+          console.log('Links fetched, store now has:', this.$store.state.links.length);
         } else {
           if (response.status === 403) {
             this.errorMsg = "Session expired. Please refresh the page and try again.";
