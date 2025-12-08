@@ -107,13 +107,6 @@
         </div>
       </div>
 
-      <!-- TEMPORARY DEBUG - Remove after fixing -->
-      <div v-if="debugInfo" class="notification is-warning mb-4">
-        <button class="delete" @click="debugInfo = null"></button>
-        <strong>API Debug Info:</strong>
-        <pre style="max-height: 400px; overflow: auto; background: white; padding: 1rem; margin-top: 0.5rem; font-size: 11px;">{{ debugInfo }}</pre>
-      </div>
-
       <!-- Pagination above table -->
       <nav class="pagination is-centered mb-4" v-if="totalPages > 1">
         <a class="pagination-previous" 
@@ -287,8 +280,7 @@ export default {
       successMsg: null,
       errorMsg: null,
       showSidebar: false,
-      refreshing: false,
-      debugInfo: null
+      refreshing: false
     };
   },
   computed: {
@@ -616,35 +608,30 @@ export default {
           
           console.log('fetchLinks response:', data);
           
-          // TEMPORARY: Show raw API response in UI for debugging
-          this.debugInfo = JSON.stringify({
-            rawResponse: data,
-            responseType: Array.isArray(data) ? 'array' : typeof data,
-            hasItems: data?.Items ? true : false,
-            hasBody: data?.body ? true : false,
-            storeLinksCount: this.$store.state.links.length
-          }, null, 2);
-          
-          // Handle DynamoDB Query API response format
-          // According to AWS DynamoDB API docs, Query returns: { Items: [...], Count: n, ScannedCount: n }
+          // API Gateway response mapping template returns a direct array format:
+          // [ { "id": "...", "url": "...", "timestamp": "...", "owner": "...", "remark": "..." }, ... ]
           let linksArray = [];
           
-          if (data && data.Items && Array.isArray(data.Items)) {
-            console.log('Using data.Items format, count:', data.Items.length);
-            linksArray = data.Items;
-          } else if (Array.isArray(data)) {
+          if (Array.isArray(data)) {
+            // Direct array format from API Gateway mapping template (CORRECT FORMAT)
             console.log('Using direct array format, count:', data.length);
             linksArray = data;
+          } else if (data && data.Items && Array.isArray(data.Items)) {
+            // DynamoDB raw format (fallback)
+            console.log('Using data.Items format, count:', data.Items.length);
+            linksArray = data.Items;
           } else if (data && data.body) {
+            // Lambda proxy format (fallback)
             const bodyData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
-            if (bodyData && bodyData.Items && Array.isArray(bodyData.Items)) {
-              console.log('Using bodyData.Items format, count:', bodyData.Items.length);
-              linksArray = bodyData.Items;
-            } else if (Array.isArray(bodyData)) {
+            if (Array.isArray(bodyData)) {
               console.log('Using bodyData array format, count:', bodyData.length);
               linksArray = bodyData;
+            } else if (bodyData && bodyData.Items && Array.isArray(bodyData.Items)) {
+              console.log('Using bodyData.Items format, count:', bodyData.Items.length);
+              linksArray = bodyData.Items;
             }
           } else if (data && typeof data === 'object' && !Array.isArray(data)) {
+            // Single object (fallback)
             console.log('Single object, converting to array');
             linksArray = [data];
           }

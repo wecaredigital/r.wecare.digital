@@ -7,6 +7,7 @@
     "url":       "$elem.url.S",
     "timestamp": "$elem.timestamp.S",
     "owner":     "$elem.owner.S",
+    "folder":    "$util.defaultIfNull($elem.folder.S, '')",
     "remark":    "$util.defaultIfNull($elem.remark.S, '')"
   }#if($foreach.hasNext),#end
   #end
