@@ -1,10 +1,10 @@
 {
-  "TableName": "SlipLink-LinkTable-A2SD9C321JCE",
+  "TableName": "r-wecare-digital-LinkTable-YPF44B2N1ONI",
   "IndexName": "OwnerIndex",
   "KeyConditionExpression": "#n_owner = :v_owner",
   "ExpressionAttributeValues": {
     ":v_owner": {
-      "S": "$context.authorizer.claims.email"
+      "S": "links@wecare.digital"
     }
   },
   "ExpressionAttributeNames": {

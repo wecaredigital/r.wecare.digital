@@ -251,20 +251,23 @@ const clientId = process.env.VUE_APP_CLIENT_ID;
 const authDomain = process.env.VUE_APP_AUTH_DOMAIN;
 const redUrl = window.location.origin;
 
-// Helper to get user email from JWT token
-function getUserEmail() {
-  const token = window.localStorage.getItem("cognitoIdentityToken");
-  if (!token || token === 'null') return null;
+// Helper to get organization owner email
+// All links are owned by the organization domain for shared access
+function getOwnerEmail() {
+  // Option 1: Use a fixed organizational owner
+  return "links@wecare.digital";
   
-  try {
-    // JWT format: header.payload.signature
-    const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload));
-    return decoded.email || null;
-  } catch (err) {
-    console.error('Error decoding token:', err);
-    return null;
-  }
+  // Option 2: Use the logged-in user's email (uncomment to enable per-user links)
+  // const token = window.localStorage.getItem("cognitoIdentityToken");
+  // if (!token || token === 'null') return null;
+  // try {
+  //   const payload = token.split('.')[1];
+  //   const decoded = JSON.parse(atob(payload));
+  //   return decoded.email || null;
+  // } catch (err) {
+  //   console.error('Error decoding token:', err);
+  //   return null;
+  // }
 }
 
 // Helper to generate IST timestamp in "YYYY-MM-DD HH:mm:ss +0530"
@@ -432,16 +435,16 @@ export default {
         return;
       }
 
-      const userEmail = getUserEmail();
-      if (!userEmail) {
-        this.errorMsg = "Unable to get user email. Please sign in again.";
+      const ownerEmail = getOwnerEmail();
+      if (!ownerEmail) {
+        this.errorMsg = "Unable to get owner email. Please sign in again.";
         setTimeout(() => (this.errorMsg = null), 5000);
         return;
       }
 
       const payload = { 
         ...this.model, 
-        owner: userEmail,
+        owner: ownerEmail,
         timestamp: getISTTimestamp()
       };
 
@@ -490,16 +493,16 @@ export default {
       }
     },
     async updateLink() {
-      const userEmail = getUserEmail();
-      if (!userEmail) {
-        this.errorMsg = "Unable to get user email. Please sign in again.";
+      const ownerEmail = getOwnerEmail();
+      if (!ownerEmail) {
+        this.errorMsg = "Unable to get owner email. Please sign in again.";
         setTimeout(() => (this.errorMsg = null), 5000);
         return;
       }
 
       const payload = { 
         ...this.model, 
-        owner: userEmail,
+        owner: ownerEmail,
         timestamp: getISTTimestamp()
       };
 
