@@ -579,26 +579,46 @@ export default {
         if (response.ok) {
           const data = await response.json();
           
-
+          console.log('=== FETCH LINKS DEBUG ===');
+          console.log('Raw response data:', data);
+          console.log('Data type:', typeof data);
+          console.log('Is array:', Array.isArray(data));
+          if (data) {
+            console.log('Data keys:', Object.keys(data));
+            if (data.Items) {
+              console.log('Items found:', data.Items.length);
+              console.log('First item:', data.Items[0]);
+            }
+          }
           
           // Handle DynamoDB Query API response format
           // According to AWS DynamoDB API docs, Query returns: { Items: [...], Count: n, ScannedCount: n }
           let linksArray = [];
           
           if (data && data.Items && Array.isArray(data.Items)) {
+            console.log('✅ Using data.Items format');
             linksArray = data.Items;
           } else if (Array.isArray(data)) {
+            console.log('✅ Using direct array format');
             linksArray = data;
           } else if (data && data.body) {
+            console.log('✅ Checking data.body format');
             const bodyData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
             if (bodyData && bodyData.Items && Array.isArray(bodyData.Items)) {
+              console.log('✅ Using bodyData.Items format');
               linksArray = bodyData.Items;
             } else if (Array.isArray(bodyData)) {
+              console.log('✅ Using bodyData array format');
               linksArray = bodyData;
             }
           } else if (data && typeof data === 'object' && !Array.isArray(data)) {
+            console.log('⚠️ Single object, converting to array');
             linksArray = [data];
           }
+          
+          console.log('Final linksArray:', linksArray);
+          console.log('Links count:', linksArray.length);
+          console.log('=== END DEBUG ===');
           
           this.$store.commit("hydrateLinks", linksArray);
           
