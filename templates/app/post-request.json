@@ -1,30 +1,35 @@
-#set( $email   = $context.authorizer.claims.email )
-#set( $rawId   = $input.json('$.id') )
-#set( $id      = "${rawId}_$email" )
-#set( $url     = $input.json('$.url') )
-#set( $remark  = $util.defaultIfNull($input.json('$.remark'), "") )
-#set( $folder  = $util.defaultIfNull($input.json('$.folder'), "") )
-
-#set($inputRoot = $input.path('$'))
 {
   "TableName": "r-wecare-digital-LinkTable-YPF44B2N1ONI",
+  "ConditionExpression": "attribute_not_exists(id)",
   "Key": {
-    "id": { "S": "$inputRoot.id" }
+    "id": {
+      "S": $input.json('$.id')
+    }
   },
   "ExpressionAttributeNames": {
     "#u": "url",
     "#o": "owner",
     "#ts": "timestamp",
-    "#r": "remark",
-    "#f": "folder"
+    "#f": "folder",
+    "#r": "remark"
   },
   "ExpressionAttributeValues": {
-    ":u": { "S": "$inputRoot.url" },
-    ":o": { "S": "$inputRoot.owner" },
-    ":ts": { "S": "$inputRoot.timestamp" },
-    ":r": { "S": "$inputRoot.remark" },
-    ":f": { "S": "$inputRoot.folder" }
+    ":u": {
+      "S": $input.json('$.url')
+    },
+    ":o": {
+      "S": "$context.authorizer.claims.email"
+    },
+    ":ts": {
+      "S": "$context.requestTime"
+    },
+    ":f": {
+      "S": $input.json('$.folder')
+    },
+    ":r": {
+      "S": $input.json('$.remark')
+    }
   },
-  "UpdateExpression": "SET #u = :u, #o = :o, #ts = :ts, #r = :r, #f = :f",
+  "UpdateExpression": "SET #u = :u, #o = :o, #ts = :ts, #f = :f, #r = :r",
   "ReturnValues": "ALL_NEW"
 }
