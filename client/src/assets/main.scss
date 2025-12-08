@@ -221,3 +221,181 @@ $warning: #ffdd57;
     background-color: rgba(0, 0, 0, 0.1) !important;
   }
 }
+
+// Table styling with rounded corners
+.table {
+  border-radius: 30px !important;
+  overflow: hidden !important;
+  border: 2px solid #dbdbdb !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  
+  th, td {
+    border: 1px solid #dbdbdb !important;
+    padding: 1rem !important;
+    vertical-align: middle !important;
+  }
+  
+  th {
+    background-color: #f8f9fa !important;
+    font-weight: 600 !important;
+    color: #2c3e50 !important;
+  }
+  
+  tbody tr {
+    transition: background-color 0.2s ease !important;
+    
+    &:hover {
+      background-color: #f8f9fa !important;
+    }
+  }
+}
+
+.table-container {
+  border-radius: 30px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+// Menu styling with rounded corners
+.menu {
+  background-color: #ffffff !important;
+  border-radius: 30px !important;
+  padding: 1.5rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border: 2px solid #f5f5f5 !important;
+}
+
+.menu-label {
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  margin-bottom: 1rem !important;
+}
+
+.menu-list {
+  a {
+    border-radius: 20px !important;
+    padding: 0.75rem 1rem !important;
+    margin-bottom: 0.5rem !important;
+    transition: all 0.3s ease !important;
+    color: #4a5568 !important;
+    font-weight: 500 !important;
+    
+    &:hover {
+      background-color: #f7fafc !important;
+      color: #2d3748 !important;
+      transform: translateX(4px) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    &.is-active {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+      
+      &:hover {
+        background-color: #333333 !important;
+        transform: translateX(4px) !important;
+      }
+    }
+  }
+}
+
+// Box styling with rounded corners
+.box {
+  border-radius: 30px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border: 2px solid #f5f5f5 !important;
+  padding: 2rem !important;
+  
+  &:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-2px) !important;
+  }
+}
+
+// Modal styling with rounded corners
+.modal-content {
+  border-radius: 30px !important;
+  overflow: hidden !important;
+  
+  .box {
+    border-radius: 30px !important;
+    margin: 0 !important;
+  }
+}
+
+// Input and form styling with rounded corners
+.input, .textarea, .select select {
+  border-radius: 20px !important;
+  border: 2px solid #e2e8f0 !important;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.3s ease !important;
+  
+  &:focus {
+    border-color: #000000 !important;
+    box-shadow: 0 0 0 0.125em rgba(0, 0, 0, 0.25) !important;
+  }
+}
+
+// Notification styling with rounded corners
+.notification {
+  border-radius: 20px !important;
+  border: 2px solid transparent !important;
+  
+  &.is-success {
+    border-color: #48c774 !important;
+  }
+  
+  &.is-danger {
+    border-color: #ff3860 !important;
+  }
+  
+  &.is-info {
+    border-color: #3298dc !important;
+  }
+  
+  &.is-warning {
+    border-color: #ffdd57 !important;
+  }
+}
+
+// Navbar improvements
+.navbar {
+  border-radius: 0 0 30px 30px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  
+  .navbar-item {
+    border-radius: 15px !important;
+    margin: 0 0.25rem !important;
+    transition: all 0.3s ease !important;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      transform: translateY(-2px) !important;
+    }
+  }
+}
+
+// Pagination improvements
+.pagination {
+  margin-top: 2rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.pagination-link,
+.pagination-previous,
+.pagination-next {
+  border-radius: 20px !important;
+  margin: 0 0.25rem !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  }
+}

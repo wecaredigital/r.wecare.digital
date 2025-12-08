@@ -270,7 +270,7 @@ export default {
       isEditMode: false,
       selectedFolder: "",
       currentPage: 1,
-      pageSize: 25,
+      pageSize: 20,
       successMsg: null,
       errorMsg: null,
       showSidebar: false,
@@ -511,19 +511,21 @@ export default {
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
   position: fixed;
-  top: 70px;
-  left: 10px;
+  top: 80px;
+  left: 15px;
   z-index: 1000;
   background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 0.5rem;
 }
 
 /* Sidebar */
 .sidebar-folders {
-  border-right: 1px solid #eee;
   height: 100vh;
   position: relative;
+  padding: 1rem;
+  background-color: #fafafa;
 }
 
 .mobile-close {
@@ -549,29 +551,24 @@ export default {
 
 /* Dashboard */
 .dashboard {
-  padding: 1rem;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
 }
 
-/* Table Styles */
+/* Table Styles - Enhanced with rounded corners */
 .table {
-  border-collapse: collapse;
-  border: 1px solid #dbdbdb;
+  border-collapse: separate;
+  border-spacing: 0;
   width: 100%;
   background: white;
-  border-radius: 6px;
-  overflow: hidden;
+  margin-bottom: 0;
 }
 
-.table th,
-.table td {
-  border: 1px solid #dbdbdb !important;
-  padding: 0.75rem;
-  vertical-align: middle;
-}
-
-.table th {
-  background-color: #f5f5f5;
-  font-weight: 600;
+.wrap-text {
+  word-break: break-word;
+  white-space: normal;
+  max-width: 200px;
 }
 
 .wrap-text {
@@ -583,7 +580,12 @@ export default {
 /* Pagination Styles */
 .pagination-info {
   text-align: center;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 15px;
+  border: 2px solid #e9ecef;
+  font-weight: 500;
 }
 
 .pagination-link.is-disabled,
@@ -600,12 +602,13 @@ export default {
     position: fixed;
     top: 0;
     left: 0;
-    width: 280px;
+    width: 300px;
     z-index: 999;
-    background: white;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    background: #fafafa;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    border-radius: 0 30px 30px 0;
   }
   
   .sidebar-folders:not(.is-hidden-mobile) {
