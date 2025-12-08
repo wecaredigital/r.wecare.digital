@@ -282,12 +282,16 @@ export default {
     };
   },
   computed: {
+    storeLinks() {
+      // Direct reference to store links for reactivity
+      return this.$store.state.links;
+    },
     folderList() {
-      const folders = this.$store.state.links.map(l => l.folder || "").filter(Boolean);
+      const folders = this.storeLinks.map(l => l.folder || "").filter(Boolean);
       return [...new Set(folders)].sort();
     },
     filteredLinks() {
-      let arr = this.$store.state.links;
+      let arr = this.storeLinks;
       
       // Apply folder filter first
       if (this.selectedFolder) {
@@ -340,6 +344,17 @@ export default {
   },
   created() {
     this.fetchLinks();
+  },
+  
+  watch: {
+    storeLinks: {
+      handler(newLinks) {
+        console.log('Store links changed! New count:', newLinks.length);
+        console.log('Filtered links:', this.filteredLinks.length);
+        console.log('Paginated links:', this.paginatedLinks.length);
+      },
+      deep: true
+    }
   },
 
   methods: {
