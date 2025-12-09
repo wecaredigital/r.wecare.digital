@@ -45,33 +45,35 @@ export default {
 
 .get-started-button {
   background-color: #000000;
-  color: #ffffff;
+  color: #FFFFFF;
   border: none;
   border-radius: 30px;
-  padding: 16px 48px;
+  padding: 1rem 3rem;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   outline: none;
   min-width: 160px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .get-started-button:hover {
-  background-color: #333333;
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   text-decoration: none;
 }
 
 .get-started-button:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(0.98);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .get-started-button:focus {

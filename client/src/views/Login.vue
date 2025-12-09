@@ -54,29 +54,31 @@ export default {
 
 .signin-button {
   background-color: #000000;
-  color: #ffffff;
+  color: #FFFFFF;
   border: none;
   border-radius: 30px;
-  padding: 16px 48px;
+  padding: 1rem 3rem;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   outline: none;
   min-width: 160px;
   text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .signin-button:hover {
-  background-color: #333333;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .signin-button:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(0.98);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .signin-button:focus {
@@ -85,10 +87,9 @@ export default {
 }
 
 .signin-button:disabled {
-  background-color: #666666;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
 }
 
 /* Remove any default margins/padding from body when this page is active */

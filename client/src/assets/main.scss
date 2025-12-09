@@ -35,10 +35,11 @@ p, span, td, th, label, input, textarea, select, button {
 
 // Error messages - global styling
 .help.is-error {
-  color: #008000; /* Error Green */
+  color: #000000;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
+  opacity: 0.7;
 }
 
 // Custom primary color override (optional)
@@ -154,7 +155,7 @@ $warning: #ffdd57;
   
   // Danger buttons
   &.is-danger {
-    background-color: #FF0000 !important;
+    background-color: #000000 !important;
     color: #FFFFFF !important;
     border: none !important;
     
@@ -164,12 +165,12 @@ $warning: #ffdd57;
     
     &.is-outlined {
       background-color: #F5F5F5 !important;
-      color: #FF0000 !important;
+      color: #000000 !important;
       border: none !important;
       
       &:hover:not(:disabled) {
-        background-color: #FF0000 !important;
-        color: #ffffff !important;
+        background-color: #000000 !important;
+        color: #FFFFFF !important;
         opacity: 1 !important;
       }
     }
@@ -177,7 +178,7 @@ $warning: #ffdd57;
   
   // Success buttons
   &.is-success {
-    background-color: #00AA00 !important;
+    background-color: #000000 !important;
     color: #FFFFFF !important;
     border: none !important;
     
@@ -615,14 +616,14 @@ $warning: #ffdd57;
   font-weight: 300 !important;
   
   &.is-success {
-    border-color: #00AA00 !important;
-    color: #00AA00 !important;
+    border-color: #000000 !important;
+    color: #000000 !important;
     background: #FFFFFF !important;
   }
   
   &.is-danger {
-    border-color: #FF0000 !important;
-    color: #FF0000 !important;
+    border-color: #000000 !important;
+    color: #000000 !important;
     background: #FFFFFF !important;
   }
   
