@@ -219,7 +219,7 @@
                 <i class="fas fa-pen" aria-hidden="true"></i>
               </button>
               <button class="btn-action" @click="deleteLink(link.id)" title="Delete link" aria-label="Delete link">
-                <i class="fas fa-xmark" aria-hidden="true"></i>
+                <i class="fas fa-times" aria-hidden="true"></i>
               </button>
             </td>
           </tr>
