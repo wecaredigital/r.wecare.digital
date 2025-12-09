@@ -1793,7 +1793,7 @@ p, span, td, th, label {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .btn-copy.copied::after {
@@ -2083,7 +2083,7 @@ p, span, td, th, label {
     border-radius: 30px 0 0 30px;
     box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
     transform: translateX(100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.2s ease;
     padding: 20px;
     overflow-y: auto;
   }
@@ -2434,11 +2434,13 @@ p, span, td, th, label {
   color: #000000;
   border: 2px solid #000000;
   border-radius: 30px;
-  padding: 1rem 1.25rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   position: relative;
   overflow: hidden;
-  min-width: 300px;
+  min-width: 320px;
+  backdrop-filter: blur(10px);
+  animation: toastSlideIn 0.3s ease-out;
 }
 
 .toast-success {
@@ -2451,6 +2453,17 @@ p, span, td, th, label {
   border-color: #000000;
 }
 
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 .toast-content {
   display: flex;
   align-items: center;
@@ -2459,10 +2472,11 @@ p, span, td, th, label {
 }
 
 .toast-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
   stroke: #000000;
+  stroke-width: 2.5;
 }
 
 .toast-success .toast-icon {
@@ -2476,27 +2490,36 @@ p, span, td, th, label {
 .toast-message {
   color: #000000;
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   flex: 1;
+  line-height: 1.5;
 }
 
 .toast-close {
   position: absolute;
   top: 50%;
-  right: 0.75rem;
+  right: 1rem;
   transform: translateY(-50%);
-  background: transparent;
+  background: #F5F5F5;
   border: none;
+  border-radius: 50%;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s ease;
+  transition: all 0.2s ease;
+  width: 24px;
+  height: 24px;
 }
 
 .toast-close:hover {
-  opacity: 0.7;
+  background: #E8E8E8;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.toast-close:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
 .toast-close svg {
