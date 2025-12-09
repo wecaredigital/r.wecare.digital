@@ -1477,10 +1477,42 @@ p, span, td, th, label {
   background: #FFFFFF;
   border-collapse: collapse;
   margin: 0;
-  table-layout: fixed;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
+}
+
+/* Column widths - narrow serial number column */
+.table thead th:first-child,
+.table tbody td:first-child {
+  width: 60px;
+  text-align: center;
+}
+
+.table thead th:nth-child(2),
+.table tbody td:nth-child(2) {
+  width: 15%;
+}
+
+.table thead th:nth-child(3),
+.table tbody td:nth-child(3) {
+  width: 30%;
+}
+
+.table thead th:nth-child(4),
+.table tbody td:nth-child(4) {
+  width: 15%;
+}
+
+.table thead th:nth-child(5),
+.table tbody td:nth-child(5) {
+  width: 20%;
+}
+
+.table thead th:last-child,
+.table tbody td:last-child {
+  width: 120px;
+  text-align: center;
 }
 
 .table thead th {
@@ -1497,13 +1529,24 @@ p, span, td, th, label {
 
 .table tbody td {
   color: #000000;
-  border: 1px solid #000000 !important;
+  border-right: 1px solid #000000 !important;
+  border-bottom: 1px solid #000000 !important;
   padding: 1rem;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
   word-break: break-word;
   overflow-wrap: break-word;
+}
+
+/* Remove left border on first cell to avoid double border */
+.table tbody td:first-child {
+  border-left: none;
+}
+
+/* Remove extra border on action buttons cell */
+.table tbody td:last-child {
+  border-right: none;
 }
 
 /* Alternating row background colors */
@@ -1544,14 +1587,15 @@ p, span, td, th, label {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  justify-content: center;
 }
 
 .btn-action {
   background: #FFFFFF;
   color: #000000;
-  border: 1px solid #000000;
+  border: none;
   border-radius: 30px;
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem 0.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
