@@ -4,9 +4,8 @@
     <div class="mobile-menu-toggle is-hidden-tablet">
       <button class="hamburger-btn" @click="showSidebar = !showSidebar">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="8" x2="21" y2="8"></line>
+          <line x1="3" y1="16" x2="21" y2="16"></line>
         </svg>
       </button>
     </div>
@@ -70,9 +69,8 @@
           </ul>
         </div>
 
-        <!-- Account Section -->
-        <p class="menu-label account-label">Account</p>
-        <ul class="menu-list">
+        <!-- Sign Out Button -->
+        <ul class="menu-list signout-section">
           <li>
             <button @click="logout" class="folder-btn btn-signout">
               <span>Sign Out</span>
@@ -102,13 +100,9 @@
           <div class="column is-12-mobile is-6-tablet is-4-desktop">
             <h1 class="brand-title">WECARE.DIGITAL</h1>
             <p class="link-count">
-              <svg class="data-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12"></line>
-                <line x1="8" y1="18" x2="21" y2="18"></line>
-                <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              <svg class="data-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
               </svg>
               Total links: {{ filteredLinks.length }}
             </p>
@@ -789,13 +783,13 @@ export default {
   top: 20px;
   left: 15px;
   z-index: 1000;
-  background: #FFFFFF;
+  background: transparent;
   border: none;
   padding: 0;
 }
 
 .hamburger-btn {
-  background: #FFFFFF;
+  background: transparent;
   border: none;
   padding: 0.5rem;
   cursor: pointer;
@@ -808,6 +802,7 @@ export default {
   width: 24px;
   height: 24px;
   stroke: #000000;
+  stroke-width: 2;
 }
 
 /* ===== SIDEBAR ===== */
@@ -841,10 +836,6 @@ export default {
   font-size: 14px;
   font-weight: 300;
   margin-bottom: 1rem;
-}
-
-.menu-label.account-label {
-  margin-top: 2rem;
 }
 
 /* Folders Dropdown */
@@ -941,6 +932,7 @@ export default {
   height: 16px;
   stroke: currentColor;
   flex-shrink: 0;
+  stroke-width: 1.5;
 }
 
 .folder-count {
@@ -949,10 +941,14 @@ export default {
   padding-left: 1rem;
 }
 
-/* Sign Out Button - Inverted Style */
+/* Sign Out Button - Primary Style */
+.signout-section {
+  margin-top: 2rem;
+}
+
 .btn-signout {
-  background: #FFFFFF !important;
-  color: #000000 !important;
+  background: #000000 !important;
+  color: #FFFFFF !important;
   border: 1px solid #000000 !important;
 }
 
@@ -996,6 +992,7 @@ export default {
   width: 16px;
   height: 16px;
   stroke: #000000;
+  stroke-width: 1.5;
 }
 
 /* ===== SEARCH BAR ===== */
@@ -1112,28 +1109,30 @@ export default {
   white-space: nowrap;
   display: flex;
   gap: 1rem;
+  align-items: center;
 }
 
 .btn-action {
-  background: #FFFFFF;
+  background: transparent;
   color: #000000;
   border: none;
-  padding: 0;
+  padding: 0.25rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 16px;
+  line-height: 1;
 }
 
 .btn-action:hover {
   opacity: 0.6;
-  text-decoration: underline;
 }
 
 .btn-action i {
   font-size: 16px;
+  display: block;
 }
 
 /* Copy Button */
