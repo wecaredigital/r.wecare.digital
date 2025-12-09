@@ -1327,13 +1327,18 @@ p, span, td, th, label {
   border-radius: 30px !important;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  transition: all 0.2s ease;
   font-size: 14px;
   font-weight: 300;
 }
 
 .folder-btn:hover {
   background: #E8E8E8 !important;
+  transform: translateX(2px);
+}
+
+.folder-btn:active {
+  transform: scale(0.98);
 }
 
 .folder-btn.is-active {
@@ -1402,13 +1407,16 @@ p, span, td, th, label {
   border: none;
   padding: 1.5rem 0;
   margin-bottom: 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .brand-title {
   color: #000000;
-  font-size: 16px;
-  font-weight: 300;
+  font-size: 18px;
+  font-weight: 500;
   margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
 }
 
 .link-count {
@@ -1462,14 +1470,22 @@ p, span, td, th, label {
   border-radius: 30px;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: all 0.2s ease;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-standard:hover:not(:disabled) {
-  opacity: 0.8;
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-standard:active:not(:disabled) {
+  transform: scale(0.98) translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .btn-standard:focus {
@@ -1495,6 +1511,7 @@ p, span, td, th, label {
   border-radius: 30px;
   overflow: hidden;
   margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .table {
@@ -1657,7 +1674,7 @@ p, span, td, th, label {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  transition: all 0.2s ease;
   font-size: 16px;
   line-height: 1;
   min-width: 32px;
@@ -1667,7 +1684,11 @@ p, span, td, th, label {
 .btn-action:hover {
   background: #000000;
   color: #FFFFFF;
-  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.btn-action:active {
+  transform: scale(0.95);
 }
 
 .btn-action:focus {
@@ -1745,11 +1766,16 @@ p, span, td, th, label {
   font-weight: 300;
   min-width: 40px;
   text-align: center;
-  transition: opacity 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .pagination-link:hover:not(.is-current) {
-  opacity: 0.8;
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.pagination-link:active:not(.is-current) {
+  transform: scale(0.95);
 }
 
 .pagination-link.is-current {
@@ -1832,6 +1858,19 @@ p, span, td, th, label {
   border: 1px solid #000000;
   border-radius: 30px;
   padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-content .box .subtitle {
@@ -2109,6 +2148,7 @@ p, span, td, th, label {
 .empty-state {
   text-align: center;
   padding: 2rem 1rem;
+  animation: fadeIn 0.4s ease-in;
 }
 
 .empty-icon {
@@ -2117,6 +2157,7 @@ p, span, td, th, label {
   stroke: #666666;
   margin: 0 auto 1rem;
   display: block;
+  animation: float 3s ease-in-out infinite;
 }
 
 .empty-text {
@@ -2140,6 +2181,8 @@ p, span, td, th, label {
   border: 1px solid #000000;
   border-radius: 30px;
   margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.4s ease-in;
 }
 
 .empty-icon-large {
@@ -2148,12 +2191,13 @@ p, span, td, th, label {
   stroke: #666666;
   margin: 0 auto 1.5rem;
   display: block;
+  animation: float 3s ease-in-out infinite;
 }
 
 .empty-title {
   color: #000000;
   font-size: 18px;
-  font-weight: 300;
+  font-weight: 400;
   margin-bottom: 0.75rem;
 }
 
@@ -2164,6 +2208,26 @@ p, span, td, th, label {
   margin-bottom: 1.5rem;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
 /* ===== LOADING STATE ===== */
 .loading-container {
   text-align: center;
@@ -2172,6 +2236,7 @@ p, span, td, th, label {
   border: 1px solid #000000;
   border-radius: 30px;
   margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .loading-spinner {
@@ -2195,6 +2260,41 @@ p, span, td, th, label {
   font-size: 14px;
   font-weight: 300;
   margin: 0;
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(90deg, #F5F5F5 25%, #E8E8E8 50%, #F5F5F5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  align-items: center;
+}
+
+.skeleton-text {
+  height: 16px;
+  flex: 1;
+}
+
+.skeleton-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ===== CLEAR SEARCH BUTTON ===== */
