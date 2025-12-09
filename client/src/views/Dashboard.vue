@@ -35,7 +35,7 @@
                 </svg>
                 All Links
               </span>
-              <span class="folder-count">{{ storeLinks.length }}</span>
+              <span class="folder-count-badge">{{ storeLinks.length }}</span>
             </button>
           </li>
         </ul>
@@ -96,7 +96,7 @@
                   </svg>
                   {{ folder }}
                 </span>
-                <span class="folder-count">{{ getFolderCount(folder) }}</span>
+                <span class="folder-count-badge">{{ getFolderCount(folder) }}</span>
               </li>
             </ul>
           </div>
@@ -114,10 +114,33 @@
     </div>
 
     <!-- Main Content -->
-    <div class="column dashboard">
-      <!-- Success/Error Notifications -->
-      <div v-if="successMsg" class="notification is-success is-light mb-4">
-        <button class="delete" @click="successMsg = null"></button>
+    <div class="column dashboard" @click="handleDashboardClick">
+      <!-- Toast Notifications Container -->
+      <div class="toast-container">
+        <transition-group name="toast">
+          <div v-for="notification in notifications" :key="notification.id" 
+               :class="['toast-notification', `toast-${notification.type}`]">
+            <div class="toast-content">
+              <svg v-if="notification.type === 'success'" class="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <svg v-else class="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span class="toast-message">{{ notification.message }}</span>
+            </div>
+            <button class="toast-close" @click="removeNotification(notification.id)">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+            <div class="toast-progress" :style="{ animationDuration: notification.duration + 'ms' }"></div>
+          </div>
+        </transition-group>
+      </div>
         <strong>Success!</strong> {{ successMsg }}
       </div>
       <div v-if="errorMsg" class="notification is-danger is-light mb-4">
@@ -254,12 +277,42 @@
       <!-- Links Table -->
       <div v-else class="table-container">
         <table class="table is-fullwidth is-striped">
-        <thead>
+        <thead class="sticky-header">
           <tr>
             <th>#</th>
-            <th>ID</th>
-            <th>URL</th>
-            <th>Folder</th>
+            <th class="sortable" @click="sortBy('id')">
+              ID
+              <span class="sort-icon" v-if="sortColumn === 'id'">
+                <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </span>
+            </th>
+            <th class="sortable" @click="sortBy('url')">
+              URL
+              <span class="sort-icon" v-if="sortColumn === 'url'">
+                <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </span>
+            </th>
+            <th class="sortable" @click="sortBy('folder')">
+              Folder
+              <span class="sort-icon" v-if="sortColumn === 'folder'">
+                <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </span>
+            </th>
             <th>Remark</th>
             <th>Actions</th>
           </tr>
@@ -313,9 +366,35 @@
                 <p v-if="model.url && !isValidUrl(model.url)" class="help is-error">This URL isn't valid. Please enter a complete URL starting with http:// or https://</p>
               </div>
 
-              <div class="field">
+              <div class="field folder-autocomplete-field" ref="folderAutocomplete">
                 <label class="label">Folder</label>
-                <input class="input" v-model="model.folder" />
+                <input 
+                  class="input" 
+                  v-model="model.folder" 
+                  @input="onFolderInput"
+                  @focus="showFolderSuggestions = true"
+                  @keydown.down.prevent="navigateSuggestions(1)"
+                  @keydown.up.prevent="navigateSuggestions(-1)"
+                  @keydown.enter.prevent="selectSuggestion"
+                  @keydown.esc="showFolderSuggestions = false"
+                  placeholder="Enter folder name or select existing"
+                  autocomplete="off"
+                />
+                <div v-if="showFolderSuggestions && filteredFolderSuggestions.length > 0" class="folder-suggestions">
+                  <div 
+                    v-for="(folder, index) in filteredFolderSuggestions" 
+                    :key="folder"
+                    :class="['folder-suggestion-item', { 'is-highlighted': index === selectedSuggestionIndex }]"
+                    @click="selectFolderSuggestion(folder)"
+                    @mouseenter="selectedSuggestionIndex = index"
+                  >
+                    <svg class="suggestion-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    {{ folder }}
+                    <span class="suggestion-count">{{ getFolderCount(folder) }}</span>
+                  </div>
+                </div>
               </div>
 
               <div class="field">
@@ -394,14 +473,18 @@ export default {
       selectedFolder: "",
       currentPage: 1,
       pageSize: 20,
-      successMsg: null,
-      errorMsg: null,
       showSidebar: false,
       refreshing: false,
       foldersExpanded: true,
       folderSearchTerm: "",
       isLoading: false,
-      searchDebounceTimer: null
+      searchDebounceTimer: null,
+      notifications: [],
+      notificationIdCounter: 0,
+      showFolderSuggestions: false,
+      selectedSuggestionIndex: -1,
+      sortColumn: null,
+      sortDirection: 'asc'
     };
   },
   computed: {
@@ -422,6 +505,15 @@ export default {
         folder.toLowerCase().includes(term)
       );
     },
+    filteredFolderSuggestions() {
+      if (!this.model.folder || !this.model.folder.trim()) {
+        return this.folderList.slice(0, 5); // Show top 5 folders
+      }
+      const term = this.model.folder.toLowerCase().trim();
+      return this.folderList.filter(folder => 
+        folder.toLowerCase().includes(term)
+      ).slice(0, 5);
+    },
     filteredLinks() {
       let arr = this.storeLinks;
       
@@ -441,6 +533,22 @@ export default {
             (link.folder && link.folder.toLowerCase().includes(term)) ||
             (link.remark && link.remark.toLowerCase().includes(term))
           );
+        });
+      }
+      
+      // Apply sorting
+      if (this.sortColumn) {
+        arr = [...arr].sort((a, b) => {
+          let aVal = a[this.sortColumn] || '';
+          let bVal = b[this.sortColumn] || '';
+          
+          // Convert to lowercase for case-insensitive sorting
+          if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+          if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+          
+          if (aVal < bVal) return this.sortDirection === 'asc' ? -1 : 1;
+          if (aVal > bVal) return this.sortDirection === 'asc' ? 1 : -1;
+          return 0;
         });
       }
       
@@ -487,12 +595,16 @@ export default {
     
     // Add escape key listener
     document.addEventListener('keydown', this.handleEscapeKey);
+    
+    // Add keyboard shortcuts listener
+    document.addEventListener('keydown', this.handleKeyboardShortcuts);
   },
   
   beforeUnmount() {
     // Clean up event listeners
     document.removeEventListener('click', this.handleClickOutside);
     document.removeEventListener('keydown', this.handleEscapeKey);
+    document.removeEventListener('keydown', this.handleKeyboardShortcuts);
     
     // Clear debounce timer
     if (this.searchDebounceTimer) {
@@ -527,21 +639,17 @@ export default {
     },
     copy(text) {
       navigator.clipboard.writeText(text).then(() => {
-        this.successMsg = "Link copied to clipboard";
-        setTimeout(() => (this.successMsg = null), 3000);
+        this.addNotification("Link copied to clipboard", "success", 3000);
       }).catch(() => {
-        this.errorMsg = "Failed to copy link";
-        setTimeout(() => (this.errorMsg = null), 3000);
+        this.addNotification("Failed to copy link", "error", 3000);
       });
     },
     copyShort(id) {
       const shortUrl = `https://r.wecare.digital/${id}`;
       navigator.clipboard.writeText(shortUrl).then(() => {
-        this.successMsg = `Short link copied: r.wecare.digital/${id}`;
-        setTimeout(() => (this.successMsg = null), 3000);
+        this.addNotification(`Short link copied: r.wecare.digital/${id}`, "success", 3000);
       }).catch(() => {
-        this.errorMsg = "Failed to copy short link";
-        setTimeout(() => (this.errorMsg = null), 3000);
+        this.addNotification("Failed to copy short link", "error", 3000);
       });
     },
     async createLink() {
@@ -563,15 +671,13 @@ export default {
 
       // Check for duplicate ID in local store first (faster and no API call)
       if (this.$store.state.links.some(link => link.id === this.model.id)) {
-        this.errorMsg = `ID "${this.model.id}" already exists. Please choose a different ID.`;
-        setTimeout(() => (this.errorMsg = null), 5000);
+        this.addNotification(`ID "${this.model.id}" already exists. Please choose a different ID.`, "error");
         return;
       }
 
       const ownerEmail = getOwnerEmail();
       if (!ownerEmail) {
-        this.errorMsg = "Unable to get owner email. Please sign in again.";
-        setTimeout(() => (this.errorMsg = null), 5000);
+        this.addNotification("Unable to get owner email. Please sign in again.", "error");
         return;
       }
 
@@ -595,8 +701,7 @@ export default {
         if (response.ok) {
           console.log('Link created successfully:', payload.id);
           this.toggleModal();
-          this.successMsg = `Link created: r.wecare.digital/${payload.id}`;
-          setTimeout(() => (this.successMsg = null), 5000);
+          this.addNotification(`Link created: r.wecare.digital/${payload.id}`, "success");
           
           // Fetch links immediately to get the saved data
           console.log('Fetching links after creation...');
@@ -613,23 +718,20 @@ export default {
           }
           
           if (response.status === 403) {
-            this.errorMsg = "Session expired. Please sign out and sign in again.";
+            this.addNotification("Session expired. Please sign out and sign in again.", "error");
           } else {
-            this.errorMsg = `Failed to create link: ${errorMsg}`;
+            this.addNotification(`Failed to create link: ${errorMsg}`, "error");
           }
-          setTimeout(() => (this.errorMsg = null), 5000);
         }
       } catch (err) {
-        this.errorMsg = "Network error. Please check your connection.";
-        setTimeout(() => (this.errorMsg = null), 5000);
+        this.addNotification("Network error. Please check your connection.", "error");
         console.error(err);
       }
     },
     async updateLink() {
       const ownerEmail = getOwnerEmail();
       if (!ownerEmail) {
-        this.errorMsg = "Unable to get owner email. Please sign in again.";
-        setTimeout(() => (this.errorMsg = null), 5000);
+        this.addNotification("Unable to get owner email. Please sign in again.", "error");
         return;
       }
 
@@ -655,8 +757,7 @@ export default {
             this.$store.commit("updateLink", { link: payload, ind: linkIndex });
           }
           this.toggleModal();
-          this.successMsg = `Link updated: r.wecare.digital/${payload.id}`;
-          setTimeout(() => (this.successMsg = null), 5000);
+          this.addNotification(`Link updated: r.wecare.digital/${payload.id}`, "success");
           
           // Refresh the links from server to ensure consistency
           setTimeout(() => {
@@ -671,12 +772,10 @@ export default {
           } catch (e) {
             errorMsg = errorText || response.statusText;
           }
-          this.errorMsg = `Failed to update link: ${errorMsg}`;
-          setTimeout(() => (this.errorMsg = null), 5000);
+          this.addNotification(`Failed to update link: ${errorMsg}`, "error");
         }
       } catch (err) {
-        this.errorMsg = "Network error. Please check your connection.";
-        setTimeout(() => (this.errorMsg = null), 5000);
+        this.addNotification("Network error. Please check your connection.", "error");
         console.error(err);
       }
     },
@@ -697,8 +796,7 @@ export default {
         if (response.ok) {
           const ind = this.$store.state.links.findIndex(l => l.id === id);
           if (ind > -1) this.$store.commit("removeLink", ind);
-          this.successMsg = "Link deleted successfully";
-          setTimeout(() => (this.successMsg = null), 3000);
+          this.addNotification("Link deleted successfully", "success", 3000);
         } else {
           const errorText = await response.text();
           let errorMsg = "";
@@ -708,12 +806,10 @@ export default {
           } catch (e) {
             errorMsg = errorText || response.statusText;
           }
-          this.errorMsg = `Failed to delete link: ${errorMsg}`;
-          setTimeout(() => (this.errorMsg = null), 5000);
+          this.addNotification(`Failed to delete link: ${errorMsg}`, "error");
         }
       } catch (err) {
-        this.errorMsg = "Network error while deleting. Please try again.";
-        setTimeout(() => (this.errorMsg = null), 5000);
+        this.addNotification("Network error while deleting. Please try again.", "error");
         console.error(err);
       }
     },
@@ -764,7 +860,80 @@ export default {
           this.toggleModal();
         } else if (this.foldersExpanded) {
           this.closeFoldersDropdown();
+        } else if (this.showFolderSuggestions) {
+          this.showFolderSuggestions = false;
         }
+      }
+    },
+    handleKeyboardShortcuts(event) {
+      // Ctrl/Cmd + K - Focus search
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) searchInput.focus();
+      }
+      // Ctrl/Cmd + N - New link
+      if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
+        event.preventDefault();
+        if (!this.modalIsActive) {
+          this.toggleModal('create');
+        }
+      }
+    },
+    handleDashboardClick(event) {
+      // Close folder suggestions if clicking outside
+      if (this.showFolderSuggestions && this.$refs.folderAutocomplete && !this.$refs.folderAutocomplete.contains(event.target)) {
+        this.showFolderSuggestions = false;
+      }
+    },
+    addNotification(message, type = 'success', duration = 5000) {
+      const id = ++this.notificationIdCounter;
+      const notification = { id, message, type, duration };
+      this.notifications.push(notification);
+      
+      // Auto-remove after duration
+      setTimeout(() => {
+        this.removeNotification(id);
+      }, duration);
+    },
+    removeNotification(id) {
+      const index = this.notifications.findIndex(n => n.id === id);
+      if (index > -1) {
+        this.notifications.splice(index, 1);
+      }
+    },
+    onFolderInput() {
+      this.showFolderSuggestions = true;
+      this.selectedSuggestionIndex = -1;
+    },
+    selectFolderSuggestion(folder) {
+      this.model.folder = folder;
+      this.showFolderSuggestions = false;
+      this.selectedSuggestionIndex = -1;
+    },
+    navigateSuggestions(direction) {
+      if (!this.showFolderSuggestions || this.filteredFolderSuggestions.length === 0) return;
+      
+      this.selectedSuggestionIndex += direction;
+      
+      if (this.selectedSuggestionIndex < 0) {
+        this.selectedSuggestionIndex = this.filteredFolderSuggestions.length - 1;
+      } else if (this.selectedSuggestionIndex >= this.filteredFolderSuggestions.length) {
+        this.selectedSuggestionIndex = 0;
+      }
+    },
+    selectSuggestion() {
+      if (this.selectedSuggestionIndex >= 0 && this.selectedSuggestionIndex < this.filteredFolderSuggestions.length) {
+        this.selectFolderSuggestion(this.filteredFolderSuggestions[this.selectedSuggestionIndex]);
+      }
+    },
+    sortBy(column) {
+      if (this.sortColumn === column) {
+        // Toggle direction
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortColumn = column;
+        this.sortDirection = 'asc';
       }
     },
 
@@ -793,8 +962,7 @@ export default {
         console.log('fetchLinks - Token check:', token ? 'Token exists' : 'No token', 'Length:', token?.length);
         
         if (!token || token === 'null') {
-          this.errorMsg = "Please sign in to view your links.";
-          setTimeout(() => (this.errorMsg = null), 5000);
+          this.addNotification("Please sign in to view your links.", "error");
           this.isLoading = false;
           return;
         }
@@ -857,18 +1025,16 @@ export default {
         } else {
           if (response.status === 401 || response.status === 403) {
             console.error('Authentication error - token may be expired');
-            this.errorMsg = "Session expired. Please sign out and sign in again.";
+            this.addNotification("Session expired. Please sign out and sign in again.", "error");
           } else if (response.status === 404) {
             this.$store.commit("hydrateLinks", []);
           } else {
-            this.errorMsg = `Failed to load links. Please try refreshing.`;
+            this.addNotification("Failed to load links. Please try refreshing.", "error");
           }
-          setTimeout(() => (this.errorMsg = null), 5000);
         }
       } catch (err) {
         this.$store.commit("drainLinks");
-        this.errorMsg = "Network error. Please check your connection.";
-        setTimeout(() => (this.errorMsg = null), 5000);
+        this.addNotification("Network error. Please check your connection.", "error");
       } finally {
         this.isLoading = false;
       }
@@ -901,16 +1067,14 @@ export default {
         await new Promise(resolve => setTimeout(resolve, 500));
         await this.fetchLinks();
         
-        this.successMsg = `Refreshed! Found ${this.$store.state.links.length} links.`;
-        setTimeout(() => (this.successMsg = null), 3000);
+        this.addNotification(`Refreshed! Found ${this.$store.state.links.length} links.`, "success", 3000);
         
         // Force Vue to update
         this.$forceUpdate();
         
       } catch (err) {
         console.error("Force refresh failed:", err);
-        this.errorMsg = "Refresh failed. Please try again.";
-        setTimeout(() => (this.errorMsg = null), 3000);
+        this.addNotification("Refresh failed. Please try again.", "error", 3000);
       } finally {
         this.refreshing = false;
       }
@@ -1903,5 +2067,287 @@ p, span, td, th, label {
   outline: 2px solid #000000;
   outline-offset: 2px;
   border-radius: 50%;
+}
+
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 400px;
+}
+
+.toast-notification {
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  min-width: 300px;
+}
+
+.toast-success {
+  border-color: #00AA00;
+}
+
+.toast-error {
+  border-color: #FF0000;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-right: 2rem;
+}
+
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.toast-success .toast-icon {
+  stroke: #00AA00;
+}
+
+.toast-error .toast-icon {
+  stroke: #FF0000;
+}
+
+.toast-message {
+  color: #000000;
+  font-size: 14px;
+  font-weight: 300;
+  flex: 1;
+}
+
+.toast-close {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.toast-close:hover {
+  opacity: 0.7;
+}
+
+.toast-close svg {
+  width: 14px;
+  height: 14px;
+  stroke: #666666;
+  stroke-width: 2;
+}
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #000000;
+  width: 100%;
+  animation: toast-progress linear forwards;
+}
+
+.toast-success .toast-progress {
+  background: #00AA00;
+}
+
+.toast-error .toast-progress {
+  background: #FF0000;
+}
+
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Toast animations */
+.toast-enter-active {
+  animation: toast-slide-in 0.3s ease-out;
+}
+
+.toast-leave-active {
+  animation: toast-slide-out 0.3s ease-in;
+}
+
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+/* ===== FOLDER COUNT BADGES ===== */
+.folder-count-badge {
+  background: #F5F5F5;
+  color: #000000;
+  font-size: 12px;
+  font-weight: 300;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  min-width: 24px;
+  text-align: center;
+  display: inline-block;
+}
+
+.folder-btn.is-active .folder-count-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+.folder-dropdown-item.is-active .folder-count-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+/* ===== FOLDER AUTOCOMPLETE ===== */
+.folder-autocomplete-field {
+  position: relative;
+}
+
+.folder-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 20px;
+  margin-top: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.folder-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.folder-suggestion-item:first-child {
+  border-radius: 20px 20px 0 0;
+}
+
+.folder-suggestion-item:last-child {
+  border-radius: 0 0 20px 20px;
+}
+
+.folder-suggestion-item:hover,
+.folder-suggestion-item.is-highlighted {
+  background: #F5F5F5;
+}
+
+.suggestion-icon {
+  width: 16px;
+  height: 16px;
+  stroke: #666666;
+  flex-shrink: 0;
+}
+
+.suggestion-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: #666666;
+  background: #F5F5F5;
+  padding: 0.125rem 0.5rem;
+  border-radius: 10px;
+}
+
+/* ===== STICKY TABLE HEADER ===== */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #FFFFFF;
+}
+
+.sticky-header th {
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== SORTABLE TABLE HEADERS ===== */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.sortable:hover {
+  background: #F5F5F5 !important;
+}
+
+.sort-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.25rem;
+  vertical-align: middle;
+}
+
+.sort-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: #000000;
+}
+
+/* ===== MOBILE RESPONSIVENESS FOR NEW FEATURES ===== */
+@media screen and (max-width: 768px) {
+  .toast-container {
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .toast-notification {
+    min-width: auto;
+  }
+  
+  .folder-suggestions {
+    max-height: 150px;
+  }
 }
 </style>
