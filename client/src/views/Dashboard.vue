@@ -1519,7 +1519,7 @@ p, span, td, th, label {
   background: #FFFFFF;
   color: #000000;
   border: 1px solid #000000 !important;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   text-align: left;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
@@ -1529,24 +1529,13 @@ p, span, td, th, label {
 
 .table tbody td {
   color: #000000;
-  border-right: 1px solid #000000 !important;
-  border-bottom: 1px solid #000000 !important;
-  padding: 1rem;
+  border: 1px solid #000000 !important;
+  padding: 0.75rem 1rem;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
   word-break: break-word;
   overflow-wrap: break-word;
-}
-
-/* Remove left border on first cell to avoid double border */
-.table tbody td:first-child {
-  border-left: none;
-}
-
-/* Remove extra border on action buttons cell */
-.table tbody td:last-child {
-  border-right: none;
 }
 
 /* Alternating row background colors */
