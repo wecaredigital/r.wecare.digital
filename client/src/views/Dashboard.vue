@@ -2,7 +2,7 @@
   <div class="columns is-mobile">
     <!-- Mobile Menu Toggle -->
     <div class="mobile-menu-toggle is-hidden-tablet">
-      <button class="hamburger-btn" @click="showSidebar = !showSidebar">
+      <button class="hamburger-btn" @click="showSidebar = !showSidebar" aria-label="Open mobile menu">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="3" y1="8" x2="21" y2="8"></line>
           <line x1="3" y1="16" x2="21" y2="16"></line>
@@ -23,7 +23,7 @@
         <!-- All Links Button -->
         <ul class="menu-list">
           <li>
-            <button :class="['folder-btn', { 'is-active': selectedFolder === '' }]" @click="selectFolder('')">
+            <button :class="['folder-btn', { 'is-active': selectedFolder === '' }]" @click="selectFolder('')" aria-label="View all links">
               <span class="folder-name">
                 <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="8" y1="6" x2="21" y2="6"></line>
@@ -42,23 +42,23 @@
 
         <!-- Folders Dropdown -->
         <div class="folders-section">
-          <button class="folder-dropdown-toggle" @click="foldersExpanded = !foldersExpanded">
+          <button class="folder-dropdown-toggle" @click="foldersExpanded = !foldersExpanded" aria-label="Toggle folders list">
             <span class="folder-name">
               <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
               </svg>
               Folders
             </span>
-            <svg class="chevron-icon" :class="{ 'expanded': foldersExpanded }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="chevron-icon" :class="{ 'expanded': foldersExpanded }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
           
           <ul class="menu-list folder-list" v-show="foldersExpanded">
             <li v-for="folder in folderList" :key="folder">
-              <button :class="['folder-btn folder-item', { 'is-active': selectedFolder === folder }]" @click="selectFolder(folder)">
+              <button :class="['folder-btn folder-item', { 'is-active': selectedFolder === folder }]" @click="selectFolder(folder)" :aria-label="`View folder ${folder}`">
                 <span class="folder-name">
-                  <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                   </svg>
                   {{ folder }}
@@ -134,28 +134,25 @@
 
       <!-- Pagination above table -->
       <div class="pagination-wrapper" v-if="totalPages > 1">
-        <!-- Page info on the right -->
-        <div class="pagination-info">
-          Showing {{ startItem }}-{{ endItem }} of {{ filteredLinks.length }} links
-        </div>
-        
         <nav class="pagination is-centered mb-4">
           <button class="pagination-previous btn-standard" 
              :disabled="currentPage === 1" 
              @click="previousPage"
-             :class="{ 'is-disabled': currentPage === 1 }">
+             :class="{ 'is-disabled': currentPage === 1 }"
+             aria-label="Go to previous page">
             <span>Previous</span>
           </button>
           <button class="pagination-next btn-standard" 
              :disabled="currentPage === totalPages" 
              @click="nextPage"
-             :class="{ 'is-disabled': currentPage === totalPages }">
+             :class="{ 'is-disabled': currentPage === totalPages }"
+             aria-label="Go to next page">
             <span>Next</span>
           </button>
           <ul class="pagination-list">
             <!-- First page -->
             <li v-if="currentPage > 3">
-              <button class="pagination-link btn-standard" @click="goToPage(1)">1</button>
+              <button class="pagination-link btn-standard" @click="goToPage(1)" aria-label="Go to page 1">1</button>
             </li>
             <li v-if="currentPage > 4">
               <span class="pagination-ellipsis">&hellip;</span>
@@ -165,7 +162,9 @@
             <li v-for="page in visiblePages" :key="page">
               <button class="pagination-link btn-standard" 
                  :class="{ 'is-current': currentPage === page }"
-                 @click="goToPage(page)">{{ page }}</button>
+                 @click="goToPage(page)"
+                 :aria-label="`Go to page ${page}`"
+                 :aria-current="currentPage === page ? 'page' : null">{{ page }}</button>
             </li>
             
             <!-- Last page -->
@@ -173,9 +172,14 @@
               <span class="pagination-ellipsis">&hellip;</span>
             </li>
             <li v-if="currentPage < totalPages - 2">
-              <button class="pagination-link btn-standard" @click="goToPage(totalPages)">{{ totalPages }}</button>
+              <button class="pagination-link btn-standard" @click="goToPage(totalPages)" :aria-label="`Go to page ${totalPages}`">{{ totalPages }}</button>
             </li>
           </ul>
+          
+          <!-- Page info on the right -->
+          <div class="pagination-info">
+            Showing {{ startItem }}-{{ endItem }} of {{ filteredLinks.length }} links
+          </div>
         </nav>
       </div>
 
@@ -198,24 +202,24 @@
             <td>{{ idx + 1 + (currentPage - 1) * pageSize }}</td>
             <td>
               {{ link.id }}
-              <button class="btn-copy" @click="copyShort(link.id)" title="Copy short link">
-                <i class="fas fa-link"></i>
+              <button class="btn-copy" @click="copyShort(link.id)" title="Copy short link" aria-label="Copy short link">
+                <i class="fas fa-link" aria-hidden="true"></i>
               </button>
             </td>
             <td class="wrap-text">
               <a :href="link.url" target="_blank">{{ link.url }}</a>
-              <button class="btn-copy" @click="copy(link.url)" title="Copy URL">
-                <i class="fas fa-link"></i>
+              <button class="btn-copy" @click="copy(link.url)" title="Copy URL" aria-label="Copy URL">
+                <i class="fas fa-link" aria-hidden="true"></i>
               </button>
             </td>
             <td>{{ link.folder }}</td>
             <td>{{ link.remark }}</td>
             <td class="action-buttons">
-              <button class="btn-action" @click="editLink(link)" title="Edit link">
-                <i class="fas fa-pen"></i>
+              <button class="btn-action" @click="editLink(link)" title="Edit link" aria-label="Edit link">
+                <i class="fas fa-pen" aria-hidden="true"></i>
               </button>
-              <button class="btn-action" @click="deleteLink(link.id)" title="Delete link">
-                <i class="fas fa-times"></i>
+              <button class="btn-action" @click="deleteLink(link.id)" title="Delete link" aria-label="Delete link">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
               </button>
             </td>
           </tr>
@@ -777,8 +781,17 @@ export default {
 
 <style scoped>
 /* ===== GLOBAL THEME ===== */
-* {
+html, body {
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.5;
+  color: #000000;
+  background-color: #FFFFFF;ground-color: #FFFFFF;
+}
+
+p, span, td, th, label {
+  font-family: inherit;
   font-size: 14px;
   font-weight: 300;
 }
@@ -787,7 +800,7 @@ export default {
 .mobile-menu-toggle {
   position: fixed;
   top: 20px;
-  right: 15px;
+  left: 15px;
   z-index: 1000;
   background: transparent;
   border: none;
@@ -796,12 +809,14 @@ export default {
 
 .hamburger-btn {
   background: transparent;
-  border: none;
+  border: 1px solid #000000;
+  border-radius: 30px;
   padding: 0.5rem;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .hamburger-btn svg {
@@ -809,6 +824,11 @@ export default {
   height: 24px;
   stroke: #000000;
   stroke-width: 2;
+}
+
+.hamburger-btn:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
 }
 
 /* ===== SIDEBAR ===== */
@@ -860,7 +880,7 @@ export default {
   border-radius: 30px;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
@@ -868,7 +888,12 @@ export default {
 }
 
 .folder-dropdown-toggle:hover {
-  opacity: 0.8;
+  opacity: 0.9;
+}
+
+.folder-dropdown-toggle:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
 }
 
 .chevron-icon {
@@ -907,25 +932,30 @@ export default {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: #000000;
-  color: #FFFFFF;
+  background: #FFFFFF;
+  color: #000000;
   border: 1px solid #000000;
   border-radius: 30px;
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
   font-size: 14px;
   font-weight: 300;
 }
 
 .folder-btn:hover {
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .folder-btn.is-active {
-  background: #FFFFFF;
-  color: #000000;
-  border: 1px solid #000000;
+  background: #000000;
+  color: #FFFFFF;
+  border-color: #000000;
+}
+
+.folder-btn:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
 }
 
 .folder-name {
@@ -1022,7 +1052,8 @@ export default {
 }
 
 .search-input:focus {
-  outline: none;
+  outline: 2px solid #000000;
+  outline-offset: 2px;
   border-color: #000000 !important;
   box-shadow: none !important;
 }
@@ -1035,7 +1066,7 @@ export default {
   border-radius: 30px;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
@@ -1043,6 +1074,11 @@ export default {
 
 .btn-standard:hover:not(:disabled) {
   opacity: 0.8;
+}
+
+.btn-standard:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
 }
 
 .btn-standard:disabled {
@@ -1060,9 +1096,26 @@ export default {
 .table-container {
   background: #FFFFFF;
   border: 1px solid #000000;
+  border-radius: 30px;
   overflow: hidden;
   margin-bottom: 2rem;
-  border-radius: 0;
+}
+
+/* Multiple tables - alternating border colors */
+.table-container:nth-of-type(1) {
+  border-color: #000000;
+}
+
+.table-container:nth-of-type(2) {
+  border-color: #008000;
+}
+
+.table-container:nth-of-type(3) {
+  border-color: #000000;
+}
+
+.table-container:nth-of-type(4) {
+  border-color: #008000;
 }
 
 .table {
@@ -1070,6 +1123,7 @@ export default {
   background: #FFFFFF;
   border-collapse: collapse;
   margin: 0;
+  table-layout: fixed;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
@@ -1084,6 +1138,7 @@ export default {
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
+  white-space: nowrap;
 }
 
 .table tbody td {
@@ -1094,6 +1149,9 @@ export default {
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .table tbody tr:last-child td {
@@ -1127,7 +1185,7 @@ export default {
 .action-buttons {
   white-space: nowrap;
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -1136,27 +1194,33 @@ export default {
   color: #000000;
   border: 1px solid #000000;
   border-radius: 30px;
-  padding: 0.4rem 0.6rem;
+  padding: 0.25rem 0.5rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  font-size: 16px;
   line-height: 1;
-  min-width: 36px;
-  min-height: 36px;
+  min-width: 32px;
+  min-height: 32px;
 }
 
 .btn-action:hover {
-  background: #F5F5F5;
+  background: #000000;
+  color: #FFFFFF;
+  opacity: 0.9;
+}
+
+.btn-action:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
 }
 
 .btn-action i {
-  font-size: 14px;
+  font-size: 16px;
   display: block;
   line-height: 1;
-  color: #000000;
 }
 
 /* Copy Button */
@@ -1165,27 +1229,30 @@ export default {
   color: #000000;
   border: 1px solid #000000;
   border-radius: 30px;
-  padding: 0.3rem 0.5rem;
+  padding: 0.25rem 0.75rem;
   cursor: pointer;
   margin-left: 0.5rem;
-  font-size: 12px;
-  transition: all 0.2s ease;
+  font-size: 14px;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease, color 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px;
-  min-height: 28px;
 }
 
 .btn-copy:hover {
-  background: #F5F5F5;
+  background: #000000;
+  color: #FFFFFF;
+}
+
+.btn-copy:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
 }
 
 .btn-copy i {
-  font-size: 12px;
+  font-size: 14px;
   display: block;
   line-height: 1;
-  color: #000000;
 }
 
 /* ===== PAGINATION ===== */
@@ -1194,12 +1261,10 @@ export default {
   border: 1px solid #FFFFFF;
   padding: 1.5rem;
   display: flex;
-  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 2rem;
-  clear: both;
 }
 
 .pagination-list {
@@ -1221,6 +1286,7 @@ export default {
   font-weight: 300;
   min-width: 40px;
   text-align: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .pagination-link:hover:not(.is-current) {
@@ -1230,7 +1296,12 @@ export default {
 .pagination-link.is-current {
   background: #FFFFFF;
   color: #000000;
-  border: 1px solid #000000;
+  border-color: #000000;
+}
+
+.pagination-link:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
 }
 
 .pagination-previous,
@@ -1243,11 +1314,18 @@ export default {
   cursor: pointer;
   font-size: 14px;
   font-weight: 300;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .pagination-previous:hover:not(:disabled),
 .pagination-next:hover:not(:disabled) {
   opacity: 0.8;
+}
+
+.pagination-previous:focus,
+.pagination-next:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
 }
 
 .pagination-ellipsis {
@@ -1261,6 +1339,7 @@ export default {
 }
 
 .pagination-info {
+  margin-left: auto;
   text-align: right;
   color: #000000;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -1271,13 +1350,16 @@ export default {
   border-radius: 30px;
   padding: 0.5rem 1rem;
   display: inline-block;
-  float: right;
-  margin-bottom: 1rem;
 }
 
 /* ===== MODAL ===== */
 .modal-background {
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+}
+
+.modal-content {
+  z-index: 2001;
 }
 
 .modal-content .box {
@@ -1318,7 +1400,7 @@ export default {
 .modal-content .input:focus {
   outline: none;
   border-color: #000000;
-  box-shadow: none;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .modal-content .input:read-only {
@@ -1332,8 +1414,9 @@ export default {
 
 .modal-content .help.is-error {
   color: #008000;
-  font-family: "Helvetica", Arial, sans-serif;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
+  font-weight: 300;
 }
 
 .modal-content .field {
@@ -1385,14 +1468,16 @@ export default {
     top: 0;
     left: 0;
     width: 280px;
+    height: 100vh;
     z-index: 999;
     background: #F7F7F7;
-    border-right: 1px solid #FFFFFF;
+    border-right: none;
+    border-radius: 0 30px 30px 0;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 20px;
+    overflow-y: auto;
   }
   
   .sidebar-folders:not(.is-hidden-mobile) {
@@ -1400,7 +1485,10 @@ export default {
   }
   
   .dashboard {
-    padding: 1rem;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
   
   .header-card {
@@ -1411,7 +1499,8 @@ export default {
     font-size: 14px;
   }
   
-  .table-container {
+  .table-container,
+  .table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -1435,7 +1524,10 @@ export default {
 
 @media screen and (max-width: 480px) {
   .dashboard {
-    padding: 0.5rem;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
   
   .header-card {

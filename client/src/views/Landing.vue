@@ -75,7 +75,8 @@ export default {
 }
 
 .get-started-button:focus {
-  box-shadow: 0 0 0 0.125em rgba(0, 0, 0, 0.25);
+  outline: 2px solid #000000;
+  outline-offset: 2px;
 }
 
 /* Remove any default margins/padding from body when this page is active */

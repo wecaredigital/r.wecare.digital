@@ -15,8 +15,17 @@
 
 ### Base Styles
 ```css
-* {
+html, body {
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.5;
+  color: #000000;
+  background-color: #FFFFFF;
+}
+
+p, span, td, th, label {
+  font-family: inherit;
   font-size: 14px;
   font-weight: 300;
 }
@@ -388,7 +397,7 @@
 
 **Icons**:
 - Edit: `fas fa-pen`
-- Delete: `fas fa-trash-alt`
+- Delete: `fas fa-xmark` (or `fas fa-times`)
 
 ---
 
@@ -532,8 +541,9 @@
 ```css
 .modal-content .help.is-error {
   color: #008000; /* Green */
-  font-family: "Helvetica", Arial, sans-serif;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
+  font-weight: 300;
 }
 ```
 

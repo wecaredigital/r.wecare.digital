@@ -79,6 +79,11 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.signin-button:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
 .signin-button:disabled {
   background-color: #666666;
   cursor: not-allowed;
