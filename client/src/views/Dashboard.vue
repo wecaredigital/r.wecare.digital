@@ -787,7 +787,7 @@ export default {
 .mobile-menu-toggle {
   position: fixed;
   top: 20px;
-  left: 15px;
+  right: 15px;
   z-index: 1000;
   background: transparent;
   border: none;
