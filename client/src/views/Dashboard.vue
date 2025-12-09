@@ -141,14 +141,6 @@
           </div>
         </transition-group>
       </div>
-        <strong>Success!</strong> {{ successMsg }}
-      </div>
-      <div v-if="errorMsg" class="notification is-danger is-light mb-4">
-        <button class="delete" @click="errorMsg = null"></button>
-        <strong>Error:</strong> {{ errorMsg }}
-      </div>
-
-
 
       <!-- Header Section -->
       <div class="header-card mb-5">
