@@ -1,5 +1,8 @@
 <template>
   <div class="columns is-mobile">
+    <!-- Mobile Backdrop -->
+    <div class="mobile-backdrop" :class="{ 'is-active': showSidebar }" @click="showSidebar = false"></div>
+    
     <!-- Mobile Menu Toggle -->
     <div class="mobile-menu-toggle is-hidden-tablet">
       <button class="hamburger-btn" @click="showSidebar = !showSidebar" :aria-label="showSidebar ? 'Close navigation menu' : 'Open navigation menu'">
@@ -1492,11 +1495,14 @@ p, span, td, th, label {
   border: none !important;
 }
 
-/* Override all Bulma table borders */
+/* Override all Bulma table borders - AGGRESSIVE */
 .table td,
 .table th {
   border: none !important;
   border-width: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
 }
 
 /* Override Bulma striped table borders */
@@ -1504,6 +1510,24 @@ p, span, td, th, label {
 .table.is-striped tbody tr:not(.is-selected) th {
   border: none !important;
   border-width: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+}
+
+/* Override Bulma is-bordered class */
+.table.is-bordered td,
+.table.is-bordered th {
+  border: none !important;
+  border-width: 0 !important;
+}
+
+/* Remove all possible Bulma borders */
+.table tr td,
+.table tr th {
+  border-left-width: 0 !important;
+  border-right-width: 0 !important;
+  border-top-width: 0 !important;
 }
 
 /* Column widths - narrow serial number column */
@@ -1889,9 +1913,27 @@ p, span, td, th, label {
   font-size: 20px;
 }
 
+/* ===== MOBILE BACKDROP ===== */
+.mobile-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+@media screen and (max-width: 768px) {
+  .mobile-backdrop.is-active {
+    display: block;
+  }
+}
+
 /* ===== MOBILE RESPONSIVENESS ===== */
 @media screen and (max-width: 768px) {
-  /* Mobile sidebar - slide-in drawer */
+  /* Hide sidebar by default on mobile */
   .sidebar-folders {
     position: fixed;
     top: 0;
@@ -1899,18 +1941,24 @@ p, span, td, th, label {
     width: 280px;
     height: 100vh;
     z-index: 999;
-    background: #F7F7F7;
+    background: #FFFFFF;
     border-right: none;
     border-radius: 0 30px 30px 0;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
     transform: translateX(-100%);
     transition: transform 0.3s ease;
     padding: 20px;
     overflow-y: auto;
   }
   
+  /* Show sidebar when not hidden */
   .sidebar-folders:not(.is-hidden-mobile) {
     transform: translateX(0);
+  }
+  
+  /* Ensure hamburger is visible on mobile */
+  .mobile-menu-toggle {
+    display: block !important;
   }
   
   /* Mobile main content - 20px side padding */
@@ -1930,31 +1978,79 @@ p, span, td, th, label {
   }
   
   /* Tables scroll horizontally on mobile */
-  .table-container,
-  .table-wrapper {
+  .table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    border-radius: 20px;
   }
   
   .table {
-    min-width: 600px;
+    min-width: 700px;
+    font-size: 13px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 0.5rem 0.75rem;
+    font-size: 13px;
   }
   
   .wrap-text {
     max-width: 150px;
+    font-size: 13px;
+  }
+  
+  /* Mobile-friendly buttons */
+  .btn-standard {
+    padding: 0.6rem 1.2rem;
+    font-size: 13px;
+  }
+  
+  .btn-action {
+    padding: 0.4rem 0.6rem;
+    min-width: 28px;
+    min-height: 28px;
+  }
+  
+  .btn-copy {
+    padding: 0.2rem 0.6rem;
+    font-size: 13px;
   }
   
   .pagination {
-    padding: 1rem;
+    padding: 0.75rem;
+    gap: 0.4rem;
   }
   
   .pagination-list {
     flex-wrap: wrap;
+    gap: 0.4rem;
   }
   
-  /* Ensure pagination info stays on same row */
+  .pagination-link,
+  .pagination-previous,
+  .pagination-next {
+    padding: 0.4rem 0.8rem;
+    font-size: 13px;
+    min-width: 36px;
+  }
+  
+  /* Ensure pagination info stays visible */
   .pagination-info {
     margin-left: auto;
+    font-size: 12px;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  /* Mobile header adjustments */
+  .header-card .columns {
+    gap: 0.75rem;
+  }
+  
+  /* Mobile search input */
+  .search-input {
+    font-size: 13px !important;
+    padding: 0.6rem 1rem !important;
   }
 }
 
