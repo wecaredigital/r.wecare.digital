@@ -2,8 +2,8 @@
   <div class="columns is-mobile">
     <!-- Mobile Menu Toggle -->
     <div class="mobile-menu-toggle is-hidden-tablet">
-      <button class="hamburger-btn" @click="showSidebar = !showSidebar" aria-label="Open mobile menu">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button class="hamburger-btn" @click="showSidebar = !showSidebar" :aria-label="showSidebar ? 'Close navigation menu' : 'Open navigation menu'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <line x1="3" y1="8" x2="21" y2="8"></line>
           <line x1="3" y1="16" x2="21" y2="16"></line>
         </svg>
@@ -42,7 +42,7 @@
 
         <!-- Folders Dropdown -->
         <div class="folders-section">
-          <button class="folder-dropdown-toggle" @click="foldersExpanded = !foldersExpanded" aria-label="Toggle folders list">
+          <button class="folder-dropdown-toggle" @click="toggleFoldersDropdown" aria-label="Toggle folders list">
             <span class="folder-name">
               <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -54,19 +54,30 @@
             </svg>
           </button>
           
-          <ul class="menu-list folder-list" v-show="foldersExpanded">
-            <li v-for="folder in folderList" :key="folder">
-              <button :class="['folder-btn folder-item', { 'is-active': selectedFolder === folder }]" @click="selectFolder(folder)" :aria-label="`View folder ${folder}`">
-                <span class="folder-name">
-                  <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                  </svg>
-                  {{ folder }}
-                </span>
-                <span class="folder-count">{{ getFolderCount(folder) }}</span>
-              </button>
-            </li>
-          </ul>
+          <div class="folder-dropdown-content" v-show="foldersExpanded">
+            <div class="folder-search-wrapper">
+              <input 
+                class="folder-search-input" 
+                v-model="folderSearchTerm" 
+                type="text" 
+                placeholder="Search folders..." 
+                @click.stop
+              />
+            </div>
+            <ul class="menu-list folder-list">
+              <li v-for="folder in filteredFolderList" :key="folder">
+                <button :class="['folder-btn folder-item', { 'is-active': selectedFolder === folder }]" @click="selectFolder(folder)" :aria-label="`View folder ${folder}`">
+                  <span class="folder-name">
+                    <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    {{ folder }}
+                  </span>
+                  <span class="folder-count">{{ getFolderCount(folder) }}</span>
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <!-- Sign Out Button -->
@@ -331,7 +342,8 @@ export default {
       errorMsg: null,
       showSidebar: false,
       refreshing: false,
-      foldersExpanded: true
+      foldersExpanded: true,
+      folderSearchTerm: ""
     };
   },
   computed: {
@@ -342,6 +354,15 @@ export default {
     folderList() {
       const folders = this.storeLinks.map(l => l.folder || "").filter(Boolean);
       return [...new Set(folders)].sort();
+    },
+    filteredFolderList() {
+      if (!this.folderSearchTerm || !this.folderSearchTerm.trim()) {
+        return this.folderList;
+      }
+      const term = this.folderSearchTerm.toLowerCase().trim();
+      return this.folderList.filter(folder => 
+        folder.toLowerCase().includes(term)
+      );
     },
     filteredLinks() {
       let arr = this.storeLinks;
@@ -628,9 +649,19 @@ export default {
     selectFolder(folder) {
       this.selectedFolder = folder;
       this.currentPage = 1;
+      // Close dropdown after selection
+      this.foldersExpanded = false;
+      this.folderSearchTerm = "";
       // Close sidebar on mobile after selection
       if (window.innerWidth <= 768) {
         this.showSidebar = false;
+      }
+    },
+    toggleFoldersDropdown() {
+      this.foldersExpanded = !this.foldersExpanded;
+      // Clear search when closing
+      if (!this.foldersExpanded) {
+        this.folderSearchTerm = "";
       }
     },
 
@@ -837,7 +868,8 @@ p, span, td, th, label {
   position: relative;
   padding: 1.5rem 1rem;
   background: #FFFFFF;
-  border-right: 1px solid #FFFFFF;
+  border-right: none;
+  overflow-y: auto;
 }
 
 .mobile-close {
@@ -907,6 +939,39 @@ p, span, td, th, label {
   transform: rotate(180deg);
 }
 
+.folder-dropdown-content {
+  margin-top: 0.5rem;
+}
+
+.folder-search-wrapper {
+  padding: 0 0.5rem 0.5rem 0.5rem;
+}
+
+.folder-search-input {
+  width: 100%;
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  border-radius: 30px !important;
+  padding: 0.5rem 1rem !important;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 300 !important;
+}
+
+.folder-search-input::placeholder {
+  color: #666666;
+  font-size: 13px;
+  font-weight: 300;
+}
+
+.folder-search-input:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+  border-color: #000000 !important;
+  box-shadow: none !important;
+}
+
 .folder-list {
   padding-left: 0.5rem;
 }
@@ -914,6 +979,7 @@ p, span, td, th, label {
 .folder-item {
   font-size: 13px;
   padding: 0.6rem 1rem;
+  color: #000000 !important;
 }
 
 /* Folder Buttons */
@@ -933,7 +999,7 @@ p, span, td, th, label {
   justify-content: space-between;
   width: 100%;
   background: #FFFFFF;
-  color: #000000;
+  color: #000000 !important;
   border: 1px solid #000000;
   border-radius: 30px;
   padding: 0.75rem 1.5rem;
@@ -949,7 +1015,7 @@ p, span, td, th, label {
 
 .folder-btn.is-active {
   background: #000000;
-  color: #FFFFFF;
+  color: #FFFFFF !important;
   border-color: #000000;
 }
 
@@ -962,6 +1028,7 @@ p, span, td, th, label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: inherit;
 }
 
 .folder-icon {
@@ -976,6 +1043,7 @@ p, span, td, th, label {
   font-size: 14px;
   margin-left: auto;
   padding-left: 1rem;
+  color: inherit;
 }
 
 /* Sign Out Button - Primary Style */
@@ -1102,19 +1170,11 @@ p, span, td, th, label {
 }
 
 /* Multiple tables - alternating border colors */
-.table-container:nth-of-type(1) {
+.table-container:nth-of-type(odd) {
   border-color: #000000;
 }
 
-.table-container:nth-of-type(2) {
-  border-color: #008000;
-}
-
-.table-container:nth-of-type(3) {
-  border-color: #000000;
-}
-
-.table-container:nth-of-type(4) {
+.table-container:nth-of-type(even) {
   border-color: #008000;
 }
 
@@ -1132,7 +1192,7 @@ p, span, td, th, label {
 .table thead th {
   background: #FFFFFF;
   color: #000000;
-  border-bottom: 1px solid #000000;
+  border: 1px solid #000000;
   padding: 1rem;
   text-align: left;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -1144,21 +1204,20 @@ p, span, td, th, label {
 .table tbody td {
   background: #FFFFFF;
   color: #000000;
-  border-bottom: 1px solid #000000;
+  border: 1px solid #000000;
   padding: 1rem;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
   word-break: break-word;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
+  overflow-wrap: break-word;
 }
 
 .table tbody tr:hover {
+  background: #F5F5F5;
+}
+
+.table tbody tr:hover td {
   background: #F5F5F5;
 }
 
@@ -1258,13 +1317,13 @@ p, span, td, th, label {
 /* ===== PAGINATION ===== */
 .pagination {
   background: #FFFFFF;
-  border: 1px solid #FFFFFF;
-  padding: 1.5rem;
+  border: 1px solid transparent;
+  padding: 1rem;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .pagination-list {
@@ -1273,6 +1332,7 @@ p, span, td, th, label {
   gap: 0.5rem;
   margin: 0;
   padding: 0;
+  flex-wrap: wrap;
 }
 
 .pagination-link {
@@ -1286,7 +1346,7 @@ p, span, td, th, label {
   font-weight: 300;
   min-width: 40px;
   text-align: center;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .pagination-link:hover:not(.is-current) {
@@ -1314,12 +1374,18 @@ p, span, td, th, label {
   cursor: pointer;
   font-size: 14px;
   font-weight: 300;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .pagination-previous:hover:not(:disabled),
 .pagination-next:hover:not(:disabled) {
   opacity: 0.8;
+}
+
+.pagination-previous:disabled,
+.pagination-next:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .pagination-previous:focus,
@@ -1350,6 +1416,7 @@ p, span, td, th, label {
   border-radius: 30px;
   padding: 0.5rem 1rem;
   display: inline-block;
+  white-space: nowrap;
 }
 
 /* ===== MODAL ===== */
@@ -1463,6 +1530,7 @@ p, span, td, th, label {
 
 /* ===== MOBILE RESPONSIVENESS ===== */
 @media screen and (max-width: 768px) {
+  /* Mobile sidebar - slide-in drawer */
   .sidebar-folders {
     position: fixed;
     top: 0;
@@ -1484,6 +1552,7 @@ p, span, td, th, label {
     transform: translateX(0);
   }
   
+  /* Mobile main content - 20px side padding */
   .dashboard {
     padding-left: 20px;
     padding-right: 20px;
@@ -1499,6 +1568,7 @@ p, span, td, th, label {
     font-size: 14px;
   }
   
+  /* Tables scroll horizontally on mobile */
   .table-container,
   .table-wrapper {
     overflow-x: auto;
@@ -1519,6 +1589,11 @@ p, span, td, th, label {
   
   .pagination-list {
     flex-wrap: wrap;
+  }
+  
+  /* Ensure pagination info stays on same row */
+  .pagination-info {
+    margin-left: auto;
   }
 }
 
@@ -1550,6 +1625,11 @@ p, span, td, th, label {
   .folder-btn {
     padding: 0.5rem 1rem;
     font-size: 14px;
+  }
+  
+  .pagination-info {
+    font-size: 13px;
+    padding: 0.4rem 0.8rem;
   }
 }
 </style>
