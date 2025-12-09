@@ -1160,7 +1160,7 @@ export default {
 /* ===== PAGINATION ===== */
 .pagination {
   background: #FFFFFF;
-  border: 1px solid #000000;
+  border: 1px solid #FFFFFF;
   padding: 1.5rem;
   display: flex;
   justify-content: center;
@@ -1232,7 +1232,7 @@ export default {
   font-size: 14px;
   font-weight: 300;
   background: #FFFFFF;
-  border: 1px solid #000000;
+  border: 1px solid #FFFFFF;
   padding: 0.75rem;
 }
 
