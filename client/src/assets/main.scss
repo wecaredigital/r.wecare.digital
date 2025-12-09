@@ -14,6 +14,7 @@
 }
 
 // ===== GLOBAL BASE STYLES (DESIGN SYSTEM) =====
+// Remove global * selector for font family - use root element instead
 html, body {
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
@@ -22,9 +23,11 @@ html, body {
   color: #000000;
   background-color: #FFFFFF;
   scroll-behavior: smooth;
+  margin: 0;
+  padding: 0;
 }
 
-p, span, td, th, label {
+p, span, td, th, label, input, textarea, select, button {
   font-family: inherit;
   font-size: 14px;
   font-weight: 300;
@@ -224,6 +227,18 @@ $warning: #ffdd57;
 }
 
 // ===== PAGINATION STYLES (DESIGN SYSTEM) =====
+.pagination {
+  background: #FFFFFF !important;
+  border: 1px solid transparent !important;
+  padding: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
 .pagination-link,
 .pagination-previous,
 .pagination-next {
@@ -235,10 +250,14 @@ $warning: #ffdd57;
   font-size: 14px !important;
   font-weight: 300 !important;
   padding: 0.5rem 1rem !important;
-  transition: opacity 0.2s ease, transform 0.2s ease !important;
+  transition: opacity 0.2s ease !important;
+  min-width: 40px !important;
+  text-align: center !important;
   
   &:hover:not(.is-current):not(:disabled) {
     opacity: 0.8 !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
   }
   
   &:focus {
@@ -252,6 +271,35 @@ $warning: #ffdd57;
     color: #000000 !important;
     border-color: #000000 !important;
   }
+  
+  &:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+  }
+}
+
+.pagination-list {
+  display: flex !important;
+  list-style: none !important;
+  gap: 0.5rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex-wrap: wrap !important;
+}
+
+.pagination-info {
+  margin-left: auto !important;
+  text-align: right !important;
+  color: #000000 !important;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 300 !important;
+  background: #FFFFFF !important;
+  border: 1px solid #000000 !important;
+  border-radius: 30px !important;
+  padding: 0.5rem 1rem !important;
+  display: inline-block !important;
+  white-space: nowrap !important;
 }
 
 // Delete button (X button in notifications)
@@ -282,7 +330,7 @@ $warning: #ffdd57;
   font-weight: 300 !important;
   
   th, td {
-    border-bottom: 1px solid #000000 !important;
+    border: 1px solid #000000 !important; // Inner grid borders
     padding: 1rem !important;
     vertical-align: middle !important;
     font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
@@ -295,18 +343,15 @@ $warning: #ffdd57;
     color: #000000 !important;
     text-align: left !important;
     white-space: nowrap !important;
+    border: 1px solid #000000 !important;
   }
   
   tbody td {
     background: #FFFFFF !important;
     color: #000000 !important;
     word-break: break-word !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-  
-  tbody tr:last-child td {
-    border-bottom: none !important;
+    overflow-wrap: break-word !important;
+    border: 1px solid #000000 !important;
   }
   
   tbody tr {
@@ -314,6 +359,18 @@ $warning: #ffdd57;
     
     &:hover {
       background-color: #F5F5F5 !important;
+      
+      td {
+        background-color: #F5F5F5 !important;
+      }
+    }
+  }
+  
+  // Slim "SL" table variant - compact spacing
+  &.table-slim {
+    th, td {
+      padding: 0.5rem !important;
+      font-size: 13px !important;
     }
   }
 }
@@ -327,19 +384,11 @@ $warning: #ffdd57;
 }
 
 // Alternating border colors for multiple tables
-.table-container:nth-of-type(1) {
+.table-container:nth-of-type(odd) {
   border-color: #000000 !important;
 }
 
-.table-container:nth-of-type(2) {
-  border-color: #008000 !important;
-}
-
-.table-container:nth-of-type(3) {
-  border-color: #000000 !important;
-}
-
-.table-container:nth-of-type(4) {
+.table-container:nth-of-type(even) {
   border-color: #008000 !important;
 }
 
@@ -361,17 +410,27 @@ $warning: #ffdd57;
 }
 
 .menu-list {
-  a {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  
+  a, button {
     background: #FFFFFF !important;
     color: #000000 !important;
     border: 1px solid #000000 !important;
     border-radius: 30px !important;
     padding: 0.75rem 1.5rem !important;
     margin-bottom: 0.5rem !important;
-    transition: opacity 0.2s ease, transform 0.2s ease !important;
+    transition: opacity 0.2s ease !important;
     font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
     font-size: 14px !important;
     font-weight: 300 !important;
+    width: 100% !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     
     .icon {
       color: #000000 !important;
@@ -381,7 +440,6 @@ $warning: #ffdd57;
       opacity: 0.9 !important;
       background-color: #FFFFFF !important;
       color: #000000 !important;
-      transform: none !important;
       
       .icon {
         color: #000000 !important;
@@ -411,7 +469,57 @@ $warning: #ffdd57;
     &:focus {
       outline: 2px solid #000000 !important;
       outline-offset: 2px !important;
+      box-shadow: none !important;
     }
+  }
+}
+
+// Folder buttons - white with black text by default
+.folder-btn,
+.folder-dropdown-toggle {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  border-radius: 30px !important;
+  padding: 0.75rem 1.5rem !important;
+  cursor: pointer !important;
+  transition: opacity 0.2s ease !important;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 300 !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  
+  &:hover {
+    opacity: 0.9 !important;
+  }
+  
+  &.is-active {
+    background: #000000 !important;
+    color: #FFFFFF !important;
+    border-color: #000000 !important;
+  }
+  
+  &:focus {
+    outline: 2px solid #000000 !important;
+    outline-offset: 2px !important;
+    box-shadow: none !important;
+  }
+}
+
+// Sign Out button - black pill (primary action)
+.btn-signout {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #000000 !important;
+  border-radius: 30px !important;
+  
+  &:hover {
+    opacity: 0.8 !important;
+    background: #000000 !important;
+    color: #FFFFFF !important;
   }
 }
 
@@ -462,7 +570,8 @@ $warning: #ffdd57;
   transition: all 0.2s ease !important;
   
   &:focus {
-    outline: none !important;
+    outline: 2px solid #000000 !important;
+    outline-offset: 2px !important;
     border-color: #000000 !important;
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
   }
@@ -475,6 +584,30 @@ $warning: #ffdd57;
     color: #666666 !important;
     font-size: 14px !important;
     font-weight: 300 !important;
+  }
+}
+
+// Search input specific styling
+.search-input {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  border-radius: 30px !important;
+  padding: 0.75rem 1.25rem !important;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 300 !important;
+  width: 100% !important;
+  
+  &::placeholder {
+    color: #666666 !important;
+  }
+  
+  &:focus {
+    outline: 2px solid #000000 !important;
+    outline-offset: 2px !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
   }
 }
 
@@ -519,40 +652,72 @@ $warning: #ffdd57;
   }
 }
 
-// Navbar improvements
-.navbar {
-  border-radius: 0 0 30px 30px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+// ===== ACTION BUTTONS (ICON BUTTONS) =====
+.btn-action {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  border-radius: 30px !important;
+  padding: 0.25rem 0.5rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
   
-  .navbar-item {
-    border-radius: 15px !important;
-    margin: 0 0.25rem !important;
-    transition: all 0.3s ease !important;
-    
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1) !important;
-      transform: translateY(-2px) !important;
-    }
+  &:hover {
+    background: #000000 !important;
+    color: #FFFFFF !important;
+    opacity: 0.9 !important;
+  }
+  
+  &:focus {
+    outline: 2px solid #000000 !important;
+    outline-offset: 2px !important;
+    box-shadow: none !important;
+  }
+  
+  i {
+    font-size: 16px !important;
+    display: block !important;
+    line-height: 1 !important;
   }
 }
 
-// Pagination improvements
-.pagination {
-  margin-top: 2rem !important;
-  margin-bottom: 2rem !important;
-}
-
-.pagination-link,
-.pagination-previous,
-.pagination-next {
-  border-radius: 20px !important;
-  margin: 0 0.25rem !important;
-  font-weight: 500 !important;
-  transition: all 0.3s ease !important;
+// Copy button
+.btn-copy {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  border-radius: 30px !important;
+  padding: 0.25rem 0.75rem !important;
+  cursor: pointer !important;
+  margin-left: 0.5rem !important;
+  font-size: 14px !important;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   
   &:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+    background: #000000 !important;
+    color: #FFFFFF !important;
+  }
+  
+  &:focus {
+    outline: 2px solid #000000 !important;
+    outline-offset: 2px !important;
+    box-shadow: none !important;
+  }
+  
+  i {
+    font-size: 14px !important;
+    display: block !important;
+    line-height: 1 !important;
   }
 }
 
@@ -566,6 +731,15 @@ $warning: #ffdd57;
   
   .table {
     min-width: 600px !important;
+  }
+  
+  // Mobile main content padding
+  .dashboard,
+  .main-dashboard,
+  .main-dashboard-content,
+  .dashboard-content {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
   }
 }
 
@@ -583,7 +757,56 @@ $warning: #ffdd57;
 .pagination-link:focus,
 .pagination-previous:focus,
 .pagination-next:focus,
-.menu-list a:focus {
+.menu-list a:focus,
+.menu-list button:focus,
+.folder-btn:focus,
+.folder-dropdown-toggle:focus,
+.btn-action:focus,
+.btn-copy:focus,
+.btn-standard:focus,
+.btn-signout:focus,
+.search-input:focus,
+.hamburger-btn:focus {
   outline: 2px solid #000000 !important;
   outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+// Mobile menu toggle
+.mobile-menu-toggle {
+  position: fixed !important;
+  top: 20px !important;
+  left: 15px !important;
+  z-index: 1000 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.hamburger-btn {
+  background: transparent !important;
+  border: 1px solid #000000 !important;
+  border-radius: 30px !important;
+  padding: 0.5rem !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: opacity 0.2s ease !important;
+  
+  svg {
+    width: 24px !important;
+    height: 24px !important;
+    stroke: #000000 !important;
+    stroke-width: 2 !important;
+  }
+  
+  &:hover {
+    opacity: 0.8 !important;
+  }
+  
+  &:focus {
+    outline: 2px solid #000000 !important;
+    outline-offset: 2px !important;
+  }
 }
