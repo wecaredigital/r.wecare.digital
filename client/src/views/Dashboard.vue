@@ -1115,7 +1115,7 @@ p, span, td, th, label {
 .mobile-menu-toggle {
   position: fixed;
   top: 20px;
-  left: 15px;
+  right: 15px;
   z-index: 1000;
   background: transparent;
   border: none;
@@ -1321,9 +1321,9 @@ p, span, td, th, label {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: #F5F5F5 !important;
+  background: transparent !important;
   color: #000000 !important;
-  border: none !important;
+  border: 1px solid #000000 !important;
   border-radius: 30px !important;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
@@ -1333,7 +1333,7 @@ p, span, td, th, label {
 }
 
 .folder-btn:hover {
-  background: #E8E8E8 !important;
+  background: #F5F5F5 !important;
 }
 
 .folder-btn.is-active {
@@ -1380,13 +1380,13 @@ p, span, td, th, label {
 }
 
 .btn-signout {
-  background: #000000 !important;
-  color: #FFFFFF !important;
-  border: none !important;
+  background: transparent !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
 }
 
 .btn-signout:hover {
-  opacity: 0.8 !important;
+  background: #F5F5F5 !important;
 }
 
 /* ===== DASHBOARD MAIN AREA ===== */
@@ -1947,19 +1947,20 @@ p, span, td, th, label {
 
 /* ===== MOBILE RESPONSIVENESS ===== */
 @media screen and (max-width: 768px) {
-  /* Hide sidebar by default on mobile */
+  /* Hide sidebar by default on mobile - slide from RIGHT */
   .sidebar-folders {
     position: fixed;
     top: 0;
-    left: 0;
+    right: 0;
+    left: auto;
     width: 280px;
     height: 100vh;
     z-index: 999;
     background: #FFFFFF;
-    border-right: none;
-    border-radius: 0 30px 30px 0;
-    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
-    transform: translateX(-100%);
+    border-left: none;
+    border-radius: 30px 0 0 30px;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+    transform: translateX(100%);
     transition: transform 0.3s ease;
     padding: 20px;
     overflow-y: auto;

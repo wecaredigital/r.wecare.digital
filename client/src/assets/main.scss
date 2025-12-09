@@ -472,16 +472,16 @@ $warning: #ffdd57;
   }
 }
 
-// Folder buttons - white with black text by default
+// Folder buttons - transparent with black border
 .folder-btn,
 .folder-dropdown-toggle {
-  background: #FFFFFF !important;
+  background: transparent !important;
   color: #000000 !important;
   border: 1px solid #000000 !important;
   border-radius: 30px !important;
   padding: 0.75rem 1.5rem !important;
   cursor: pointer !important;
-  transition: opacity 0.2s ease !important;
+  transition: background 0.2s ease !important;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
   font-size: 14px !important;
   font-weight: 300 !important;
@@ -491,7 +491,7 @@ $warning: #ffdd57;
   justify-content: space-between !important;
   
   &:hover {
-    opacity: 0.9 !important;
+    background: #F5F5F5 !important;
   }
   
   &.is-active {
@@ -507,17 +507,15 @@ $warning: #ffdd57;
   }
 }
 
-// Sign Out button - black pill (primary action)
+// Sign Out button - transparent with black border
 .btn-signout {
-  background: #000000 !important;
-  color: #FFFFFF !important;
+  background: transparent !important;
+  color: #000000 !important;
   border: 1px solid #000000 !important;
   border-radius: 30px !important;
   
   &:hover {
-    opacity: 0.8 !important;
-    background: #000000 !important;
-    color: #FFFFFF !important;
+    background: #F5F5F5 !important;
   }
 }
 
@@ -770,11 +768,11 @@ $warning: #ffdd57;
   box-shadow: none !important;
 }
 
-// Mobile menu toggle
+// Mobile menu toggle - positioned on RIGHT
 .mobile-menu-toggle {
   position: fixed !important;
   top: 20px !important;
-  left: 15px !important;
+  right: 15px !important;
   z-index: 1000 !important;
   background: transparent !important;
   border: none !important;
@@ -782,15 +780,15 @@ $warning: #ffdd57;
 }
 
 .hamburger-btn {
-  background: transparent !important;
-  border: 1px solid #000000 !important;
+  background: #F5F5F5 !important;
+  border: none !important;
   border-radius: 30px !important;
   padding: 0.5rem !important;
   cursor: pointer !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition: opacity 0.2s ease !important;
+  transition: background 0.2s ease !important;
   
   svg {
     width: 24px !important;
@@ -800,7 +798,7 @@ $warning: #ffdd57;
   }
   
   &:hover {
-    opacity: 0.8 !important;
+    background: #E8E8E8 !important;
   }
   
   &:focus {
