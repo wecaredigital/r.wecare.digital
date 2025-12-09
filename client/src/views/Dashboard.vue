@@ -14,50 +14,35 @@
          :class="{ 'is-hidden-mobile': !showSidebar }">
       <aside class="menu">
         <div class="menu-header">
-          <p class="menu-label">
-            <span class="icon-text">
-              <span class="icon"><i class="fas fa-folder-tree"></i></span>
-              <span>Folders</span>
-            </span>
-          </p>
-          <button class="button is-small is-white is-hidden-tablet mobile-close" @click="showSidebar = false">
-            <span class="icon is-small">
-              <i class="fas fa-times"></i>
-            </span>
+          <p class="menu-label">Folders</p>
+          <button class="button is-small mobile-close is-hidden-tablet" @click="showSidebar = false">
+            <span>✕</span>
           </button>
         </div>
         <ul class="menu-list">
           <li>
-            <a :class="{ 'is-active': selectedFolder === '' }" @click="selectFolder('')" href="#">
-              <span class="icon"><i class="fas fa-layer-group"></i></span>
+            <button :class="['folder-btn', { 'is-active': selectedFolder === '' }]" @click="selectFolder('')">
               <span>All Links</span>
-              <span class="tag is-rounded is-light ml-auto">{{ storeLinks.length }}</span>
-            </a>
+              <span class="folder-count">{{ storeLinks.length }}</span>
+            </button>
           </li>
           <li v-for="folder in folderList" :key="folder">
-            <a :class="{ 'is-active': selectedFolder === folder }" @click="selectFolder(folder)" href="#">
-              <span class="icon"><i class="fas fa-folder"></i></span>
+            <button :class="['folder-btn', { 'is-active': selectedFolder === folder }]" @click="selectFolder(folder)">
               <span>{{ folder }}</span>
-              <span class="tag is-rounded is-light ml-auto">{{ getFolderCount(folder) }}</span>
-            </a>
+              <span class="folder-count">{{ getFolderCount(folder) }}</span>
+            </button>
           </li>
         </ul>
         
         <div class="menu-divider"></div>
 
         <!-- Account Section -->
-        <p class="menu-label">
-          <span class="icon-text">
-            <span class="icon"><i class="fas fa-user-circle"></i></span>
-            <span>Account</span>
-          </span>
-        </p>
+        <p class="menu-label">Account</p>
         <ul class="menu-list">
           <li>
-            <a @click="logout" href="#" class="logout-link">
-              <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+            <button @click="logout" class="folder-btn btn-signout">
               <span>Sign Out</span>
-            </a>
+            </button>
           </li>
         </ul>
       </aside>
@@ -81,46 +66,28 @@
       <div class="header-card mb-5">
         <div class="columns is-multiline is-mobile is-vcentered">
           <div class="column is-12-mobile is-6-tablet is-4-desktop">
-            <h1 class="title is-size-4-mobile is-size-2-tablet has-text-weight-bold mb-2">
-              <span class="icon-text">
-                <span class="icon has-text-primary is-large"><i class="fas fa-link"></i></span>
-                <span class="gradient-text">WECARE.DIGITAL</span>
-              </span>
-            </h1>
-            <p class="subtitle is-6 has-text-grey-dark">
-              <span class="icon-text">
-                <span class="icon is-small"><i class="fas fa-database"></i></span>
-                <span class="has-text-weight-semibold">{{ filteredLinks.length }} link{{ filteredLinks.length !== 1 ? 's' : '' }}</span>
-              </span>
-            </p>
+            <h1 class="brand-title">WECARE.DIGITAL</h1>
+            <p class="link-count">{{ filteredLinks.length }} link{{ filteredLinks.length !== 1 ? 's' : '' }}</p>
           </div>
           <div class="column is-12-mobile is-6-tablet is-4-desktop">
             <div class="field">
-              <div class="control has-icons-left">
-                <input class="input is-rounded search-input" 
+              <div class="control">
+                <input class="input search-input" 
                        v-model="searchTerm" 
                        type="text" 
-                       placeholder="🔍 Search links..." 
+                       placeholder="Search" 
                        @input="onSearchInput" />
-                <span class="icon is-left">
-                  <i class="fas fa-search"></i>
-                </span>
               </div>
             </div>
           </div>
           <div class="column is-12-mobile is-6-tablet is-2-desktop">
-            <button class="button is-fullwidth is-rounded btn-refresh" @click="forceRefresh" :class="{ 'is-loading': refreshing }">
-              <span class="icon">
-                <i class="fas fa-sync-alt"></i>
-              </span>
+            <button class="button is-fullwidth btn-standard btn-refresh" @click="forceRefresh" :class="{ 'is-loading': refreshing }">
               <span class="is-hidden-mobile">Refresh</span>
+              <span class="is-hidden-tablet">Refresh</span>
             </button>
           </div>
           <div class="column is-12-mobile is-6-tablet is-2-desktop">
-            <button class="button is-fullwidth is-rounded btn-create" @click="toggleModal('create')">
-              <span class="icon">
-                <i class="fas fa-plus-circle"></i>
-              </span>
+            <button class="button is-fullwidth btn-standard btn-create" @click="toggleModal('create')">
               <span>Create Link</span>
             </button>
           </div>
@@ -129,28 +96,22 @@
 
       <!-- Pagination above table -->
       <nav class="pagination is-centered mb-4" v-if="totalPages > 1">
-        <a class="pagination-previous" 
+        <button class="pagination-previous btn-standard" 
            :disabled="currentPage === 1" 
            @click="previousPage"
            :class="{ 'is-disabled': currentPage === 1 }">
-          <span class="icon is-small">
-            <i class="fas fa-chevron-left"></i>
-          </span>
-          <span class="is-hidden-mobile">Previous</span>
-        </a>
-        <a class="pagination-next" 
+          <span>Previous</span>
+        </button>
+        <button class="pagination-next btn-standard" 
            :disabled="currentPage === totalPages" 
            @click="nextPage"
            :class="{ 'is-disabled': currentPage === totalPages }">
-          <span class="is-hidden-mobile">Next</span>
-          <span class="icon is-small">
-            <i class="fas fa-chevron-right"></i>
-          </span>
-        </a>
+          <span>Next</span>
+        </button>
         <ul class="pagination-list">
           <!-- First page -->
           <li v-if="currentPage > 3">
-            <a class="pagination-link" @click="goToPage(1)">1</a>
+            <button class="pagination-link btn-standard" @click="goToPage(1)">1</button>
           </li>
           <li v-if="currentPage > 4">
             <span class="pagination-ellipsis">&hellip;</span>
@@ -158,9 +119,9 @@
           
           <!-- Pages around current -->
           <li v-for="page in visiblePages" :key="page">
-            <a class="pagination-link" 
+            <button class="pagination-link btn-standard" 
                :class="{ 'is-current': currentPage === page }"
-               @click="goToPage(page)">{{ page }}</a>
+               @click="goToPage(page)">{{ page }}</button>
           </li>
           
           <!-- Last page -->
@@ -168,12 +129,12 @@
             <span class="pagination-ellipsis">&hellip;</span>
           </li>
           <li v-if="currentPage < totalPages - 2">
-            <a class="pagination-link" @click="goToPage(totalPages)">{{ totalPages }}</a>
+            <button class="pagination-link btn-standard" @click="goToPage(totalPages)">{{ totalPages }}</button>
           </li>
         </ul>
         
         <!-- Page info -->
-        <div class="pagination-info has-text-grey is-size-7 mt-2">
+        <div class="pagination-info">
           Showing {{ startItem }}-{{ endItem }} of {{ filteredLinks.length }} links
         </div>
       </nav>
@@ -197,24 +158,20 @@
             <td>{{ idx + 1 + (currentPage - 1) * pageSize }}</td>
             <td>
               {{ link.id }}
-              <button class="button is-small is-white ml-2" @click="copyShort(link.id)">📋</button>
+              <button class="btn-copy" @click="copyShort(link.id)">📋</button>
             </td>
             <td class="wrap-text">
               <a :href="link.url" target="_blank">{{ link.url }}</a>
-              <button class="button is-small is-white ml-2" @click="copy(link.url)">📋</button>
+              <button class="btn-copy" @click="copy(link.url)">📋</button>
             </td>
             <td>{{ link.folder }}</td>
             <td>{{ link.remark }}</td>
             <td class="action-buttons">
-              <button class="button is-small is-rounded btn-edit" @click="editLink(link)" title="Edit link">
-                <span class="icon is-small">
-                  <i class="fas fa-pen"></i>
-                </span>
+              <button class="btn-icon btn-edit" @click="editLink(link)" title="Edit link">
+                <i class="fas fa-pen"></i>
               </button>
-              <button class="button is-small is-rounded btn-delete ml-2" @click="deleteLink(link.id)" title="Delete link">
-                <span class="icon is-small">
-                  <i class="fas fa-trash-alt"></i>
-                </span>
+              <button class="btn-icon btn-delete" @click="deleteLink(link.id)" title="Delete link">
+                <i class="fas fa-trash-alt"></i>
               </button>
             </td>
           </tr>
@@ -253,13 +210,13 @@
 
               <div class="field is-grouped">
                 <div class="control">
-                  <button class="button" type="submit"
+                  <button class="btn-standard" type="submit"
                     :disabled="!model.id || !model.url || (!isEditMode && idExists) || !isValidUrl(model.url)">
                     {{ isEditMode ? 'Update' : 'Create' }}
                   </button>
                 </div>
                 <div class="control">
-                  <button class="button is-light" type="button" @click="toggleModal()">Cancel</button>
+                  <button class="btn-standard" type="button" @click="toggleModal()">Cancel</button>
                 </div>
               </div>
             </form>
@@ -761,191 +718,496 @@ export default {
 </script>
 
 <style scoped>
+/* ===== GLOBAL THEME ===== */
+* {
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+}
+
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
   position: fixed;
   top: 20px;
   left: 15px;
   z-index: 1000;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
   padding: 0.5rem;
 }
 
-/* Sidebar */
+.mobile-menu-toggle .button {
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+}
+
+/* ===== SIDEBAR ===== */
 .sidebar-folders {
   height: 100vh;
   position: relative;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+  background: #FFFFFF;
+  border-right: 1px solid #000000;
 }
 
 .mobile-close {
-  float: right;
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
 }
 
 .menu-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .menu-label {
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  font-size: 0.875rem !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
-  margin-bottom: 1rem !important;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 300;
+  margin-bottom: 1rem;
 }
 
 .menu-divider {
-  height: 2px;
-  background: rgba(255, 255, 255, 0.2);
+  height: 1px;
+  background: #000000;
   margin: 1.5rem 0;
-  border-radius: 2px;
 }
 
-.menu-list a {
+/* Folder Buttons */
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-list li {
+  margin-bottom: 0.5rem;
+}
+
+.folder-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
-  color: rgba(255, 255, 255, 0.9) !important;
-  border-radius: 15px !important;
-  padding: 0.875rem 1rem !important;
-  margin-bottom: 0.5rem !important;
-  transition: all 0.3s ease !important;
-  font-weight: 500 !important;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  justify-content: space-between;
+  width: 100%;
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 300;
 }
 
-.menu-list a:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
-  transform: translateX(8px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.4);
+.folder-btn:hover {
+  opacity: 0.8;
 }
 
-.menu-list a.is-active {
-  background: #ffffff !important;
-  color: #667eea !important;
-  font-weight: 700 !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
-  border-color: #ffffff;
+.folder-btn.is-active {
+  background: #FFFFFF;
+  color: #000000;
+  border: 1px solid #000000;
 }
 
-.menu-list a.is-active .icon {
-  color: #667eea !important;
-}
-
-.menu-list a.is-active .tag {
-  background-color: #667eea !important;
-  color: #ffffff !important;
-}
-
-.menu-list .icon {
-  width: 20px;
-  min-width: 20px;
-  font-size: 1.1rem;
-}
-
-.menu-list .tag {
+.folder-count {
+  font-size: 14px;
   margin-left: auto;
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding-left: 1rem;
 }
 
-/* Dashboard */
+/* Sign Out Button - Inverted Style */
+.btn-signout {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+}
+
+.btn-signout:hover {
+  opacity: 0.8 !important;
+}
+
+/* ===== DASHBOARD MAIN AREA ===== */
 .dashboard {
   padding: 2rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #FFFFFF;
   min-height: 100vh;
 }
 
-/* Table Styles - Enhanced with rounded corners */
-.table {
-  border-collapse: separate;
-  border-spacing: 0;
+/* ===== HEADER CARD ===== */
+.header-card {
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.brand-title {
+  color: #000000;
+  font-size: 16px;
+  font-weight: 300;
+  margin-bottom: 0.5rem;
+}
+
+.link-count {
+  color: #000000;
+  font-size: 14px;
+  font-weight: 300;
+  margin: 0;
+}
+
+/* ===== SEARCH BAR ===== */
+.search-input {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  border-radius: 30px !important;
+  padding: 0.75rem 1.25rem !important;
+  font-size: 14px !important;
+  font-weight: 300 !important;
   width: 100%;
-  background: white;
-  margin-bottom: 0;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
 }
 
-.table thead th {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
-  font-size: 0.875rem !important;
-  padding: 1.25rem 1rem !important;
-  border: none !important;
+.search-input::placeholder {
+  color: #666666;
+  font-size: 14px;
+  font-weight: 300;
 }
 
-.table tbody tr {
-  transition: all 0.3s ease !important;
+.search-input:focus {
+  outline: none;
+  border-color: #000000 !important;
+  box-shadow: none !important;
 }
 
-.table tbody tr:hover {
-  background-color: #f8f9ff !important;
-  transform: scale(1.01) !important;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15) !important;
+/* ===== STANDARD BUTTONS ===== */
+.btn-standard {
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 300;
 }
 
-.action-buttons {
-  white-space: nowrap;
+.btn-standard:hover:not(:disabled) {
+  opacity: 0.8;
 }
 
-.action-buttons .button {
-  min-width: 40px;
-  height: 40px;
-  padding: 0.5rem;
+.btn-standard:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.wrap-text {
-  word-break: break-word;
-  white-space: normal;
-  max-width: 200px;
-}
-
-/* Pagination Styles */
-.pagination-info {
-  text-align: center;
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background-color: #f8f9fa;
-  border-radius: 15px;
-  border: 2px solid #e9ecef;
-  font-weight: 500;
-}
-
-.pagination-link.is-disabled,
-.pagination-previous.is-disabled,
-.pagination-next.is-disabled {
+.btn-standard.is-disabled {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-/* Mobile Responsiveness */
+/* ===== TABLE STYLES ===== */
+.table-container {
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.table {
+  width: 100%;
+  background: #FFFFFF;
+  border-collapse: collapse;
+  margin: 0;
+}
+
+.table thead th {
+  background: #FFFFFF;
+  color: #000000;
+  border-bottom: 1px solid #000000;
+  padding: 1rem;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.table tbody td {
+  background: #FFFFFF;
+  color: #000000;
+  border-bottom: 1px solid #000000;
+  padding: 1rem;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: #F5F5F5;
+}
+
+.wrap-text {
+  word-break: break-word;
+  white-space: normal;
+  max-width: 300px;
+}
+
+.table a {
+  color: #000000;
+  text-decoration: underline;
+}
+
+.table a:hover {
+  opacity: 0.7;
+}
+
+/* ===== ACTION BUTTONS (ICON BUTTONS) ===== */
+.action-buttons {
+  white-space: nowrap;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.btn-icon:hover {
+  opacity: 0.8;
+}
+
+.btn-icon i {
+  font-size: 14px;
+}
+
+/* Copy Button */
+.btn-copy {
+  background: #FFFFFF;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-copy:hover {
+  background: #000000;
+  color: #FFFFFF;
+}
+
+/* ===== PAGINATION ===== */
+.pagination {
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.pagination-list {
+  display: flex;
+  list-style: none;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.pagination-link {
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 300;
+  min-width: 40px;
+  text-align: center;
+}
+
+.pagination-link:hover:not(.is-current) {
+  opacity: 0.8;
+}
+
+.pagination-link.is-current {
+  background: #FFFFFF;
+  color: #000000;
+  border: 1px solid #000000;
+}
+
+.pagination-previous,
+.pagination-next {
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.pagination-previous:hover:not(:disabled),
+.pagination-next:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.pagination-ellipsis {
+  padding: 0.5rem;
+  color: #000000;
+  font-size: 14px;
+}
+
+.pagination-info {
+  width: 100%;
+  text-align: center;
+  margin-top: 1rem;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 300;
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  padding: 0.75rem;
+}
+
+/* ===== MODAL ===== */
+.modal-background {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content .box {
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  padding: 2rem;
+}
+
+.modal-content .box .subtitle {
+  color: #000000;
+  font-size: 16px;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+}
+
+.modal-content .label {
+  color: #000000;
+  font-size: 14px;
+  font-weight: 300;
+  margin-bottom: 0.5rem;
+}
+
+.modal-content .input {
+  background: #FFFFFF;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.75rem 1.25rem;
+  font-size: 14px;
+  font-weight: 300;
+  width: 100%;
+}
+
+.modal-content .input:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: none;
+}
+
+.modal-content .input:read-only {
+  background: #F5F5F5;
+}
+
+.modal-content .help {
+  font-size: 14px;
+  margin-top: 0.25rem;
+}
+
+.modal-content .help.is-danger {
+  color: #FF0000;
+}
+
+.modal-content .field {
+  margin-bottom: 1.5rem;
+}
+
+.modal-content .field.is-grouped {
+  display: flex;
+  gap: 1rem;
+}
+
+/* ===== NOTIFICATIONS ===== */
+.notification {
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.notification.is-success {
+  border-color: #00AA00;
+  color: #00AA00;
+}
+
+.notification.is-danger {
+  border-color: #FF0000;
+  color: #FF0000;
+}
+
+.notification .delete {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+/* ===== MOBILE RESPONSIVENESS ===== */
 @media screen and (max-width: 768px) {
   .sidebar-folders {
     position: fixed;
     top: 0;
     left: 0;
-    width: 300px;
+    width: 280px;
     z-index: 999;
-    background: #fafafa;
-    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+    background: #FFFFFF;
+    border-right: 1px solid #000000;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    border-radius: 0 30px 30px 0;
   }
   
   .sidebar-folders:not(.is-hidden-mobile) {
@@ -953,8 +1215,15 @@ export default {
   }
   
   .dashboard {
-    padding: 0.5rem;
-    margin-top: 0;
+    padding: 1rem;
+  }
+  
+  .header-card {
+    padding: 1rem;
+  }
+  
+  .brand-title {
+    font-size: 14px;
   }
   
   .table-container {
@@ -966,43 +1235,28 @@ export default {
     min-width: 600px;
   }
   
-  .table th,
-  .table td {
-    padding: 0.5rem;
-    font-size: 0.875rem;
-  }
-  
   .wrap-text {
     max-width: 150px;
   }
   
-  .button.is-small {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
+  .pagination {
+    padding: 1rem;
   }
   
-  /* Mobile pagination */
   .pagination-list {
     flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .pagination-list li {
-    margin: 0.125rem;
-  }
-  
-  .pagination-link {
-    min-width: 2.5rem;
-    height: 2.5rem;
-  }
-  
-  /* Hide some pagination elements on very small screens */
-  .pagination-ellipsis {
-    display: none;
   }
 }
 
 @media screen and (max-width: 480px) {
+  .dashboard {
+    padding: 0.5rem;
+  }
+  
+  .header-card {
+    padding: 0.75rem;
+  }
+  
   .table {
     min-width: 500px;
   }
@@ -1011,260 +1265,14 @@ export default {
     max-width: 120px;
   }
   
-  .dashboard {
-    padding: 0.25rem;
+  .btn-standard {
+    padding: 0.5rem 1rem;
+    font-size: 14px;
   }
   
-  /* Stack columns on very small screens */
-  .columns.is-mobile .column {
-    padding: 0.25rem;
+  .folder-btn {
+    padding: 0.5rem 1rem;
+    font-size: 14px;
   }
-  
-  /* Smaller buttons on mobile */
-  .button {
-    font-size: 0.875rem;
-  }
-  
-  .title.is-size-4-mobile {
-    font-size: 1.25rem !important;
-  }
-  
-  /* Mobile-friendly pagination */
-  .pagination {
-    flex-wrap: wrap;
-  }
-  
-  .pagination-previous,
-  .pagination-next {
-    margin-bottom: 0.5rem;
-  }
-}
-
-/* Logout link styling */
-.logout-link {
-  color: rgba(255, 255, 255, 0.9) !important;
-  background: rgba(239, 68, 68, 0.2) !important;
-  border: 1px solid rgba(239, 68, 68, 0.3) !important;
-}
-
-.logout-link:hover {
-  background: rgba(239, 68, 68, 0.9) !important;
-  color: #ffffff !important;
-  border-color: rgba(239, 68, 68, 1) !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
-}
-
-.logout-link .icon {
-  color: rgba(255, 255, 255, 0.9) !important;
-}
-
-.logout-link:hover .icon {
-  color: #ffffff !important;
-}
-
-/* Fast search input styling */
-.input[placeholder*="search"] {
-  transition: all 0.2s ease !important;
-  border: 2px solid #e2e8f0 !important;
-}
-
-.input[placeholder*="search"]:focus {
-  border-color: #000000 !important;
-  box-shadow: 0 0 0 0.125em rgba(0, 0, 0, 0.25) !important;
-  transform: scale(1.02) !important;
-}
-
-.input[placeholder*="search"]:not(:placeholder-shown) {
-  border-color: #48c774 !important;
-  background-color: #f0fff4 !important;
-}
-
-/* Header Card Styling */
-.header-card {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border: 2px solid #e9ecef;
-}
-
-/* Gradient Text for WECARE.DIGITAL */
-.gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 800;
-  letter-spacing: 1px;
-}
-
-/* Button Styling */
-.btn-edit {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
-  border: none !important;
-  color: white !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3) !important;
-}
-
-.btn-edit:hover {
-  transform: translateY(-2px) scale(1.05) !important;
-  box-shadow: 0 6px 16px rgba(79, 172, 254, 0.5) !important;
-}
-
-.btn-delete {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
-  border: none !important;
-  color: white !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3) !important;
-}
-
-.btn-delete:hover {
-  transform: translateY(-2px) scale(1.05) !important;
-  box-shadow: 0 6px 16px rgba(245, 87, 108, 0.5) !important;
-}
-
-.btn-refresh {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
-  border: 2px solid #667eea !important;
-  color: #667eea !important;
-  font-weight: 600 !important;
-  transition: all 0.3s ease !important;
-}
-
-.btn-refresh:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: white !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
-}
-
-.btn-create {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  border: none !important;
-  color: white !important;
-  font-weight: 600 !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
-}
-
-.btn-create:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
-}
-
-/* Search Input Enhanced */
-.search-input {
-  border: 2px solid #e9ecef !important;
-  transition: all 0.3s ease !important;
-  font-size: 1rem !important;
-  padding: 1.5rem 1rem 1.5rem 3rem !important;
-}
-
-.search-input:focus {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 0.2em rgba(102, 126, 234, 0.25) !important;
-}
-
-/* Table Container with Border */
-.table-container {
-  border-radius: 20px;
-  overflow: hidden;
-  border: 2px solid #e9ecef;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  background: white;
-}
-
-/* Pagination Enhanced */
-.pagination {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 20px;
-  border: 2px solid #e9ecef;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.pagination-link,
-.pagination-previous,
-.pagination-next {
-  border: 2px solid #e9ecef !important;
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-  transition: all 0.3s ease !important;
-}
-
-.pagination-link:hover,
-.pagination-previous:hover,
-.pagination-next:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: white !important;
-  border-color: #667eea !important;
-  transform: translateY(-2px) !important;
-}
-
-.pagination-link.is-current {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  border-color: #667eea !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
-}
-
-/* Modal Styling */
-.modal-content .box {
-  border-radius: 20px;
-  border: 2px solid #e9ecef;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-}
-
-.modal-content .box .subtitle {
-  color: #667eea;
-  font-weight: 700;
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.modal-content .input {
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-}
-
-.modal-content .input:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 0.2em rgba(102, 126, 234, 0.25);
-}
-
-.modal-content .button {
-  border-radius: 12px;
-  font-weight: 600;
-  padding: 1.25rem 2rem;
-  transition: all 0.3s ease;
-}
-
-.modal-content .button[type="submit"] {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-}
-
-.modal-content .button[type="submit"]:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-}
-
-/* Notification Styling */
-.notification {
-  border-radius: 15px;
-  border: 2px solid;
-  font-weight: 500;
-}
-
-.notification.is-success {
-  border-color: #48c774;
-}
-
-.notification.is-danger {
-  border-color: #f14668;
 }
 </style>
