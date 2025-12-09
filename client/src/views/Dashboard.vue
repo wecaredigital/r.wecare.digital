@@ -317,13 +317,13 @@
             <td>{{ idx + 1 + (currentPage - 1) * pageSize }}</td>
             <td>
               {{ link.id }}
-              <button class="btn-copy" @click="copyShort(link.id)" title="Copy short link" aria-label="Copy short link">
+              <button class="btn-copy" @click="copyShort(link.id, $event)" title="Copy short link" aria-label="Copy short link">
                 <i class="fas fa-link" aria-hidden="true"></i>
               </button>
             </td>
             <td class="wrap-text">
               <a :href="link.url" target="_blank">{{ link.url }}</a>
-              <button class="btn-copy" @click="copy(link.url)" title="Copy URL" aria-label="Copy URL">
+              <button class="btn-copy" @click="copy(link.url, $event)" title="Copy URL" aria-label="Copy URL">
                 <i class="fas fa-link" aria-hidden="true"></i>
               </button>
             </td>
@@ -631,17 +631,33 @@ export default {
         return false;
       }
     },
-    copy(text) {
+    copy(text, event) {
       navigator.clipboard.writeText(text).then(() => {
         this.addNotification("Link copied to clipboard", "success", 3000);
+        // Add copied class for tooltip
+        if (event && event.target) {
+          const btn = event.target.closest('.btn-copy');
+          if (btn) {
+            btn.classList.add('copied');
+            setTimeout(() => btn.classList.remove('copied'), 2000);
+          }
+        }
       }).catch(() => {
         this.addNotification("Failed to copy link", "error", 3000);
       });
     },
-    copyShort(id) {
+    copyShort(id, event) {
       const shortUrl = `https://r.wecare.digital/${id}`;
       navigator.clipboard.writeText(shortUrl).then(() => {
         this.addNotification(`Short link copied: r.wecare.digital/${id}`, "success", 3000);
+        // Add copied class for tooltip
+        if (event && event.target) {
+          const btn = event.target.closest('.btn-copy');
+          if (btn) {
+            btn.classList.add('copied');
+            setTimeout(() => btn.classList.remove('copied'), 2000);
+          }
+        }
       }).catch(() => {
         this.addNotification("Failed to copy short link", "error", 3000);
       });
@@ -1238,6 +1254,7 @@ p, span, td, th, label {
   border: none;
   border-radius: 30px;
   padding: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .folder-search-wrapper {
@@ -1265,7 +1282,7 @@ p, span, td, th, label {
 .folder-search-input:focus {
   outline: 2px solid #000000;
   outline-offset: 2px;
-  border-color: #000000 !important;
+  background: #FFFFFF !important;
   box-shadow: none !important;
 }
 
@@ -1632,8 +1649,30 @@ p, span, td, th, label {
   background: #F5F5F5;
 }
 
+.table tbody tr {
+  transition: all 0.2s ease;
+}
+
 .table tbody tr:hover td {
   background: #E8E8E8 !important;
+}
+
+.table tbody tr:hover .btn-action {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.table tbody tr:hover .btn-copy {
+  opacity: 1;
+}
+
+/* Hide action buttons slightly until hover */
+.table tbody tr .btn-action {
+  opacity: 0.7;
+}
+
+.table tbody tr .btn-copy {
+  opacity: 0.7;
 }
 
 .wrap-text {
@@ -1712,15 +1751,20 @@ p, span, td, th, label {
   cursor: pointer;
   margin-left: 0.5rem;
   font-size: 14px;
-  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .btn-copy:hover {
   background: #000000;
   color: #FFFFFF;
+}
+
+.btn-copy:active {
+  transform: scale(0.95);
 }
 
 .btn-copy:focus {
@@ -1732,6 +1776,42 @@ p, span, td, th, label {
   font-size: 14px;
   display: block;
   line-height: 1;
+}
+
+/* Copy Tooltip */
+.btn-copy::after {
+  content: 'Copied!';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px);
+  background: #000000;
+  color: #FFFFFF;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.btn-copy.copied::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-8px);
+  animation: tooltipFade 2s ease forwards;
+}
+
+@keyframes tooltipFade {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* ===== PAGINATION ===== */
@@ -1841,6 +1921,7 @@ p, span, td, th, label {
   padding: 0.5rem 1rem;
   display: inline-block;
   white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 /* ===== MODAL ===== */
@@ -2347,22 +2428,23 @@ p, span, td, th, label {
 }
 
 .toast-notification {
-  background: #FFFFFF;
-  border: 1px solid #000000;
+  background: #000000;
+  color: #FFFFFF;
+  border: none;
   border-radius: 30px;
   padding: 1rem 1.25rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
   min-width: 300px;
 }
 
 .toast-success {
-  border-color: #00AA00;
+  background: #000000;
 }
 
 .toast-error {
-  border-color: #FF0000;
+  background: #000000;
 }
 
 .toast-content {
@@ -2376,18 +2458,19 @@ p, span, td, th, label {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+  stroke: #FFFFFF;
 }
 
 .toast-success .toast-icon {
-  stroke: #00AA00;
+  stroke: #FFFFFF;
 }
 
 .toast-error .toast-icon {
-  stroke: #FF0000;
+  stroke: #FFFFFF;
 }
 
 .toast-message {
-  color: #000000;
+  color: #FFFFFF;
   font-size: 14px;
   font-weight: 300;
   flex: 1;
@@ -2415,7 +2498,7 @@ p, span, td, th, label {
 .toast-close svg {
   width: 14px;
   height: 14px;
-  stroke: #666666;
+  stroke: #FFFFFF;
   stroke-width: 2;
 }
 
@@ -2424,17 +2507,18 @@ p, span, td, th, label {
   bottom: 0;
   left: 0;
   height: 3px;
-  background: #000000;
+  background: #FFFFFF;
   width: 100%;
   animation: toast-progress linear forwards;
+  opacity: 0.5;
 }
 
 .toast-success .toast-progress {
-  background: #00AA00;
+  background: #FFFFFF;
 }
 
 .toast-error .toast-progress {
-  background: #FF0000;
+  background: #FFFFFF;
 }
 
 @keyframes toast-progress {
@@ -2602,6 +2686,8 @@ p, span, td, th, label {
 /* ===== MOBILE RESPONSIVENESS FOR NEW FEATURES ===== */
 @media screen and (max-width: 768px) {
   .toast-container {
+    top: auto;
+    bottom: 20px;
     right: 10px;
     left: 10px;
     max-width: none;
