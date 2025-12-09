@@ -1283,11 +1283,13 @@ export default {
 .modal-content .box {
   background: #FFFFFF;
   border: 1px solid #000000;
+  border-radius: 30px;
   padding: 2rem;
 }
 
 .modal-content .box .subtitle {
   color: #000000;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 16px;
   font-weight: 300;
   margin-bottom: 1.5rem;
@@ -1295,6 +1297,7 @@ export default {
 
 .modal-content .label {
   color: #000000;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
   margin-bottom: 0.5rem;
