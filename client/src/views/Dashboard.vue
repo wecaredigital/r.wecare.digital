@@ -1089,7 +1089,20 @@ html, body {
   font-weight: 300;
   line-height: 1.5;
   color: #000000;
-  background-color: #FFFFFF;ground-color: #FFFFFF;
+  background-color: #FFFFFF;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Prevent horizontal scroll on all containers */
+* {
+  box-sizing: border-box;
+}
+
+.columns {
+  margin: 0 !important;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 p, span, td, th, label {
@@ -1186,13 +1199,13 @@ p, span, td, th, label {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: #FFFFFF;
+  background: #F5F5F5;
   color: #000000;
-  border: 1px solid #000000;
+  border: none;
   border-radius: 30px;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
@@ -1200,7 +1213,7 @@ p, span, td, th, label {
 }
 
 .folder-dropdown-toggle:hover {
-  opacity: 0.9;
+  background: #E8E8E8;
 }
 
 .folder-dropdown-toggle:focus {
@@ -1221,8 +1234,8 @@ p, span, td, th, label {
 
 .folder-dropdown-content {
   margin-top: 0.5rem;
-  background: #FFFFFF;
-  border: 1px solid #000000;
+  background: #F5F5F5;
+  border: none;
   border-radius: 30px;
   padding: 0.75rem;
 }
@@ -1235,7 +1248,7 @@ p, span, td, th, label {
   width: 100%;
   background: #FFFFFF !important;
   color: #000000 !important;
-  border: 1px solid #000000 !important;
+  border: none !important;
   border-radius: 30px !important;
   padding: 0.5rem 1rem !important;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
@@ -1308,19 +1321,19 @@ p, span, td, th, label {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: #FFFFFF !important;
+  background: #F5F5F5 !important;
   color: #000000 !important;
-  border: 1px solid #000000 !important;
+  border: none !important;
   border-radius: 30px !important;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
   font-size: 14px;
   font-weight: 300;
 }
 
 .folder-btn:hover {
-  opacity: 0.9;
+  background: #E8E8E8 !important;
 }
 
 .folder-btn.is-active {
@@ -1417,9 +1430,9 @@ p, span, td, th, label {
 
 /* ===== SEARCH BAR ===== */
 .search-input {
-  background: #FFFFFF !important;
+  background: #F5F5F5 !important;
   color: #000000 !important;
-  border: 1px solid #000000 !important;
+  border: none !important;
   border-radius: 30px !important;
   padding: 0.75rem 1.25rem !important;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
@@ -1437,7 +1450,7 @@ p, span, td, th, label {
 .search-input:focus {
   outline: 2px solid #000000;
   outline-offset: 2px;
-  border-color: #000000 !important;
+  background: #FFFFFF !important;
   box-shadow: none !important;
 }
 
@@ -1796,8 +1809,8 @@ p, span, td, th, label {
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
-  background: #FFFFFF;
-  border: 1px solid #000000;
+  background: #F5F5F5;
+  border: none;
   border-radius: 30px;
   padding: 0.5rem 1rem;
   display: inline-block;
@@ -1838,9 +1851,9 @@ p, span, td, th, label {
 }
 
 .modal-content .input {
-  background: #FFFFFF;
+  background: #F5F5F5;
   color: #000000;
-  border: 1px solid #000000;
+  border: none;
   border-radius: 30px;
   padding: 0.75rem 1.25rem;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -1850,9 +1863,10 @@ p, span, td, th, label {
 }
 
 .modal-content .input:focus {
-  outline: none;
-  border-color: #000000;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+  background: #FFFFFF;
+  box-shadow: none;
 }
 
 .modal-content .input:read-only {
