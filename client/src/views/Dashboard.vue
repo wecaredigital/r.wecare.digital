@@ -852,7 +852,7 @@ export default {
   color: #FFFFFF;
   border: 1px solid #000000;
   border-radius: 30px;
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 14px;
@@ -1115,8 +1115,9 @@ export default {
 .btn-action {
   background: transparent;
   color: #000000;
-  border: none;
-  padding: 0.25rem;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.25rem 0.5rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1124,6 +1125,8 @@ export default {
   transition: all 0.2s ease;
   font-size: 16px;
   line-height: 1;
+  min-width: 32px;
+  min-height: 32px;
 }
 
 .btn-action:hover {
@@ -1133,6 +1136,7 @@ export default {
 .btn-action i {
   font-size: 16px;
   display: block;
+  line-height: 1;
 }
 
 /* Copy Button */
@@ -1337,11 +1341,13 @@ export default {
     left: 0;
     width: 280px;
     z-index: 999;
-    background: #FFFFFF;
+    background: #F7F7F7;
     border-right: 1px solid #FFFFFF;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    padding-left: 20px;
+    padding-right: 20px;
   }
   
   .sidebar-folders:not(.is-hidden-mobile) {
