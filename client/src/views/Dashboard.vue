@@ -1321,9 +1321,9 @@ p, span, td, th, label {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: transparent !important;
+  background: #F5F5F5 !important;
   color: #000000 !important;
-  border: 1px solid #000000 !important;
+  border: none !important;
   border-radius: 30px !important;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
@@ -1333,7 +1333,7 @@ p, span, td, th, label {
 }
 
 .folder-btn:hover {
-  background: #F5F5F5 !important;
+  background: #E8E8E8 !important;
 }
 
 .folder-btn.is-active {
@@ -1380,13 +1380,13 @@ p, span, td, th, label {
 }
 
 .btn-signout {
-  background: transparent !important;
-  color: #000000 !important;
-  border: 1px solid #000000 !important;
+  background: #000000 !important;
+  color: #FFFFFF !important;
+  border: none !important;
 }
 
 .btn-signout:hover {
-  background: #F5F5F5 !important;
+  opacity: 0.8 !important;
 }
 
 /* ===== DASHBOARD MAIN AREA ===== */
