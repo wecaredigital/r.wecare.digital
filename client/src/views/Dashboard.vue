@@ -2,10 +2,12 @@
   <div class="columns is-mobile">
     <!-- Mobile Menu Toggle -->
     <div class="mobile-menu-toggle is-hidden-tablet">
-      <button class="button is-white" @click="showSidebar = !showSidebar">
-        <span class="icon">
-          <i class="fas fa-bars"></i>
-        </span>
+      <button class="hamburger-btn" @click="showSidebar = !showSidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
       </button>
     </div>
 
@@ -14,11 +16,12 @@
          :class="{ 'is-hidden-mobile': !showSidebar }">
       <aside class="menu">
         <div class="menu-header">
-          <p class="menu-label">Folders</p>
-          <button class="button is-small mobile-close is-hidden-tablet" @click="showSidebar = false">
+          <button class="mobile-close is-hidden-tablet" @click="showSidebar = false">
             <span>✕</span>
           </button>
         </div>
+        
+        <!-- All Links Button -->
         <ul class="menu-list">
           <li>
             <button :class="['folder-btn', { 'is-active': selectedFolder === '' }]" @click="selectFolder('')">
@@ -36,18 +39,36 @@
               <span class="folder-count">{{ storeLinks.length }}</span>
             </button>
           </li>
-          <li v-for="folder in folderList" :key="folder">
-            <button :class="['folder-btn', { 'is-active': selectedFolder === folder }]" @click="selectFolder(folder)">
-              <span class="folder-name">
-                <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                </svg>
-                {{ folder }}
-              </span>
-              <span class="folder-count">{{ getFolderCount(folder) }}</span>
-            </button>
-          </li>
         </ul>
+
+        <!-- Folders Dropdown -->
+        <div class="folders-section">
+          <button class="folder-dropdown-toggle" @click="foldersExpanded = !foldersExpanded">
+            <span class="folder-name">
+              <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+              Folders
+            </span>
+            <svg class="chevron-icon" :class="{ 'expanded': foldersExpanded }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          
+          <ul class="menu-list folder-list" v-show="foldersExpanded">
+            <li v-for="folder in folderList" :key="folder">
+              <button :class="['folder-btn folder-item', { 'is-active': selectedFolder === folder }]" @click="selectFolder(folder)">
+                <span class="folder-name">
+                  <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  {{ folder }}
+                </span>
+                <span class="folder-count">{{ getFolderCount(folder) }}</span>
+              </button>
+            </li>
+          </ul>
+        </div>
 
         <!-- Account Section -->
         <p class="menu-label account-label">Account</p>
@@ -190,10 +211,10 @@
             <td>{{ link.folder }}</td>
             <td>{{ link.remark }}</td>
             <td class="action-buttons">
-              <button class="btn-icon btn-edit" @click="editLink(link)" title="Edit link">
+              <button class="btn-action" @click="editLink(link)" title="Edit link">
                 <i class="fas fa-pen"></i>
               </button>
-              <button class="btn-icon btn-delete" @click="deleteLink(link.id)" title="Delete link">
+              <button class="btn-action" @click="deleteLink(link.id)" title="Delete link">
                 <i class="fas fa-trash-alt"></i>
               </button>
             </td>
@@ -305,7 +326,8 @@ export default {
       successMsg: null,
       errorMsg: null,
       showSidebar: false,
-      refreshing: false
+      refreshing: false,
+      foldersExpanded: true
     };
   },
   computed: {
@@ -768,16 +790,24 @@ export default {
   left: 15px;
   z-index: 1000;
   background: #FFFFFF;
-  border: 1px solid #000000;
-  border-radius: 30px;
-  padding: 0.5rem;
+  border: none;
+  padding: 0;
 }
 
-.mobile-menu-toggle .button {
-  background: #000000;
-  color: #FFFFFF;
-  border: 1px solid #000000;
-  border-radius: 30px;
+.hamburger-btn {
+  background: #FFFFFF;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger-btn svg {
+  width: 24px;
+  height: 24px;
+  stroke: #000000;
 }
 
 /* ===== SIDEBAR ===== */
@@ -786,7 +816,7 @@ export default {
   position: relative;
   padding: 1.5rem 1rem;
   background: #FFFFFF;
-  border-right: 1px solid #000000;
+  border-right: 1px solid #FFFFFF;
 }
 
 .mobile-close {
@@ -796,13 +826,14 @@ export default {
   border-radius: 30px;
   padding: 0.5rem 1rem;
   cursor: pointer;
+  margin-left: auto;
 }
 
 .menu-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .menu-label {
@@ -814,6 +845,52 @@ export default {
 
 .menu-label.account-label {
   margin-top: 2rem;
+}
+
+/* Folders Dropdown */
+.folders-section {
+  margin-bottom: 1rem;
+}
+
+.folder-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 300;
+  margin-bottom: 0.5rem;
+}
+
+.folder-dropdown-toggle:hover {
+  opacity: 0.8;
+}
+
+.chevron-icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  transition: transform 0.2s ease;
+}
+
+.chevron-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.folder-list {
+  padding-left: 0.5rem;
+}
+
+.folder-item {
+  font-size: 13px;
+  padding: 0.6rem 1rem;
 }
 
 /* Folder Buttons */
@@ -893,8 +970,8 @@ export default {
 /* ===== HEADER CARD ===== */
 .header-card {
   background: #FFFFFF;
-  border: 1px solid #000000;
-  padding: 1.5rem 2rem;
+  border: none;
+  padding: 1.5rem 0;
   margin-bottom: 1.5rem;
 }
 
@@ -1034,30 +1111,29 @@ export default {
 .action-buttons {
   white-space: nowrap;
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.btn-icon {
-  background: #000000;
-  color: #FFFFFF;
-  border: 1px solid #000000;
-  border-radius: 30px;
-  width: 36px;
-  height: 36px;
+.btn-action {
+  background: #FFFFFF;
+  color: #000000;
+  border: none;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 14px;
+  font-size: 16px;
 }
 
-.btn-icon:hover {
-  opacity: 0.8;
+.btn-action:hover {
+  opacity: 0.6;
+  text-decoration: underline;
 }
 
-.btn-icon i {
-  font-size: 14px;
+.btn-action i {
+  font-size: 16px;
 }
 
 /* Copy Button */
@@ -1261,7 +1337,8 @@ export default {
     width: 280px;
     z-index: 999;
     background: #FFFFFF;
-    border-right: 1px solid #000000;
+    border-right: 1px solid #FFFFFF;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
     transform: translateX(-100%);
     transition: transform 0.3s ease;
   }
