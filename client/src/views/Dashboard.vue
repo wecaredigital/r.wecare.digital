@@ -1489,6 +1489,21 @@ p, span, td, th, label {
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
+  border: none !important;
+}
+
+/* Override all Bulma table borders */
+.table td,
+.table th {
+  border: none !important;
+  border-width: 0 !important;
+}
+
+/* Override Bulma striped table borders */
+.table.is-striped tbody tr:not(.is-selected) td,
+.table.is-striped tbody tr:not(.is-selected) th {
+  border: none !important;
+  border-width: 0 !important;
 }
 
 /* Column widths - narrow serial number column */
@@ -1527,8 +1542,8 @@ p, span, td, th, label {
 .table thead th {
   background: #FFFFFF;
   color: #000000;
-  border: none;
-  border-bottom: 1px solid #000000;
+  border: none !important;
+  border-bottom: 1px solid #000000 !important;
   padding: 0.75rem 1rem;
   text-align: left;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -1539,8 +1554,8 @@ p, span, td, th, label {
 
 .table tbody td {
   color: #000000;
-  border: none;
-  border-bottom: 1px solid #000000;
+  border: none !important;
+  border-bottom: 1px solid #000000 !important;
   padding: 0.75rem 1rem;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
@@ -1551,7 +1566,7 @@ p, span, td, th, label {
 
 /* Remove bottom border from last row */
 .table tbody tr:last-child td {
-  border-bottom: none;
+  border-bottom: none !important;
 }
 
 /* Alternating row background colors */
