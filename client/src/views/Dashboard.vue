@@ -170,11 +170,13 @@
             <button class="pagination-link btn-standard" @click="goToPage(totalPages)">{{ totalPages }}</button>
           </li>
         </ul>
-        
-        <!-- Page info -->
+      
+      <!-- Page info -->
+      <div class="pagination-info-wrapper">
         <div class="pagination-info">
           Showing {{ startItem }}-{{ endItem }} of {{ filteredLinks.length }} links
         </div>
+      </div>
       </nav>
 
       
@@ -196,11 +198,15 @@
             <td>{{ idx + 1 + (currentPage - 1) * pageSize }}</td>
             <td>
               {{ link.id }}
-              <button class="btn-copy" @click="copyShort(link.id)">📋</button>
+              <button class="btn-copy" @click="copyShort(link.id)" title="Copy short link">
+                <i class="fas fa-link"></i>
+              </button>
             </td>
             <td class="wrap-text">
               <a :href="link.url" target="_blank">{{ link.url }}</a>
-              <button class="btn-copy" @click="copy(link.url)">📋</button>
+              <button class="btn-copy" @click="copy(link.url)" title="Copy URL">
+                <i class="fas fa-link"></i>
+              </button>
             </td>
             <td>{{ link.folder }}</td>
             <td>{{ link.remark }}</td>
@@ -209,7 +215,7 @@
                 <i class="fas fa-pen"></i>
               </button>
               <button class="btn-action" @click="deleteLink(link.id)" title="Delete link">
-                <i class="fas fa-trash-alt"></i>
+                <i class="fas fa-times"></i>
               </button>
             </td>
           </tr>
@@ -855,6 +861,7 @@ export default {
   padding: 0.75rem 1.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
   margin-bottom: 0.5rem;
@@ -1002,6 +1009,7 @@ export default {
   border: 1px solid #000000 !important;
   border-radius: 30px !important;
   padding: 0.75rem 1.25rem !important;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
   font-size: 14px !important;
   font-weight: 300 !important;
   width: 100%;
@@ -1028,6 +1036,7 @@ export default {
   padding: 0.75rem 1.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
 }
@@ -1053,6 +1062,7 @@ export default {
   border: 1px solid #000000;
   overflow: hidden;
   margin-bottom: 2rem;
+  border-radius: 0;
 }
 
 .table {
@@ -1060,6 +1070,9 @@ export default {
   background: #FFFFFF;
   border-collapse: collapse;
   margin: 0;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 300;
 }
 
 .table thead th {
@@ -1068,6 +1081,7 @@ export default {
   border-bottom: 1px solid #000000;
   padding: 1rem;
   text-align: left;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
 }
@@ -1077,6 +1091,7 @@ export default {
   color: #000000;
   border-bottom: 1px solid #000000;
   padding: 1rem;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
 }
@@ -1093,11 +1108,15 @@ export default {
   word-break: break-word;
   white-space: normal;
   max-width: 300px;
+  overflow-wrap: break-word;
 }
 
 .table a {
   color: #000000;
   text-decoration: underline;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 300;
 }
 
 .table a:hover {
@@ -1113,9 +1132,9 @@ export default {
 }
 
 .btn-action {
-  background: transparent;
+  background: #FFFFFF;
   color: #000000;
-  border: 1px solid #000000;
+  border: 1px solid #FFFFFF;
   border-radius: 30px;
   padding: 0.25rem 0.5rem;
   display: inline-flex;
@@ -1143,18 +1162,26 @@ export default {
 .btn-copy {
   background: #FFFFFF;
   color: #000000;
-  border: 1px solid #000000;
+  border: 1px solid #FFFFFF;
   border-radius: 30px;
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.5rem;
   cursor: pointer;
   margin-left: 0.5rem;
   font-size: 14px;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-copy:hover {
-  background: #000000;
-  color: #FFFFFF;
+  opacity: 0.6;
+}
+
+.btn-copy i {
+  font-size: 14px;
+  display: block;
+  line-height: 1;
 }
 
 /* ===== PAGINATION ===== */
@@ -1224,16 +1251,22 @@ export default {
   font-size: 14px;
 }
 
-.pagination-info {
-  width: 100%;
+.pagination-info-wrapper {
   text-align: center;
-  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.pagination-info {
+  display: inline-block;
+  text-align: center;
   color: #000000;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
   background: #FFFFFF;
-  border: 1px solid #FFFFFF;
-  padding: 0.75rem;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.5rem 1rem;
 }
 
 /* ===== MODAL ===== */
@@ -1267,6 +1300,7 @@ export default {
   border: 1px solid #000000;
   border-radius: 30px;
   padding: 0.75rem 1.25rem;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
   width: 100%;
@@ -1306,9 +1340,11 @@ export default {
 .notification {
   background: #FFFFFF;
   border: 1px solid #000000;
+  border-radius: 30px;
   padding: 1rem;
   margin-bottom: 1rem;
   position: relative;
+  font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
 }
