@@ -133,51 +133,51 @@
       </div>
 
       <!-- Pagination above table -->
-      <nav class="pagination is-centered mb-4" v-if="totalPages > 1">
-        <button class="pagination-previous btn-standard" 
-           :disabled="currentPage === 1" 
-           @click="previousPage"
-           :class="{ 'is-disabled': currentPage === 1 }">
-          <span>Previous</span>
-        </button>
-        <button class="pagination-next btn-standard" 
-           :disabled="currentPage === totalPages" 
-           @click="nextPage"
-           :class="{ 'is-disabled': currentPage === totalPages }">
-          <span>Next</span>
-        </button>
-        <ul class="pagination-list">
-          <!-- First page -->
-          <li v-if="currentPage > 3">
-            <button class="pagination-link btn-standard" @click="goToPage(1)">1</button>
-          </li>
-          <li v-if="currentPage > 4">
-            <span class="pagination-ellipsis">&hellip;</span>
-          </li>
-          
-          <!-- Pages around current -->
-          <li v-for="page in visiblePages" :key="page">
-            <button class="pagination-link btn-standard" 
-               :class="{ 'is-current': currentPage === page }"
-               @click="goToPage(page)">{{ page }}</button>
-          </li>
-          
-          <!-- Last page -->
-          <li v-if="currentPage < totalPages - 3">
-            <span class="pagination-ellipsis">&hellip;</span>
-          </li>
-          <li v-if="currentPage < totalPages - 2">
-            <button class="pagination-link btn-standard" @click="goToPage(totalPages)">{{ totalPages }}</button>
-          </li>
-        </ul>
-      
-      <!-- Page info -->
-      <div class="pagination-info-wrapper">
+      <div class="pagination-wrapper" v-if="totalPages > 1">
+        <!-- Page info on the right -->
         <div class="pagination-info">
           Showing {{ startItem }}-{{ endItem }} of {{ filteredLinks.length }} links
         </div>
+        
+        <nav class="pagination is-centered mb-4">
+          <button class="pagination-previous btn-standard" 
+             :disabled="currentPage === 1" 
+             @click="previousPage"
+             :class="{ 'is-disabled': currentPage === 1 }">
+            <span>Previous</span>
+          </button>
+          <button class="pagination-next btn-standard" 
+             :disabled="currentPage === totalPages" 
+             @click="nextPage"
+             :class="{ 'is-disabled': currentPage === totalPages }">
+            <span>Next</span>
+          </button>
+          <ul class="pagination-list">
+            <!-- First page -->
+            <li v-if="currentPage > 3">
+              <button class="pagination-link btn-standard" @click="goToPage(1)">1</button>
+            </li>
+            <li v-if="currentPage > 4">
+              <span class="pagination-ellipsis">&hellip;</span>
+            </li>
+            
+            <!-- Pages around current -->
+            <li v-for="page in visiblePages" :key="page">
+              <button class="pagination-link btn-standard" 
+                 :class="{ 'is-current': currentPage === page }"
+                 @click="goToPage(page)">{{ page }}</button>
+            </li>
+            
+            <!-- Last page -->
+            <li v-if="currentPage < totalPages - 3">
+              <span class="pagination-ellipsis">&hellip;</span>
+            </li>
+            <li v-if="currentPage < totalPages - 2">
+              <button class="pagination-link btn-standard" @click="goToPage(totalPages)">{{ totalPages }}</button>
+            </li>
+          </ul>
+        </nav>
       </div>
-      </nav>
 
       
       <!-- Links Table -->
@@ -854,8 +854,8 @@ export default {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: #000000;
-  color: #FFFFFF;
+  background: #FFFFFF;
+  color: #000000;
   border: 1px solid #000000;
   border-radius: 30px;
   padding: 0.75rem 1.5rem;
@@ -1134,54 +1134,58 @@ export default {
 .btn-action {
   background: #FFFFFF;
   color: #000000;
-  border: 1px solid #FFFFFF;
+  border: 1px solid #000000;
   border-radius: 30px;
-  padding: 0.25rem 0.5rem;
+  padding: 0.4rem 0.6rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1;
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 36px;
+  min-height: 36px;
 }
 
 .btn-action:hover {
-  opacity: 0.6;
+  background: #F5F5F5;
 }
 
 .btn-action i {
-  font-size: 16px;
+  font-size: 14px;
   display: block;
   line-height: 1;
+  color: #000000;
 }
 
 /* Copy Button */
 .btn-copy {
   background: #FFFFFF;
   color: #000000;
-  border: 1px solid #FFFFFF;
+  border: 1px solid #000000;
   border-radius: 30px;
-  padding: 0.25rem 0.5rem;
+  padding: 0.3rem 0.5rem;
   cursor: pointer;
   margin-left: 0.5rem;
-  font-size: 14px;
+  font-size: 12px;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
 }
 
 .btn-copy:hover {
-  opacity: 0.6;
+  background: #F5F5F5;
 }
 
 .btn-copy i {
-  font-size: 14px;
+  font-size: 12px;
   display: block;
   line-height: 1;
+  color: #000000;
 }
 
 /* ===== PAGINATION ===== */
@@ -1195,6 +1199,7 @@ export default {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 2rem;
+  clear: both;
 }
 
 .pagination-list {
@@ -1251,14 +1256,12 @@ export default {
   font-size: 14px;
 }
 
-.pagination-info-wrapper {
-  text-align: center;
-  margin-bottom: 2rem;
+.pagination-wrapper {
+  margin-bottom: 1rem;
 }
 
 .pagination-info {
-  display: inline-block;
-  text-align: center;
+  text-align: right;
   color: #000000;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
@@ -1267,6 +1270,9 @@ export default {
   border: 1px solid #000000;
   border-radius: 30px;
   padding: 0.5rem 1rem;
+  display: inline-block;
+  float: right;
+  margin-bottom: 1rem;
 }
 
 /* ===== MODAL ===== */
