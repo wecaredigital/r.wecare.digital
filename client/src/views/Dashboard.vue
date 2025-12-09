@@ -1527,9 +1527,8 @@ p, span, td, th, label {
 .table thead th {
   background: #FFFFFF;
   color: #000000;
-  border: none !important;
-  border-bottom: 1px solid #000000 !important;
-  border-right: 1px solid #000000 !important;
+  border: none;
+  border-bottom: 1px solid #000000;
   padding: 0.75rem 1rem;
   text-align: left;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -1538,16 +1537,10 @@ p, span, td, th, label {
   white-space: nowrap;
 }
 
-/* Remove right border on last header cell */
-.table thead th:last-child {
-  border-right: none !important;
-}
-
 .table tbody td {
   color: #000000;
-  border: none !important;
-  border-bottom: 1px solid #000000 !important;
-  border-right: 1px solid #000000 !important;
+  border: none;
+  border-bottom: 1px solid #000000;
   padding: 0.75rem 1rem;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
@@ -1556,19 +1549,9 @@ p, span, td, th, label {
   overflow-wrap: break-word;
 }
 
-/* Remove right border on last body cell */
-.table tbody td:last-child {
-  border-right: none !important;
-}
-
-/* Remove any Bulma default borders */
-.table thead th:first-child,
-.table tbody td:first-child {
-  border-left: none !important;
-}
-
-.table thead tr:first-child th {
-  border-top: none !important;
+/* Remove bottom border from last row */
+.table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 /* Alternating row background colors */
