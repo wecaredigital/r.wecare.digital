@@ -64,17 +64,17 @@
                 @click.stop
               />
             </div>
-            <ul class="menu-list folder-list">
-              <li v-for="folder in filteredFolderList" :key="folder">
-                <button :class="['folder-btn folder-item', { 'is-active': selectedFolder === folder }]" @click="selectFolder(folder)" :aria-label="`View folder ${folder}`">
-                  <span class="folder-name">
-                    <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                    {{ folder }}
-                  </span>
-                  <span class="folder-count">{{ getFolderCount(folder) }}</span>
-                </button>
+            <ul class="folder-dropdown-list">
+              <li v-for="folder in filteredFolderList" :key="folder" 
+                  :class="['folder-dropdown-item', { 'is-active': selectedFolder === folder }]" 
+                  @click="selectFolder(folder)">
+                <span class="folder-name">
+                  <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  {{ folder }}
+                </span>
+                <span class="folder-count">{{ getFolderCount(folder) }}</span>
               </li>
             </ul>
           </div>
@@ -941,10 +941,14 @@ p, span, td, th, label {
 
 .folder-dropdown-content {
   margin-top: 0.5rem;
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 0.75rem;
 }
 
 .folder-search-wrapper {
-  padding: 0 0.5rem 0.5rem 0.5rem;
+  padding: 0 0 0.5rem 0;
 }
 
 .folder-search-input {
@@ -972,14 +976,40 @@ p, span, td, th, label {
   box-shadow: none !important;
 }
 
-.folder-list {
-  padding-left: 0.5rem;
+.folder-dropdown-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
-.folder-item {
-  font-size: 13px;
+.folder-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 0.6rem 1rem;
+  cursor: pointer;
   color: #000000 !important;
+  font-size: 13px;
+  font-weight: 300;
+  transition: background 0.2s ease;
+  border-radius: 20px;
+  margin-bottom: 0.25rem;
+}
+
+.folder-dropdown-item:hover {
+  background: #F5F5F5;
+}
+
+.folder-dropdown-item.is-active {
+  background: #000000;
+  color: #FFFFFF !important;
+}
+
+.folder-dropdown-item.is-active .folder-name,
+.folder-dropdown-item.is-active .folder-count {
+  color: #FFFFFF !important;
 }
 
 /* Folder Buttons */
@@ -998,10 +1028,10 @@ p, span, td, th, label {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: #FFFFFF;
+  background: #FFFFFF !important;
   color: #000000 !important;
-  border: 1px solid #000000;
-  border-radius: 30px;
+  border: 1px solid #000000 !important;
+  border-radius: 30px !important;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -1014,9 +1044,14 @@ p, span, td, th, label {
 }
 
 .folder-btn.is-active {
-  background: #000000;
+  background: #000000 !important;
   color: #FFFFFF !important;
-  border-color: #000000;
+  border-color: #000000 !important;
+}
+
+.folder-btn.is-active .folder-name,
+.folder-btn.is-active .folder-count {
+  color: #FFFFFF !important;
 }
 
 .folder-btn:focus {
@@ -1169,15 +1204,6 @@ p, span, td, th, label {
   margin-bottom: 2rem;
 }
 
-/* Multiple tables - alternating border colors */
-.table-container:nth-of-type(odd) {
-  border-color: #000000;
-}
-
-.table-container:nth-of-type(even) {
-  border-color: #008000;
-}
-
 .table {
   width: 100%;
   background: #FFFFFF;
@@ -1192,7 +1218,7 @@ p, span, td, th, label {
 .table thead th {
   background: #FFFFFF;
   color: #000000;
-  border: 1px solid #000000;
+  border: 1px solid #000000 !important;
   padding: 1rem;
   text-align: left;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -1202,9 +1228,8 @@ p, span, td, th, label {
 }
 
 .table tbody td {
-  background: #FFFFFF;
   color: #000000;
-  border: 1px solid #000000;
+  border: 1px solid #000000 !important;
   padding: 1rem;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
@@ -1213,12 +1238,17 @@ p, span, td, th, label {
   overflow-wrap: break-word;
 }
 
-.table tbody tr:hover {
+/* Alternating row background colors */
+.table tbody tr:nth-child(odd) td {
+  background: #FFFFFF;
+}
+
+.table tbody tr:nth-child(even) td {
   background: #F5F5F5;
 }
 
 .table tbody tr:hover td {
-  background: #F5F5F5;
+  background: #E8E8E8 !important;
 }
 
 .wrap-text {
