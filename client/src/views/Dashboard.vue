@@ -419,7 +419,6 @@
         <button class="modal-close is-large" @click="toggleModal()" aria-label="close"></button>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
