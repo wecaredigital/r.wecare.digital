@@ -1999,10 +1999,11 @@ p, span, td, th, label {
 }
 
 .modal-content .help.is-error {
-  color: #008000;
+  color: #000000;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
+  opacity: 0.7;
 }
 
 .modal-content .field {
@@ -2017,7 +2018,7 @@ p, span, td, th, label {
 /* ===== NOTIFICATIONS ===== */
 .notification {
   background: #FFFFFF;
-  border: 1px solid #000000;
+  border: 2px solid #000000;
   border-radius: 30px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -2025,16 +2026,17 @@ p, span, td, th, label {
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 300;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .notification.is-success {
-  border-color: #00AA00;
-  color: #00AA00;
+  border-color: #000000;
+  color: #000000;
 }
 
 .notification.is-danger {
-  border-color: #FF0000;
-  color: #FF0000;
+  border-color: #000000;
+  color: #000000;
 }
 
 .notification .delete {
@@ -2428,23 +2430,25 @@ p, span, td, th, label {
 }
 
 .toast-notification {
-  background: #000000;
-  color: #FFFFFF;
-  border: none;
+  background: #FFFFFF;
+  color: #000000;
+  border: 2px solid #000000;
   border-radius: 30px;
   padding: 1rem 1.25rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   position: relative;
   overflow: hidden;
   min-width: 300px;
 }
 
 .toast-success {
-  background: #000000;
+  background: #FFFFFF;
+  border-color: #000000;
 }
 
 .toast-error {
-  background: #000000;
+  background: #FFFFFF;
+  border-color: #000000;
 }
 
 .toast-content {
@@ -2458,19 +2462,19 @@ p, span, td, th, label {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  stroke: #FFFFFF;
+  stroke: #000000;
 }
 
 .toast-success .toast-icon {
-  stroke: #FFFFFF;
+  stroke: #000000;
 }
 
 .toast-error .toast-icon {
-  stroke: #FFFFFF;
+  stroke: #000000;
 }
 
 .toast-message {
-  color: #FFFFFF;
+  color: #000000;
   font-size: 14px;
   font-weight: 300;
   flex: 1;
@@ -2498,7 +2502,7 @@ p, span, td, th, label {
 .toast-close svg {
   width: 14px;
   height: 14px;
-  stroke: #FFFFFF;
+  stroke: #000000;
   stroke-width: 2;
 }
 
@@ -2507,18 +2511,18 @@ p, span, td, th, label {
   bottom: 0;
   left: 0;
   height: 3px;
-  background: #FFFFFF;
+  background: #000000;
   width: 100%;
   animation: toast-progress linear forwards;
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 .toast-success .toast-progress {
-  background: #FFFFFF;
+  background: #000000;
 }
 
 .toast-error .toast-progress {
-  background: #FFFFFF;
+  background: #000000;
 }
 
 @keyframes toast-progress {
