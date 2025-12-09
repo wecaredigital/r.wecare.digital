@@ -1538,6 +1538,15 @@ p, span, td, th, label {
   overflow-wrap: break-word;
 }
 
+/* Remove right border on last column (Actions) to avoid double border with container */
+.table tbody td:last-child {
+  border-right: none !important;
+}
+
+.table thead th:last-child {
+  border-right: none !important;
+}
+
 /* Alternating row background colors */
 .table tbody tr:nth-child(odd) td {
   background: #FFFFFF;
