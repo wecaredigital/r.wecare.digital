@@ -41,8 +41,8 @@
         </ul>
 
         <!-- Folders Dropdown -->
-        <div class="folders-section">
-          <button class="folder-dropdown-toggle" @click="toggleFoldersDropdown" aria-label="Toggle folders list">
+        <div class="folders-section" ref="foldersDropdown">
+          <button class="folder-dropdown-toggle" @click="toggleFoldersDropdown" aria-label="Toggle folders list" aria-expanded="foldersExpanded">
             <span class="folder-name">
               <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -62,9 +62,31 @@
                 type="text" 
                 placeholder="Search folders..." 
                 @click.stop
+                @keydown.esc="closeFoldersDropdown"
               />
             </div>
-            <ul class="folder-dropdown-list">
+            
+            <!-- Empty state: No folders exist -->
+            <div v-if="folderList.length === 0" class="empty-state">
+              <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <p class="empty-text">No folders yet</p>
+              <p class="empty-subtext">Create a link with a folder to get started</p>
+            </div>
+            
+            <!-- Empty state: No search results -->
+            <div v-else-if="filteredFolderList.length === 0" class="empty-state">
+              <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <p class="empty-text">No folders found</p>
+              <p class="empty-subtext">Try a different search term</p>
+            </div>
+            
+            <!-- Folder list -->
+            <ul v-else class="folder-dropdown-list">
               <li v-for="folder in filteredFolderList" :key="folder" 
                   :class="['folder-dropdown-item', { 'is-active': selectedFolder === folder }]" 
                   @click="selectFolder(folder)">
@@ -120,12 +142,18 @@
           </div>
           <div class="column is-12-mobile is-6-tablet is-4-desktop">
             <div class="field">
-              <div class="control">
+              <div class="control has-icons-right">
                 <input class="input search-input" 
                        v-model="searchTerm" 
                        type="text" 
-                       placeholder="Search" 
+                       placeholder="Search links..." 
                        @input="onSearchInput" />
+                <button v-if="searchTerm" class="clear-search-btn" @click="clearSearch" title="Clear search">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
@@ -195,8 +223,36 @@
       </div>
 
       
+      <!-- Loading State -->
+      <div v-if="isLoading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading links...</p>
+      </div>
+      
+      <!-- Empty State: No links at all -->
+      <div v-else-if="storeLinks.length === 0" class="empty-state-large">
+        <svg class="empty-icon-large" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+        </svg>
+        <h2 class="empty-title">No links yet</h2>
+        <p class="empty-description">Create your first short link to get started</p>
+        <button class="btn-standard" @click="toggleModal('create')">Create Link</button>
+      </div>
+      
+      <!-- Empty State: No search/filter results -->
+      <div v-else-if="filteredLinks.length === 0" class="empty-state-large">
+        <svg class="empty-icon-large" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <h2 class="empty-title">No links found</h2>
+        <p class="empty-description">Try adjusting your search or filter</p>
+        <button class="btn-standard" @click="clearFilters">Clear Filters</button>
+      </div>
+      
       <!-- Links Table -->
-      <div class="table-container">
+      <div v-else class="table-container">
         <table class="table is-fullwidth is-striped">
         <thead>
           <tr>
@@ -343,7 +399,9 @@ export default {
       showSidebar: false,
       refreshing: false,
       foldersExpanded: true,
-      folderSearchTerm: ""
+      folderSearchTerm: "",
+      isLoading: false,
+      searchDebounceTimer: null
     };
   },
   computed: {
@@ -423,6 +481,23 @@ export default {
   mounted() {
     // Set browser title
     document.title = 'WECARE.DIGITAL';
+    
+    // Add click outside listener
+    document.addEventListener('click', this.handleClickOutside);
+    
+    // Add escape key listener
+    document.addEventListener('keydown', this.handleEscapeKey);
+  },
+  
+  beforeUnmount() {
+    // Clean up event listeners
+    document.removeEventListener('click', this.handleClickOutside);
+    document.removeEventListener('keydown', this.handleEscapeKey);
+    
+    // Clear debounce timer
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
   },
   
   watch: {
@@ -664,6 +739,34 @@ export default {
         this.folderSearchTerm = "";
       }
     },
+    closeFoldersDropdown() {
+      this.foldersExpanded = false;
+      this.folderSearchTerm = "";
+    },
+    handleClickOutside(event) {
+      // Close dropdown if clicking outside
+      if (this.foldersExpanded && this.$refs.foldersDropdown && !this.$refs.foldersDropdown.contains(event.target)) {
+        this.closeFoldersDropdown();
+      }
+    },
+    clearSearch() {
+      this.searchTerm = "";
+      this.currentPage = 1;
+    },
+    clearFilters() {
+      this.searchTerm = "";
+      this.selectedFolder = "";
+      this.currentPage = 1;
+    },
+    handleEscapeKey(event) {
+      if (event.key === 'Escape') {
+        if (this.modalIsActive) {
+          this.toggleModal();
+        } else if (this.foldersExpanded) {
+          this.closeFoldersDropdown();
+        }
+      }
+    },
 
     goToPage(n) {
       this.currentPage = n;
@@ -683,6 +786,7 @@ export default {
       }
     },
     async fetchLinks() {
+      this.isLoading = true;
       try {
         const token = window.localStorage.getItem("cognitoIdentityToken");
         
@@ -691,6 +795,7 @@ export default {
         if (!token || token === 'null') {
           this.errorMsg = "Please sign in to view your links.";
           setTimeout(() => (this.errorMsg = null), 5000);
+          this.isLoading = false;
           return;
         }
         
@@ -764,6 +869,8 @@ export default {
         this.$store.commit("drainLinks");
         this.errorMsg = "Network error. Please check your connection.";
         setTimeout(() => (this.errorMsg = null), 5000);
+      } finally {
+        this.isLoading = false;
       }
     },
     logout() {
@@ -773,8 +880,14 @@ export default {
       window.location.href = logOutUrl;
     },
     onSearchInput() {
-      // Reset to first page when searching
-      this.currentPage = 1;
+      // Debounce search input
+      if (this.searchDebounceTimer) {
+        clearTimeout(this.searchDebounceTimer);
+      }
+      this.searchDebounceTimer = setTimeout(() => {
+        // Reset to first page when searching
+        this.currentPage = 1;
+      }, 300);
     },
 
     async forceRefresh() {
@@ -1661,5 +1774,134 @@ p, span, td, th, label {
     font-size: 13px;
     padding: 0.4rem 0.8rem;
   }
+}
+
+/* ===== EMPTY STATES ===== */
+.empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.empty-icon {
+  width: 48px;
+  height: 48px;
+  stroke: #666666;
+  margin: 0 auto 1rem;
+  display: block;
+}
+
+.empty-text {
+  color: #000000;
+  font-size: 14px;
+  font-weight: 300;
+  margin-bottom: 0.5rem;
+}
+
+.empty-subtext {
+  color: #666666;
+  font-size: 13px;
+  font-weight: 300;
+  margin: 0;
+}
+
+.empty-state-large {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  margin-bottom: 2rem;
+}
+
+.empty-icon-large {
+  width: 80px;
+  height: 80px;
+  stroke: #666666;
+  margin: 0 auto 1.5rem;
+  display: block;
+}
+
+.empty-title {
+  color: #000000;
+  font-size: 18px;
+  font-weight: 300;
+  margin-bottom: 0.75rem;
+}
+
+.empty-description {
+  color: #666666;
+  font-size: 14px;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+}
+
+/* ===== LOADING STATE ===== */
+.loading-container {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  margin-bottom: 2rem;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #F5F5F5;
+  border-top-color: #000000;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  color: #666666;
+  font-size: 14px;
+  font-weight: 300;
+  margin: 0;
+}
+
+/* ===== CLEAR SEARCH BUTTON ===== */
+.has-icons-right {
+  position: relative;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.clear-search-btn:hover {
+  opacity: 0.7;
+}
+
+.clear-search-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: #666666;
+  stroke-width: 2;
+}
+
+.clear-search-btn:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+  border-radius: 50%;
 }
 </style>
