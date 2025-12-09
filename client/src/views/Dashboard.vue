@@ -1107,15 +1107,19 @@ p, span, td, th, label {
 }
 
 .hamburger-btn {
-  background: transparent;
-  border: 1px solid #000000;
+  background: #F5F5F5;
+  border: none;
   border-radius: 30px;
   padding: 0.5rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.hamburger-btn:hover {
+  background: #E8E8E8;
 }
 
 .hamburger-btn svg {
@@ -1143,11 +1147,16 @@ p, span, td, th, label {
 .mobile-close {
   background: #000000;
   color: #FFFFFF;
-  border: 1px solid #000000;
+  border: none;
   border-radius: 30px;
   padding: 0.5rem 1rem;
   cursor: pointer;
   margin-left: auto;
+  transition: opacity 0.2s ease;
+}
+
+.mobile-close:hover {
+  opacity: 0.8;
 }
 
 .menu-header {
@@ -1433,7 +1442,7 @@ p, span, td, th, label {
 .btn-standard {
   background: #000000;
   color: #FFFFFF;
-  border: 1px solid #000000;
+  border: none;
   border-radius: 30px;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
@@ -1627,9 +1636,9 @@ p, span, td, th, label {
 
 /* Copy Button */
 .btn-copy {
-  background: #FFFFFF;
+  background: #F5F5F5;
   color: #000000;
-  border: 1px solid #000000;
+  border: none;
   border-radius: 30px;
   padding: 0.25rem 0.75rem;
   cursor: pointer;
@@ -1681,7 +1690,7 @@ p, span, td, th, label {
 .pagination-link {
   background: #000000;
   color: #FFFFFF;
-  border: 1px solid #000000;
+  border: none;
   border-radius: 30px;
   padding: 0.5rem 1rem;
   cursor: pointer;
@@ -1697,9 +1706,8 @@ p, span, td, th, label {
 }
 
 .pagination-link.is-current {
-  background: #FFFFFF;
+  background: #F5F5F5;
   color: #000000;
-  border-color: #000000;
 }
 
 .pagination-link:focus {
@@ -1711,7 +1719,7 @@ p, span, td, th, label {
 .pagination-next {
   background: #000000;
   color: #FFFFFF;
-  border: 1px solid #000000;
+  border: none;
   border-radius: 30px;
   padding: 0.5rem 1rem;
   cursor: pointer;
