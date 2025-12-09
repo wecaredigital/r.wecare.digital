@@ -22,22 +22,35 @@
         <ul class="menu-list">
           <li>
             <button :class="['folder-btn', { 'is-active': selectedFolder === '' }]" @click="selectFolder('')">
-              <span>All Links</span>
+              <span class="folder-name">
+                <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                All Links
+              </span>
               <span class="folder-count">{{ storeLinks.length }}</span>
             </button>
           </li>
           <li v-for="folder in folderList" :key="folder">
             <button :class="['folder-btn', { 'is-active': selectedFolder === folder }]" @click="selectFolder(folder)">
-              <span>{{ folder }}</span>
+              <span class="folder-name">
+                <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                {{ folder }}
+              </span>
               <span class="folder-count">{{ getFolderCount(folder) }}</span>
             </button>
           </li>
         </ul>
-        
-        <div class="menu-divider"></div>
 
         <!-- Account Section -->
-        <p class="menu-label">Account</p>
+        <p class="menu-label account-label">Account</p>
         <ul class="menu-list">
           <li>
             <button @click="logout" class="folder-btn btn-signout">
@@ -67,7 +80,17 @@
         <div class="columns is-multiline is-mobile is-vcentered">
           <div class="column is-12-mobile is-6-tablet is-4-desktop">
             <h1 class="brand-title">WECARE.DIGITAL</h1>
-            <p class="link-count">{{ filteredLinks.length }} link{{ filteredLinks.length !== 1 ? 's' : '' }}</p>
+            <p class="link-count">
+              <svg class="data-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              Total links: {{ filteredLinks.length }}
+            </p>
           </div>
           <div class="column is-12-mobile is-6-tablet is-4-desktop">
             <div class="field">
@@ -348,6 +371,11 @@ export default {
   },
   created() {
     this.fetchLinks();
+  },
+  
+  mounted() {
+    // Set browser title
+    document.title = 'WECARE.DIGITAL';
   },
   
   watch: {
@@ -653,6 +681,14 @@ export default {
           }
           
           console.log('Committing to store:', linksArray.length, 'links');
+          
+          // Debug: Log first item to verify folder and remark
+          if (linksArray.length > 0) {
+            console.log('Sample link data:', linksArray[0]);
+            console.log('Has folder?', 'folder' in linksArray[0], 'Value:', linksArray[0].folder);
+            console.log('Has remark?', 'remark' in linksArray[0], 'Value:', linksArray[0].remark);
+          }
+          
           this.$store.commit("hydrateLinks", linksArray);
           console.log('Store now has:', this.$store.state.links.length, 'links');
           
@@ -748,7 +784,7 @@ export default {
 .sidebar-folders {
   height: 100vh;
   position: relative;
-  padding: 1.5rem;
+  padding: 1.5rem 1rem;
   background: #FFFFFF;
   border-right: 1px solid #000000;
 }
@@ -776,10 +812,8 @@ export default {
   margin-bottom: 1rem;
 }
 
-.menu-divider {
-  height: 1px;
-  background: #000000;
-  margin: 1.5rem 0;
+.menu-label.account-label {
+  margin-top: 2rem;
 }
 
 /* Folder Buttons */
@@ -819,6 +853,19 @@ export default {
   border: 1px solid #000000;
 }
 
+.folder-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.folder-icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
 .folder-count {
   font-size: 14px;
   margin-left: auto;
@@ -847,8 +894,8 @@ export default {
 .header-card {
   background: #FFFFFF;
   border: 1px solid #000000;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .brand-title {
@@ -863,6 +910,15 @@ export default {
   font-size: 14px;
   font-weight: 300;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.data-icon {
+  width: 16px;
+  height: 16px;
+  stroke: #000000;
 }
 
 /* ===== SEARCH BAR ===== */
