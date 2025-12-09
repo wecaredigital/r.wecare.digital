@@ -340,7 +340,7 @@ $warning: #ffdd57;
     text-align: left !important;
     white-space: nowrap !important;
     border: none !important;
-    border-bottom: 1px solid #000000 !important;
+    border-bottom: 2px solid #000000 !important;
   }
   
   tbody td {
@@ -379,15 +379,11 @@ $warning: #ffdd57;
 
 .table-container {
   background: #FFFFFF !important;
-  border: 1px solid #000000 !important;
+  border: 2px solid #000000 !important;
   border-radius: 30px !important;
   overflow: hidden !important;
   margin-bottom: 2rem !important;
-}
-
-// All table containers use black border
-.table-container {
-  border-color: #000000 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
 }
 
 // ===== MENU/SIDEBAR STYLES (DESIGN SYSTEM) =====

@@ -1524,7 +1524,7 @@ p, span, td, th, label {
 /* ===== TABLE STYLES ===== */
 .table-container {
   background: #FFFFFF;
-  border: 1px solid #000000;
+  border: 2px solid #000000;
   border-radius: 30px;
   overflow: hidden;
   margin-bottom: 2rem;
@@ -1614,7 +1614,7 @@ p, span, td, th, label {
   background: #FFFFFF;
   color: #000000;
   border: none !important;
-  border-bottom: 1px solid #000000 !important;
+  border-bottom: 2px solid #000000 !important;
   padding: 0.75rem 1rem;
   text-align: left;
   font-family: 'Helvetica Light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -1936,7 +1936,7 @@ p, span, td, th, label {
 
 .modal-content .box {
   background: #FFFFFF;
-  border: 1px solid #000000;
+  border: 2px solid #000000;
   border-radius: 30px;
   padding: 2rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
@@ -2259,7 +2259,7 @@ p, span, td, th, label {
   text-align: center;
   padding: 4rem 2rem;
   background: #FFFFFF;
-  border: 1px solid #000000;
+  border: 2px solid #000000;
   border-radius: 30px;
   margin-bottom: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -2314,7 +2314,7 @@ p, span, td, th, label {
   text-align: center;
   padding: 4rem 2rem;
   background: #FFFFFF;
-  border: 1px solid #000000;
+  border: 2px solid #000000;
   border-radius: 30px;
   margin-bottom: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -2595,7 +2595,7 @@ p, span, td, th, label {
   left: 0;
   right: 0;
   background: #FFFFFF;
-  border: 1px solid #000000;
+  border: 2px solid #000000;
   border-radius: 20px;
   margin-top: 0.5rem;
   max-height: 200px;
