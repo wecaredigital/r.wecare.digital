@@ -227,13 +227,13 @@
               <div class="field">
                 <label class="label">ID</label>
                 <input class="input" v-model="model.id" :readonly="isEditMode" required />
-                <p v-if="idExists && !isEditMode" class="help is-danger">This ID already exists.</p>
+                <p v-if="idExists && !isEditMode" class="help is-error">This ID is already in use. Please enter a unique ID.</p>
               </div>
 
               <div class="field">
                 <label class="label">URL</label>
                 <input class="input" v-model="model.url" type="url" required />
-                <p v-if="model.url && !isValidUrl(model.url)" class="help is-danger">Invalid URL.</p>
+                <p v-if="model.url && !isValidUrl(model.url)" class="help is-error">This URL isn't valid. Please enter a complete URL starting with http:// or https://</p>
               </div>
 
               <div class="field">
@@ -1283,8 +1283,10 @@ export default {
   margin-top: 0.25rem;
 }
 
-.modal-content .help.is-danger {
-  color: #FF0000;
+.modal-content .help.is-error {
+  color: #008000;
+  font-family: "Helvetica", Arial, sans-serif;
+  font-size: 14px;
 }
 
 .modal-content .field {
